@@ -2,11 +2,9 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-// Set SQLite to use a temp file before requiring the module
 const location = path.join(os.tmpdir(), `todo-test-${Date.now()}.db`);
-process.env.SQLITE_DB_LOCATION = location;
 
-const db = require('../../src/persistence/sqlite');
+const { SqliteRepository } = require('../../src/repository/SqliteRepository');
 
 const ITEM = {
     id: '7aef3d7c-d301-4846-8358-2a91ec9d6be3',
@@ -14,10 +12,13 @@ const ITEM = {
     completed: false,
 };
 
+let db;
+
 beforeEach(() => {
     if (fs.existsSync(location)) {
         fs.unlinkSync(location);
     }
+    db = new SqliteRepository(location);
 });
 
 afterAll(() => {

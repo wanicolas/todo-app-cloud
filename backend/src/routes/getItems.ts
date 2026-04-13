@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 
-const db = require('../persistence');
+function makeGetItems(service: any) {
+    return async (req: Request, res: Response) => {
+        const items = await service.getAllItems();
+        res.send(items);
+    };
+}
 
-module.exports = async (req: Request, res: Response) => {
-    const items = await db.getItems();
-    res.send(items);
-};
+module.exports = makeGetItems;

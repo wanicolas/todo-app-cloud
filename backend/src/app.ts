@@ -1,20 +1,25 @@
 import express from 'express';
 import path from 'path';
 
-const app = express();
 const getGreeting = require('./routes/getGreeting');
-const getItems = require('./routes/getItems');
-const addItem = require('./routes/addItem');
-const updateItem = require('./routes/updateItem');
-const deleteItem = require('./routes/deleteItem');
+const makeGetItems = require('./routes/getItems');
+const makeAddItem = require('./routes/addItem');
+const makeUpdateItem = require('./routes/updateItem');
+const makeDeleteItem = require('./routes/deleteItem');
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'static')));
+function createApp(service: any) {
+    const app = express();
 
-app.get('/api/greeting', getGreeting);
-app.get('/api/items', getItems);
-app.post('/api/items', addItem);
-app.put('/api/items/:id', updateItem);
-app.delete('/api/items/:id', deleteItem);
+    app.use(express.json());
+    app.use(express.static(path.join(__dirname, 'static')));
 
-module.exports = app;
+    app.get('/api/greeting', getGreeting);
+    app.get('/api/items', makeGetItems(service));
+    app.post('/api/items', makeAddItem(service));
+    app.put('/api/items/:id', makeUpdateItem(service));
+    app.delete('/api/items/:id', makeDeleteItem(service));
+
+    return app;
+}
+
+module.exports = createApp;

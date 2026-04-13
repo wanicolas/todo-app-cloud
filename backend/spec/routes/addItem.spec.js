@@ -1,30 +1,24 @@
-const db = require('../../src/persistence');
-const addItem = require('../../src/routes/addItem');
-const ITEM = { id: 12345 };
-const { v4: uuid } = require('uuid');
-
-jest.mock('uuid', () => ({ v4: jest.fn() }));
-
-jest.mock('../../src/persistence', () => ({
-    removeItem: jest.fn(),
-    storeItem: jest.fn(),
-    getItem: jest.fn(),
-}));
+const makeAddItem = require('../../src/routes/addItem');
 
 test('it stores item correctly', async () => {
-    const id = 'something-not-a-uuid';
     const name = 'A sample item';
+    const expectedItem = {
+        id: 'something-not-a-uuid',
+        name,
+        completed: false,
+    };
     const req = { body: { name } };
     const res = { send: jest.fn() };
 
-    uuid.mockReturnValue(id);
+    const mockService = {
+        addItem: jest.fn().mockResolvedValue(expectedItem),
+    };
 
-    await addItem(req, res);
+    const handler = makeAddItem(mockService);
+    await handler(req, res);
 
-    const expectedItem = { id, name, completed: false };
-
-    expect(db.storeItem.mock.calls.length).toBe(1);
-    expect(db.storeItem.mock.calls[0][0]).toEqual(expectedItem);
-    expect(res.send.mock.calls[0].length).toBe(1);
-    expect(res.send.mock.calls[0][0]).toEqual(expectedItem);
+    expect(mockService.addItem).toHaveBeenCalledTimes(1);
+    expect(mockService.addItem).toHaveBeenCalledWith(name);
+    expect(res.send).toHaveBeenCalledTimes(1);
+    expect(res.send).toHaveBeenCalledWith(expectedItem);
 });

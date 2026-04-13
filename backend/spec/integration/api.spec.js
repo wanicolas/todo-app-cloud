@@ -2,21 +2,25 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-// Set SQLite to use a temp file before any app code loads
+// Set up temp SQLite DB before any app code loads
 const dbPath = path.join(os.tmpdir(), `todo-integration-${Date.now()}.db`);
-process.env.SQLITE_DB_LOCATION = dbPath;
 delete process.env.MYSQL_HOST;
 
+const { SqliteRepository } = require('../../src/repository/SqliteRepository');
+const { TodoService } = require('../../src/service/TodoService');
+const createApp = require('../../src/app');
 const request = require('supertest');
-const app = require('../../src/app');
-const db = require('../../src/persistence');
+
+const repository = new SqliteRepository(dbPath);
+const service = new TodoService(repository);
+const app = createApp(service);
 
 beforeAll(async () => {
-    await db.init();
+    await service.init();
 });
 
 afterAll(async () => {
-    await db.teardown();
+    await service.teardown();
     if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
 });
 
