@@ -6,6 +6,7 @@
     "format": "prettier -l --write \"**/*.js\"",
     "format-check": "prettier --check \"**/*.js\"",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "dev": "nodemon src/index.js"
   },
   "dependencies": {
@@ -25,9 +26,21 @@
     "semi": true,
     "singleQuote": true
   },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/index.js"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
+  },
   "devDependencies": {
     "jest": "^29.7.0",
     "nodemon": "^3.0.3",
-    "prettier": "^3.2.4"
+    "prettier": "^3.2.4",
+    "supertest": "^7.2.2"
   }
 }
