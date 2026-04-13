@@ -6,12 +6,13 @@ const fs = require('fs');
 const dbPath = path.join(os.tmpdir(), `todo-integration-${Date.now()}.db`);
 delete process.env.MYSQL_HOST;
 
-const { SqliteRepository } = require('../../src/repository/SqliteRepository');
+const { KnexRepository } = require('../../src/repository/KnexRepository');
+const { getKnexConfig } = require('../../src/repository/knexConfig');
 const { TodoService } = require('../../src/service/TodoService');
 const createApp = require('../../src/app');
 const request = require('supertest');
 
-const repository = new SqliteRepository(dbPath);
+const repository = new KnexRepository(getKnexConfig(dbPath));
 const service = new TodoService(repository);
 const app = createApp(service);
 
