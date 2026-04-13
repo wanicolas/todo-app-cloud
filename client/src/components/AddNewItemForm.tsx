@@ -1,14 +1,23 @@
-import { useState } from 'react';
-import PropTypes from 'prop-types';
+import { FormEvent, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 
-export function AddItemForm({ onNewItem }) {
+interface TodoItem {
+    id: string;
+    name: string;
+    completed: boolean;
+}
+
+interface AddItemFormProps {
+    onNewItem: (item: TodoItem) => void;
+}
+
+export function AddItemForm({ onNewItem }: AddItemFormProps) {
     const [newItem, setNewItem] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
-    const submitNewItem = (e) => {
+    const submitNewItem = (e: FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
 
@@ -20,7 +29,7 @@ export function AddItemForm({ onNewItem }) {
 
         fetch('/api/items', options)
             .then((r) => r.json())
-            .then((item) => {
+            .then((item: TodoItem) => {
                 onNewItem(item);
                 setSubmitting(false);
                 setNewItem('');
@@ -49,7 +58,3 @@ export function AddItemForm({ onNewItem }) {
         </Form>
     );
 }
-
-AddItemForm.propTypes = {
-    onNewItem: PropTypes.func,
-};

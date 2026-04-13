@@ -1,3 +1,5 @@
+import { TodoItem } from '../types';
+
 const waitPort = require('wait-port');
 const fs = require('fs');
 const mysql = require('mysql2');
@@ -13,9 +15,9 @@ const {
     MYSQL_DB_FILE: DB_FILE,
 } = process.env;
 
-let pool;
+let pool: any;
 
-async function init() {
+async function init(): Promise<void> {
     const host = HOST_FILE ? fs.readFileSync(HOST_FILE) : HOST;
     const user = USER_FILE ? fs.readFileSync(USER_FILE) : USER;
     const password = PASSWORD_FILE ? fs.readFileSync(PASSWORD_FILE) : PASSWORD;
@@ -40,7 +42,7 @@ async function init() {
     return new Promise((acc, rej) => {
         pool.query(
             'CREATE TABLE IF NOT EXISTS todo_items (id varchar(36), name varchar(255), completed boolean) DEFAULT CHARSET utf8mb4',
-            (err) => {
+            (err: Error | null) => {
                 if (err) return rej(err);
 
                 console.log(`Connected to mysql db at host ${HOST}`);
@@ -50,18 +52,18 @@ async function init() {
     });
 }
 
-async function teardown() {
+async function teardown(): Promise<void> {
     return new Promise((acc, rej) => {
-        pool.end((err) => {
+        pool.end((err: Error | null) => {
             if (err) rej(err);
             else acc();
         });
     });
 }
 
-async function getItems() {
+async function getItems(): Promise<TodoItem[]> {
     return new Promise((acc, rej) => {
-        pool.query('SELECT * FROM todo_items', (err, rows) => {
+        pool.query('SELECT * FROM todo_items', (err: Error | null, rows: any[]) => {
             if (err) return rej(err);
             acc(
                 rows.map((item) =>
@@ -74,9 +76,9 @@ async function getItems() {
     });
 }
 
-async function getItem(id) {
+async function getItem(id: string): Promise<TodoItem> {
     return new Promise((acc, rej) => {
-        pool.query('SELECT * FROM todo_items WHERE id=?', [id], (err, rows) => {
+        pool.query('SELECT * FROM todo_items WHERE id=?', [id], (err: Error | null, rows: any[]) => {
             if (err) return rej(err);
             acc(
                 rows.map((item) =>
@@ -89,12 +91,12 @@ async function getItem(id) {
     });
 }
 
-async function storeItem(item) {
+async function storeItem(item: TodoItem): Promise<void> {
     return new Promise((acc, rej) => {
         pool.query(
             'INSERT INTO todo_items (id, name, completed) VALUES (?, ?, ?)',
             [item.id, item.name, item.completed ? 1 : 0],
-            (err) => {
+            (err: Error | null) => {
                 if (err) return rej(err);
                 acc();
             },
@@ -102,12 +104,12 @@ async function storeItem(item) {
     });
 }
 
-async function updateItem(id, item) {
+async function updateItem(id: string, item: TodoItem): Promise<void> {
     return new Promise((acc, rej) => {
         pool.query(
             'UPDATE todo_items SET name=?, completed=? WHERE id=?',
             [item.name, item.completed ? 1 : 0, id],
-            (err) => {
+            (err: Error | null) => {
                 if (err) return rej(err);
                 acc();
             },
@@ -115,9 +117,9 @@ async function updateItem(id, item) {
     });
 }
 
-async function removeItem(id) {
+async function removeItem(id: string): Promise<void> {
     return new Promise((acc, rej) => {
-        pool.query('DELETE FROM todo_items WHERE id = ?', [id], (err) => {
+        pool.query('DELETE FROM todo_items WHERE id = ?', [id], (err: Error | null) => {
             if (err) return rej(err);
             acc();
         });

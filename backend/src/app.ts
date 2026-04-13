@@ -1,4 +1,6 @@
-const express = require('express');
+import express from 'express';
+import path from 'path';
+
 const app = express();
 const getGreeting = require('./routes/getGreeting');
 const getItems = require('./routes/getItems');
@@ -7,7 +9,7 @@ const updateItem = require('./routes/updateItem');
 const deleteItem = require('./routes/deleteItem');
 
 app.use(express.json());
-app.use(express.static(__dirname + '/static'));
+app.use(express.static(path.join(__dirname, 'static')));
 
 app.get('/api/greeting', getGreeting);
 app.get('/api/items', getItems);

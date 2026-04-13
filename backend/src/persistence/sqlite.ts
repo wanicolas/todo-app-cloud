@@ -1,17 +1,19 @@
+import { TodoItem } from '../types';
+
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const location = process.env.SQLITE_DB_LOCATION || '/etc/todos/todo.db';
 
-let db, dbAll, dbRun;
+let db: any;
 
-function init() {
+function init(): Promise<void> {
     const dirName = require('path').dirname(location);
     if (!fs.existsSync(dirName)) {
         fs.mkdirSync(dirName, { recursive: true });
     }
 
     return new Promise((acc, rej) => {
-        db = new sqlite3.Database(location, (err) => {
+        db = new sqlite3.Database(location, (err: Error | null) => {
             if (err) return rej(err);
 
             if (process.env.NODE_ENV !== 'test')
@@ -19,7 +21,7 @@ function init() {
 
             db.run(
                 'CREATE TABLE IF NOT EXISTS todo_items (id varchar(36), name varchar(255), completed boolean)',
-                (err, result) => {
+                (err: Error | null) => {
                     if (err) return rej(err);
                     acc();
                 },
@@ -28,18 +30,18 @@ function init() {
     });
 }
 
-async function teardown() {
+async function teardown(): Promise<void> {
     return new Promise((acc, rej) => {
-        db.close((err) => {
+        db.close((err: Error | null) => {
             if (err) rej(err);
             else acc();
         });
     });
 }
 
-async function getItems() {
+async function getItems(): Promise<TodoItem[]> {
     return new Promise((acc, rej) => {
-        db.all('SELECT * FROM todo_items', (err, rows) => {
+        db.all('SELECT * FROM todo_items', (err: Error | null, rows: any[]) => {
             if (err) return rej(err);
             acc(
                 rows.map((item) =>
@@ -52,9 +54,9 @@ async function getItems() {
     });
 }
 
-async function getItem(id) {
+async function getItem(id: string): Promise<TodoItem> {
     return new Promise((acc, rej) => {
-        db.all('SELECT * FROM todo_items WHERE id=?', [id], (err, rows) => {
+        db.all('SELECT * FROM todo_items WHERE id=?', [id], (err: Error | null, rows: any[]) => {
             if (err) return rej(err);
             acc(
                 rows.map((item) =>
@@ -67,12 +69,12 @@ async function getItem(id) {
     });
 }
 
-async function storeItem(item) {
+async function storeItem(item: TodoItem): Promise<void> {
     return new Promise((acc, rej) => {
         db.run(
             'INSERT INTO todo_items (id, name, completed) VALUES (?, ?, ?)',
             [item.id, item.name, item.completed ? 1 : 0],
-            (err) => {
+            (err: Error | null) => {
                 if (err) return rej(err);
                 acc();
             },
@@ -80,12 +82,12 @@ async function storeItem(item) {
     });
 }
 
-async function updateItem(id, item) {
+async function updateItem(id: string, item: TodoItem): Promise<void> {
     return new Promise((acc, rej) => {
         db.run(
             'UPDATE todo_items SET name=?, completed=? WHERE id = ?',
             [item.name, item.completed ? 1 : 0, id],
-            (err) => {
+            (err: Error | null) => {
                 if (err) return rej(err);
                 acc();
             },
@@ -93,9 +95,9 @@ async function updateItem(id, item) {
     });
 }
 
-async function removeItem(id) {
+async function removeItem(id: string): Promise<void> {
     return new Promise((acc, rej) => {
-        db.run('DELETE FROM todo_items WHERE id = ?', [id], (err) => {
+        db.run('DELETE FROM todo_items WHERE id = ?', [id], (err: Error | null) => {
             if (err) return rej(err);
             acc();
         });
