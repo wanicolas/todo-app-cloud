@@ -15,12 +15,27 @@ jobs:
 
       - name: Wait for app to be ready
         run: |
-          for i in $(seq 1 30); do
-            curl -s http://localhost:3080 > /dev/null && exit 0
-            echo "Waiting for app... ($i/30)"
+          echo "Waiting for backend API..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3080/api/greeting > /dev/null 2>&1; then
+              echo "Backend API is ready!"
+              break
+            fi
+            echo "Waiting for backend... ($i/60)"
             sleep 5
           done
-          echo "App failed to start"
+
+          echo "Waiting for client..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3080 2>&1 | grep -q 'root'; then
+              echo "Client is ready!"
+              exit 0
+            fi
+            echo "Waiting for client... ($i/30)"
+            sleep 5
+          done
+
+          echo "App failed to start. Docker logs:"
           docker compose logs
           exit 1
 
@@ -28,6 +43,23 @@ jobs:
         with:
           node-version: 22
           cache: npm
+
+      - name: Debug - check services
+        run: |
+          echo "=== Docker containers ==="
+          docker compose ps
+          echo ""
+          echo "=== Client page content ==="
+          curl -s http://localhost:3080 | head -30
+          echo ""
+          echo "=== API greeting ==="
+          curl -s http://localhost:3080/api/greeting
+          echo ""
+          echo "=== Client logs ==="
+          docker compose logs client 2>&1 | tail -30
+          echo ""
+          echo "=== Backend logs ==="
+          docker compose logs backend 2>&1 | tail -15
 
       - run: npm ci
       - run: npx playwright install chromium

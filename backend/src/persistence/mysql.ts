@@ -63,31 +63,38 @@ async function teardown(): Promise<void> {
 
 async function getItems(): Promise<TodoItem[]> {
     return new Promise((acc, rej) => {
-        pool.query('SELECT * FROM todo_items', (err: Error | null, rows: any[]) => {
-            if (err) return rej(err);
-            acc(
-                rows.map((item) =>
-                    Object.assign({}, item, {
-                        completed: item.completed === 1,
-                    }),
-                ),
-            );
-        });
+        pool.query(
+            'SELECT * FROM todo_items',
+            (err: Error | null, rows: any[]) => {
+                if (err) return rej(err);
+                acc(
+                    rows.map((item) =>
+                        Object.assign({}, item, {
+                            completed: item.completed === 1,
+                        }),
+                    ),
+                );
+            },
+        );
     });
 }
 
 async function getItem(id: string): Promise<TodoItem> {
     return new Promise((acc, rej) => {
-        pool.query('SELECT * FROM todo_items WHERE id=?', [id], (err: Error | null, rows: any[]) => {
-            if (err) return rej(err);
-            acc(
-                rows.map((item) =>
-                    Object.assign({}, item, {
-                        completed: item.completed === 1,
-                    }),
-                )[0],
-            );
-        });
+        pool.query(
+            'SELECT * FROM todo_items WHERE id=?',
+            [id],
+            (err: Error | null, rows: any[]) => {
+                if (err) return rej(err);
+                acc(
+                    rows.map((item) =>
+                        Object.assign({}, item, {
+                            completed: item.completed === 1,
+                        }),
+                    )[0],
+                );
+            },
+        );
     });
 }
 
@@ -119,10 +126,14 @@ async function updateItem(id: string, item: TodoItem): Promise<void> {
 
 async function removeItem(id: string): Promise<void> {
     return new Promise((acc, rej) => {
-        pool.query('DELETE FROM todo_items WHERE id = ?', [id], (err: Error | null) => {
-            if (err) return rej(err);
-            acc();
-        });
+        pool.query(
+            'DELETE FROM todo_items WHERE id = ?',
+            [id],
+            (err: Error | null) => {
+                if (err) return rej(err);
+                acc();
+            },
+        );
     });
 }
 

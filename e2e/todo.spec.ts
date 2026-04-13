@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Todo App', () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto('/');
+        await page.goto('/', { waitUntil: 'networkidle' });
     });
 
     test('displays the greeting', async ({ page }) => {
@@ -69,10 +69,15 @@ test.describe('Todo App', () => {
     });
 
     test('shows empty state when no items exist', async ({ page }) => {
-        // Use the API to clean all items
-        const items = await page.evaluate(() =>
-            fetch('/api/items').then((r) => r.json()),
-        );
+        // Use the API to clean all items (with retry for CI stability)
+        const items = await page.evaluate(async () => {
+            for (let i = 0; i < 5; i++) {
+                const res = await fetch('/api/items');
+                if (res.ok) return res.json();
+                await new Promise((r) => setTimeout(r, 1000));
+            }
+            return [];
+        });
         for (const item of items) {
             await page.evaluate(
                 (id) => fetch(`/api/items/${id}`, { method: 'DELETE' }),
@@ -81,7 +86,7 @@ test.describe('Todo App', () => {
         }
 
         // Reload to see empty state
-        await page.reload();
+        await page.reload({ waitUntil: 'networkidle' });
 
         await expect(
             page.getByText('No items yet! Add one above!'),

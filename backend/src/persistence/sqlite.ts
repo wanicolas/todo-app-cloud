@@ -56,16 +56,20 @@ async function getItems(): Promise<TodoItem[]> {
 
 async function getItem(id: string): Promise<TodoItem> {
     return new Promise((acc, rej) => {
-        db.all('SELECT * FROM todo_items WHERE id=?', [id], (err: Error | null, rows: any[]) => {
-            if (err) return rej(err);
-            acc(
-                rows.map((item) =>
-                    Object.assign({}, item, {
-                        completed: item.completed === 1,
-                    }),
-                )[0],
-            );
-        });
+        db.all(
+            'SELECT * FROM todo_items WHERE id=?',
+            [id],
+            (err: Error | null, rows: any[]) => {
+                if (err) return rej(err);
+                acc(
+                    rows.map((item) =>
+                        Object.assign({}, item, {
+                            completed: item.completed === 1,
+                        }),
+                    )[0],
+                );
+            },
+        );
     });
 }
 
@@ -97,10 +101,14 @@ async function updateItem(id: string, item: TodoItem): Promise<void> {
 
 async function removeItem(id: string): Promise<void> {
     return new Promise((acc, rej) => {
-        db.run('DELETE FROM todo_items WHERE id = ?', [id], (err: Error | null) => {
-            if (err) return rej(err);
-            acc();
-        });
+        db.run(
+            'DELETE FROM todo_items WHERE id = ?',
+            [id],
+            (err: Error | null) => {
+                if (err) return rej(err);
+                acc();
+            },
+        );
     });
 }
 
