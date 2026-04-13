@@ -44,6 +44,23 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Debug - check services
+        run: |
+          echo "=== Docker containers ==="
+          docker compose ps
+          echo ""
+          echo "=== Client page content ==="
+          curl -s http://localhost:3080 | head -30
+          echo ""
+          echo "=== API greeting ==="
+          curl -s http://localhost:3080/api/greeting
+          echo ""
+          echo "=== Client logs ==="
+          docker compose logs client 2>&1 | tail -30
+          echo ""
+          echo "=== Backend logs ==="
+          docker compose logs backend 2>&1 | tail -15
+
       - run: npm ci
       - run: npx playwright install chromium
 
