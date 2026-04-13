@@ -9,10 +9,26 @@ class KnexRepository implements TodoRepository {
     }
 
     async init(): Promise<void> {
-        await this.db.migrate.latest();
-        if (process.env.NODE_ENV !== 'test') {
-            const client = (this.db.client as any).config.client;
-            console.log(`Connected to ${client} database via Knex`);
+        const maxRetries = 10;
+        const retryDelay = 3000;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                await this.db.migrate.latest();
+                if (process.env.NODE_ENV !== 'test') {
+                    const client = (this.db.client as any).config.client;
+                    console.log(`Connected to ${client} database via Knex`);
+                }
+                return;
+            } catch (err) {
+                if (attempt === maxRetries) throw err;
+                if (process.env.NODE_ENV !== 'test') {
+                    console.log(
+                        `Database not ready, retrying (${attempt}/${maxRetries})...`,
+                    );
+                }
+                await new Promise((r) => setTimeout(r, retryDelay));
+            }
         }
     }
 
