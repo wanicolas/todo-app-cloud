@@ -1,0 +1,27 @@
+{
+  "name": "getting-started-todo-app",
+  "version": "1.0.0",
+  "description": "This project provides a sample todo list application. It demonstrates all of the current Docker best practices, ranging from the Compose file, to the Dockerfile, to CI (using GitHub Actions), and running tests. It's intended to  be well-documented to ensure anyone can come in and easily learn.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test:e2e": "npx playwright test",
+    "test:e2e:headed": "npx playwright test --headed"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wanicolas/todo-app-cloud.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wanicolas/todo-app-cloud/issues"
+  },
+  "homepage": "https://github.com/wanicolas/todo-app-cloud#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}
