@@ -1,0 +1,43 @@
+name: CI Trivy Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t todo-backend:scan ./backend
+
+      - name: Build client image
+        run: docker build -t todo-client:scan ./client
+
+      - name: Build production image
+        run: docker build -t todo-prod:scan .
+
+      - name: Scan backend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: todo-backend:scan
+          format: table
+          severity: CRITICAL,HIGH
+
+      - name: Scan client image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: todo-client:scan
+          format: table
+          severity: CRITICAL,HIGH
+
+      - name: Scan production image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: todo-prod:scan
+          format: table
+          severity: CRITICAL,HIGH
