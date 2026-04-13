@@ -1,56 +1,124 @@
-# Getting Started Todo App
+# Todo App Cloud
 
-This project provides a sample todo list application. It demonstrates all of
-the current Docker best practices, ranging from the Compose file, to the
-Dockerfile, to CI (using GitHub Actions), and running tests. It's intended to 
-be well-documented to ensure anyone can come in and easily learn.
+Refonte cloud-native de l'application todo list de Docker ([getting-started-todo-app](https://github.com/docker/getting-started-todo-app)).
 
-## Application architecture
+Projet réalisé dans le cadre du module "Développer pour le cloud" — M2 Dev Full Stack.
 
-![image](https://github.com/docker/getting-started-todo-app/assets/313480/c128b8e4-366f-4b6f-ad73-08e6652b7c4d)
+## Stack technique
 
+- **Frontend** : React 19, TypeScript, Vite, React Bootstrap
+- **Backend** : Node.js 22, Express 5, TypeScript
+- **Base de données** : MySQL 9.3 (SQLite en fallback)
+- **Proxy** : Traefik v3.6
+- **Tests** : Jest, Vitest, Playwright
+- **CI** : GitHub Actions (3 pipelines)
 
-This sample application is a simple React frontend that receives data from a
-Node.js backend. 
+## Prérequis
 
-When the application is packaged and shipped, the frontend is compiled into
-static HTML, CSS, and JS and then bundled with the backend where it is then
-served as static assets. So no... there is no server-side rendering going on
-with this sample app.
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- Node.js 22 (voir `.nvmrc`)
 
-During development, since the backend and frontend need different dev tools, 
-they are split into two separate services. This allows [Vite](https://vitejs.dev/) 
-to manage the React app while [nodemon](https://nodemon.io/) works with the 
-backend. With containers, it's easy to separate the development needs!
+## Lancement
 
-## Development
+### Avec Docker (recommandé)
 
-To spin up the project, simply install Docker Desktop and then run the following 
-commands:
-
-```
-git clone https://github.com/docker/getting-started-todo-app
-cd getting-started-todo-app
+```bash
+git clone https://github.com/wanicolas/todo-app-cloud.git
+cd todo-app-cloud
 docker compose up --watch
 ```
 
-You'll see several container images get downloaded from Docker Hub and, after a
-moment, the application will be up and running! No need to install or configure
-anything on your machine!
+L'app est dispo sur http://localhost:3080
 
-Simply open to [http://localhost](http://localhost) to see the app up and running!
+phpMyAdmin est accessible sur http://db.localhost:3080
 
-Any changes made to either the backend or frontend should be seen immediately
-without needing to rebuild or restart the containers.
+### Sans Docker (dev local)
 
-To help with the database, the development stack also includes phpMyAdmin, which
-can be accessed at [http://db.localhost](http://db.localhost) (most browsers will 
-resolve `*.localhost` correctly, so no hosts file changes should be required).
+```bash
+# Backend
+cd backend
+npm install
+npm run dev
 
-### Tearing it down
-
-When you're done, simply remove the containers by running the following command:
-
+# Client (dans un autre terminal)
+cd client
+npm install
+npm run dev
 ```
+
+### Arrêter les services
+
+```bash
 docker compose down
 ```
+
+## Tests
+
+```bash
+# Backend (Jest) — 17 tests
+cd backend && npm test
+
+# Frontend (Vitest) — 13 tests
+cd client && npm test
+
+# E2E (Playwright) — nécessite docker compose up
+npm run test:e2e
+
+# Coverage
+cd backend && npm run test:coverage
+cd client && npm run test:coverage
+```
+
+## Lint & Typecheck
+
+```bash
+cd backend && npm run lint && npm run typecheck
+cd client && npm run lint && npm run typecheck
+```
+
+## CI/CD
+
+3 pipelines GitHub Actions :
+
+- **ci-backend** : lint, typecheck, format, build, tests — déclenché sur push/PR quand `backend/` change
+- **ci-client** : lint, typecheck, format, build, tests — déclenché sur push/PR quand `client/` change
+- **ci-e2e** : Docker Compose + Playwright — déclenché sur PR vers main uniquement
+
+## Variables d'environnement
+
+Voir `.env.example` pour la liste complète.
+
+| Variable | Description | Défaut |
+|---|---|---|
+| `MYSQL_HOST` | Hôte MySQL | — |
+| `MYSQL_USER` | Utilisateur MySQL | — |
+| `MYSQL_PASSWORD` | Mot de passe MySQL | — |
+| `MYSQL_DB` | Nom de la base | — |
+| `SQLITE_DB_LOCATION` | Chemin du fichier SQLite (si pas de MySQL) | `/etc/todos/todo.db` |
+| `NODE_ENV` | Environnement Node | `development` |
+
+Si `MYSQL_HOST` n'est pas défini, l'app utilise automatiquement SQLite.
+
+## Architecture du projet
+
+```
+.
+├── backend/              # API Express (TypeScript)
+│   ├── src/
+│   │   ├── routes/       # Handlers API (CRUD items + greeting)
+│   │   ├── persistence/  # Couche données (SQLite / MySQL)
+│   │   └── types.ts      # Interfaces TodoItem, Persistence
+│   └── spec/             # Tests Jest (unitaires + intégration)
+├── client/               # React SPA (TypeScript)
+│   ├── src/
+│   │   └── components/   # Greeting, TodoListCard, AddNewItemForm, ItemDisplay
+│   └── src/test/         # Setup Vitest
+├── e2e/                  # Tests Playwright (E2E)
+├── .github/workflows/    # CI GitHub Actions
+├── docs/                 # Sujet, grille, ADR
+└── compose.yaml          # Stack Docker (Traefik + backend + client + MySQL)
+```
+
+## Décisions techniques
+
+Les ADR (Architecture Decision Records) sont dans [`docs/adr/`](docs/adr/).
