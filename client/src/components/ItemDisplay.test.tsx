@@ -97,12 +97,12 @@ test('delete calls DELETE and onItemRemoval', async () => {
         />,
     );
 
-    await user.click(
-        screen.getByRole('button', { name: 'Remove Item' }),
-    );
+    await user.click(screen.getByRole('button', { name: 'Remove Item' }));
 
     await waitFor(() => {
-        expect(fetch).toHaveBeenCalledWith('/api/items/1', { method: 'DELETE' });
+        expect(fetch).toHaveBeenCalledWith('/api/items/1', {
+            method: 'DELETE',
+        });
     });
 
     await waitFor(() => {

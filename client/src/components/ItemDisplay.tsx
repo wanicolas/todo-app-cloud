@@ -20,7 +20,11 @@ interface ItemDisplayProps {
     onItemRemoval: (item: TodoItem) => void;
 }
 
-export function ItemDisplay({ item, onItemUpdate, onItemRemoval }: ItemDisplayProps) {
+export function ItemDisplay({
+    item,
+    onItemUpdate,
+    onItemRemoval,
+}: ItemDisplayProps) {
     const toggleCompletion = () => {
         fetch(`/api/items/${item.id}`, {
             method: 'PUT',
