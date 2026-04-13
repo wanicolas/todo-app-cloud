@@ -55,27 +55,35 @@ npm run dev                    # React sur http://localhost:5173
 
 ## Tests
 
-### Backend (Jest) — 21 tests
+### Via Docker (pas besoin de Node.js local)
 
 ```bash
-cd backend
-npm install                    # si pas encore fait
-npm test                       # lance les 21 tests (unitaires + intégration)
-npm run test:coverage          # avec rapport de couverture
+# Backend — 21 tests (SQLite automatique)
+docker compose run -e MYSQL_HOST= backend npm test
+
+# Client — 13 tests
+docker compose run client npm test
 ```
 
-### Client (Vitest) — 13 tests
+### Via Node.js local
 
 ```bash
+# Backend (Jest) — 21 tests
+cd backend
+npm install
+npm test
+npm run test:coverage          # avec rapport de couverture
+
+# Client (Vitest) — 13 tests
 cd client
-npm install                    # si pas encore fait
-npm test                       # lance les 13 tests
+npm install
+npm test
 npm run test:coverage          # avec rapport de couverture
 ```
 
 ### E2E (Playwright) — 6 tests
 
-Les tests E2E nécessitent que l'app tourne via Docker Compose.
+Les tests E2E nécessitent que l'app tourne via Docker Compose et Node.js local.
 
 ```bash
 docker compose up -d           # démarrer les services en arrière-plan
