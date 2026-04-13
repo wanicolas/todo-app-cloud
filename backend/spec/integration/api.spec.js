@@ -65,9 +65,7 @@ describe('CRUD /api/items', () => {
     });
 
     test('DELETE /api/items/:id removes an item', async () => {
-        const res = await request(app).delete(
-            `/api/items/${createdItemId}`,
-        );
+        const res = await request(app).delete(`/api/items/${createdItemId}`);
         expect(res.status).toBe(200);
     });
 
