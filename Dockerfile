@@ -1,91 +1,50 @@
 ###################################################
-# Stage: base
-# 
-# This base stage ensures all other stages are using the same base image
-# and provides common configuration for all stages, such as the working dir.
+# Dockerfile de production
+#
+# Construit l'image finale qui bundle le backend compilé
+# et les assets statiques du client. Utilisé pour le
+# déploiement (pas pour le dev — voir compose.yaml).
 ###################################################
+
 FROM node:22 AS base
 WORKDIR /usr/local/app
 
-################## CLIENT STAGES ##################
-
 ###################################################
-# Stage: client-base
-#
-# This stage is used as the base for the client-dev and client-build stages,
-# since there are common steps needed for each.
+# Stage: client-build
+# Installe les deps client et build les assets statiques.
 ###################################################
-FROM base AS client-base
+FROM base AS client-build
 COPY client/package.json client/package-lock.json ./
 RUN npm install
 COPY client/.eslintrc.cjs client/index.html client/vite.config.js client/tsconfig.json ./
 COPY client/public ./public
 COPY client/src ./src
-
-###################################################
-# Stage: client-dev
-# 
-# This stage is used for development of the client application. It sets 
-# the default command to start the Vite development server.
-###################################################
-FROM client-base AS client-dev
-CMD ["npm", "run", "dev"]
-
-###################################################
-# Stage: client-build
-#
-# This stage builds the client application, producing static HTML, CSS, and
-# JS files that can be served by the backend.
-###################################################
-FROM client-base AS client-build
 RUN npm run build
 
-
-
-
 ###################################################
-################  BACKEND STAGES  #################
+# Stage: backend-build
+# Installe les deps backend, compile TypeScript et
+# lance les tests. Si les tests échouent, le build
+# s'arrête ici.
 ###################################################
-
-###################################################
-# Stage: backend-base
-#
-# This stage is used as the base for the backend-dev and test stages, since
-# there are common steps needed for each.
-###################################################
-FROM base AS backend-dev
+FROM base AS backend-build
 COPY backend/package.json backend/package-lock.json backend/tsconfig.json ./
 RUN npm install
-COPY backend/spec ./spec
 COPY backend/src ./src
-CMD ["npm", "run", "dev"]
-
-###################################################
-# Stage: test
-#
-# This stage runs the tests on the backend. This is split into a separate
-# stage to allow the final image to not have the test dependencies or test
-# cases.
-###################################################
-FROM backend-dev AS test
+COPY backend/spec ./spec
 RUN npm run build
 RUN npm run test
 
 ###################################################
 # Stage: final
-#
-# This stage is intended to be the final "production" image. It sets up the
-# backend and copies the built client application from the client-build stage.
-#
-# It pulls the package.json and package-lock.json from the test stage to ensure that
-# the tests run (without this, the test stage would simply be skipped).
+# Image de production minimale. Copie le backend
+# compilé et les assets client dans dist/static.
 ###################################################
 FROM base AS final
 ENV NODE_ENV=production
-COPY --from=test /usr/local/app/package.json /usr/local/app/package-lock.json ./
-RUN npm ci --production && \
-    npm cache clean --force
-COPY --from=test /usr/local/app/dist ./dist
+COPY --from=backend-build /usr/local/app/package.json /usr/local/app/package-lock.json ./
+RUN npm ci --production && npm cache clean --force
+COPY --from=backend-build /usr/local/app/dist ./dist
 COPY --from=client-build /usr/local/app/dist ./dist/static
 EXPOSE 3000
 CMD ["node", "dist/src/index.js"]

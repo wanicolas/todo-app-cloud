@@ -67,8 +67,9 @@ services:
   ###################################################
   backend:
     build:
-      context: ./
-      target: backend-dev
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dev
     environment:
       MYSQL_HOST: mysql
       MYSQL_USER: root
@@ -105,8 +106,9 @@ services:
   ###################################################
   client:
     build:
-      context: ./
-      target: client-dev
+      context: ./client
+      dockerfile: Dockerfile
+      target: dev
     develop:
       watch:
         - path: ./client/src
