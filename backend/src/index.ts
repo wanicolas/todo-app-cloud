@@ -1,8 +1,14 @@
-const app = require('./app');
-const db = require('./persistence');
+const { createRepository } = require('./repository');
+const { TodoService } = require('./service/TodoService');
+const createApp = require('./app');
 
-db.init()
+const repository = createRepository();
+const service = new TodoService(repository);
+
+service
+    .init()
     .then(() => {
+        const app = createApp(service);
         app.listen(3000, () => console.log('Listening on port 3000'));
     })
     .catch((err: Error) => {
@@ -11,7 +17,8 @@ db.init()
     });
 
 const gracefulShutdown = () => {
-    db.teardown()
+    service
+        .teardown()
         .catch(() => {})
         .then(() => process.exit());
 };

@@ -1,15 +1,10 @@
 import { Request, Response } from 'express';
 
-const db = require('../persistence');
-const { v4: uuid } = require('uuid');
-
-module.exports = async (req: Request, res: Response) => {
-    const item = {
-        id: uuid(),
-        name: req.body.name,
-        completed: false,
+function makeAddItem(service: any) {
+    return async (req: Request, res: Response) => {
+        const item = await service.addItem(req.body.name);
+        res.send(item);
     };
+}
 
-    await db.storeItem(item);
-    res.send(item);
-};
+module.exports = makeAddItem;

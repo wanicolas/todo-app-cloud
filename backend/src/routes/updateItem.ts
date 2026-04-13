@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 
-const db = require('../persistence');
+function makeUpdateItem(service: any) {
+    return async (req: Request, res: Response) => {
+        const item = await service.updateItem(req.params.id, {
+            name: req.body.name,
+            completed: req.body.completed,
+        });
+        res.send(item);
+    };
+}
 
-module.exports = async (req: Request, res: Response) => {
-    await db.updateItem(req.params.id, {
-        name: req.body.name,
-        completed: req.body.completed,
-    });
-    const item = await db.getItem(req.params.id);
-    res.send(item);
-};
+module.exports = makeUpdateItem;

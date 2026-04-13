@@ -4,7 +4,7 @@ export interface TodoItem {
     completed: boolean;
 }
 
-export interface Persistence {
+export interface TodoRepository {
     init(): Promise<void>;
     teardown(): Promise<void>;
     getItems(): Promise<TodoItem[]>;
@@ -13,3 +13,5 @@ export interface Persistence {
     updateItem(id: string, item: TodoItem): Promise<void>;
     removeItem(id: string): Promise<void>;
 }
+
+export type Persistence = TodoRepository;

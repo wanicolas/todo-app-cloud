@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 
-const db = require('../persistence');
+function makeDeleteItem(service: any) {
+    return async (req: Request, res: Response) => {
+        await service.removeItem(req.params.id);
+        res.sendStatus(200);
+    };
+}
 
-module.exports = async (req: Request, res: Response) => {
-    await db.removeItem(req.params.id);
-    res.sendStatus(200);
-};
+module.exports = makeDeleteItem;
