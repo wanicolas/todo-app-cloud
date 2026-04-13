@@ -18,7 +18,7 @@ WORKDIR /usr/local/app
 FROM base AS client-base
 COPY client/package.json client/package-lock.json ./
 RUN npm install
-COPY client/.eslintrc.cjs client/index.html client/vite.config.js ./
+COPY client/.eslintrc.cjs client/index.html client/vite.config.js client/tsconfig.json ./
 COPY client/public ./public
 COPY client/src ./src
 
@@ -54,7 +54,7 @@ RUN npm run build
 # there are common steps needed for each.
 ###################################################
 FROM base AS backend-dev
-COPY backend/package.json backend/package-lock.json ./
+COPY backend/package.json backend/package-lock.json backend/tsconfig.json ./
 RUN npm install
 COPY backend/spec ./spec
 COPY backend/src ./src
@@ -68,6 +68,7 @@ CMD ["npm", "run", "dev"]
 # cases.
 ###################################################
 FROM backend-dev AS test
+RUN npm run build
 RUN npm run test
 
 ###################################################
@@ -84,7 +85,7 @@ ENV NODE_ENV=production
 COPY --from=test /usr/local/app/package.json /usr/local/app/package-lock.json ./
 RUN npm ci --production && \
     npm cache clean --force
-COPY backend/src ./src
-COPY --from=client-build /usr/local/app/dist ./src/static
+COPY --from=test /usr/local/app/dist ./dist
+COPY --from=client-build /usr/local/app/dist ./dist/static
 EXPOSE 3000
-CMD ["node", "src/index.js"]
+CMD ["node", "dist/src/index.js"]

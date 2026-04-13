@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -9,7 +8,19 @@ import faCheckSquare from '@fortawesome/fontawesome-free-regular/faCheckSquare';
 import faSquare from '@fortawesome/fontawesome-free-regular/faSquare';
 import './ItemDisplay.scss';
 
-export function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
+interface TodoItem {
+    id: string;
+    name: string;
+    completed: boolean;
+}
+
+interface ItemDisplayProps {
+    item: TodoItem;
+    onItemUpdate: (item: TodoItem) => void;
+    onItemRemoval: (item: TodoItem) => void;
+}
+
+export function ItemDisplay({ item, onItemUpdate, onItemRemoval }: ItemDisplayProps) {
     const toggleCompletion = () => {
         fetch(`/api/items/${item.id}`, {
             method: 'PUT',
@@ -74,13 +85,3 @@ export function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
         </Container>
     );
 }
-
-ItemDisplay.propTypes = {
-    item: PropTypes.shape({
-        id: PropTypes.string,
-        name: PropTypes.string,
-        completed: PropTypes.bool,
-    }),
-    onItemUpdate: PropTypes.func,
-    onItemRemoval: PropTypes.func,
-};

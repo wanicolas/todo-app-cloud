@@ -1,6 +1,8 @@
+import { Request, Response } from 'express';
+
 const db = require('../persistence');
 
-module.exports = async (req, res) => {
+module.exports = async (req: Request, res: Response) => {
     await db.updateItem(req.params.id, {
         name: req.body.name,
         completed: req.body.completed,
