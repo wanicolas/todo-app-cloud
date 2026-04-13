@@ -1,12 +1,10 @@
 import { TodoRepository } from '../types';
 
-function createRepository(): TodoRepository {
-    if (process.env.MYSQL_HOST) {
-        const { MysqlRepository } = require('./MysqlRepository');
-        return new MysqlRepository();
-    }
-    const { SqliteRepository } = require('./SqliteRepository');
-    return new SqliteRepository();
+const { KnexRepository } = require('./KnexRepository');
+const { getKnexConfig } = require('./knexConfig');
+
+function createRepository(sqliteLocation?: string): TodoRepository {
+    return new KnexRepository(getKnexConfig(sqliteLocation));
 }
 
 module.exports = { createRepository };

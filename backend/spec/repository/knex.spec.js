@@ -2,9 +2,10 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-const location = path.join(os.tmpdir(), `todo-test-${Date.now()}.db`);
+const location = path.join(os.tmpdir(), `todo-knex-${Date.now()}.db`);
 
-const { SqliteRepository } = require('../../src/repository/SqliteRepository');
+const { KnexRepository } = require('../../src/repository/KnexRepository');
+const { getKnexConfig } = require('../../src/repository/knexConfig');
 
 const ITEM = {
     id: '7aef3d7c-d301-4846-8358-2a91ec9d6be3',
@@ -14,11 +15,16 @@ const ITEM = {
 
 let db;
 
-beforeEach(() => {
+beforeEach(async () => {
     if (fs.existsSync(location)) {
         fs.unlinkSync(location);
     }
-    db = new SqliteRepository(location);
+    db = new KnexRepository(getKnexConfig(location));
+    await db.init();
+});
+
+afterEach(async () => {
+    await db.teardown();
 });
 
 afterAll(() => {
@@ -28,12 +34,11 @@ afterAll(() => {
 });
 
 test('it initializes correctly', async () => {
-    await db.init();
+    const items = await db.getItems();
+    expect(items).toEqual([]);
 });
 
 test('it can store and retrieve items', async () => {
-    await db.init();
-
     await db.storeItem(ITEM);
 
     const items = await db.getItems();
@@ -42,11 +47,6 @@ test('it can store and retrieve items', async () => {
 });
 
 test('it can update an existing item', async () => {
-    await db.init();
-
-    const initialItems = await db.getItems();
-    expect(initialItems.length).toBe(0);
-
     await db.storeItem(ITEM);
 
     await db.updateItem(
@@ -60,7 +60,6 @@ test('it can update an existing item', async () => {
 });
 
 test('it can remove an existing item', async () => {
-    await db.init();
     await db.storeItem(ITEM);
 
     await db.removeItem(ITEM.id);
@@ -70,7 +69,6 @@ test('it can remove an existing item', async () => {
 });
 
 test('it can get a single item', async () => {
-    await db.init();
     await db.storeItem(ITEM);
 
     const item = await db.getItem(ITEM.id);

@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "express": "^5.1.0",
+    "knex": "^3.2.9",
     "mysql2": "^3.14.1",
     "sqlite3": "^5.1.7",
-    "uuid": "^11.1.0",
-    "wait-port": "^1.1.0"
+    "uuid": "^11.1.0"
   },
   "resolutions": {
     "@babel/core": "7.23.9"
