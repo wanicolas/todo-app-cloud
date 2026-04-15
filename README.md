@@ -57,12 +57,14 @@ npm run dev                    # React sur http://localhost:5173
 
 ### Via Docker (pas besoin de Node.js local)
 
+Le flag `--build` force la reconstruction de l'image (utile si le code a changé) et `--rm` supprime le conteneur après exécution.
+
 ```bash
 # Backend — 21 tests (SQLite automatique)
-docker compose run -e MYSQL_HOST= backend npm test
+docker compose run --build --rm -e MYSQL_HOST= backend npm test
 
 # Client — 13 tests
-docker compose run client npm test
+docker compose run --build --rm client npm test
 ```
 
 ### Via Node.js local
