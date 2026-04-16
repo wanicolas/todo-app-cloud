@@ -3,13 +3,27 @@ name: CI Backend
 on:
   push:
     branches: [main, develop]
-    paths: ['backend/**']
+    paths: ["backend/**"]
   pull_request:
     branches: [main, develop]
-    paths: ['backend/**']
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+
   backend:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     defaults:
       run:
