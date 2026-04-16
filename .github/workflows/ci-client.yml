@@ -3,13 +3,27 @@ name: CI Client
 on:
   push:
     branches: [main, develop]
-    paths: ['client/**']
+    paths: ["client/**"]
   pull_request:
     branches: [main, develop]
-    paths: ['client/**']
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      client: ${{ steps.filter.outputs.client }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            client:
+              - 'client/**'
+
   client:
+    needs: changes
+    if: ${{ needs.changes.outputs.client == 'true' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     defaults:
       run:
