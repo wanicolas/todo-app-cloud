@@ -12,13 +12,14 @@ Git Flow classique (avec release, hotfix, etc.) est trop lourd pour un projet de
 ## Décision
 
 On utilise un GitHub Flow simplifié :
+
 - `main` = branche stable, ce qui est livrable
 - `develop` = branche de dev, où on merge les features
-- Les features partent de `develop` et sont mergées via PR
-- Les merges de `develop` vers `main` passent par une PR avec la CI obligatoire
+- Les features sont faites sur des branches et sont mergées via PR dans develop avec CI obligatoire
+- Les merges de `develop` vers `main` passent également par une PR avec la CI obligatoire
 
 ## Conséquences
 
-- Chaque merge vers main est validé par les 3 pipelines CI (backend, client, e2e)
+- Chaque merge vers main ou develop est validé par les 3 pipelines CI (backend, client, e2e)
 - Pas de branche release, on merge develop → main quand c'est stable
 - L'historique reste lisible avec des commits conventionnels (feat, fix, chore, ci, test)
