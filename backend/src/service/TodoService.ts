@@ -35,6 +35,11 @@ class TodoService {
     async removeItem(userId: string, id: string): Promise<void> {
         return this.repository.removeItem(userId, id);
     }
+
+    // Deletes every todo of a user — used when erasing an account (RGPD).
+    async removeAllForUser(userId: string): Promise<void> {
+        return this.repository.removeAllItems(userId);
+    }
 }
 
 module.exports = { TodoService };

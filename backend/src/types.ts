@@ -13,6 +13,7 @@ export interface TodoRepository {
     storeItem(item: TodoItem): Promise<void>;
     updateItem(userId: string, id: string, item: TodoItem): Promise<void>;
     removeItem(userId: string, id: string): Promise<void>;
+    removeAllItems(userId: string): Promise<void>;
 }
 
 export type Persistence = TodoRepository;

@@ -6,6 +6,7 @@ const makeGetItems = require('./routes/getItems');
 const makeAddItem = require('./routes/addItem');
 const makeUpdateItem = require('./routes/updateItem');
 const makeDeleteItem = require('./routes/deleteItem');
+const makeDeleteAllItems = require('./routes/deleteAllItems');
 const requireAuth = require('./middleware/requireAuth');
 
 function createApp(service: any) {
@@ -21,6 +22,7 @@ function createApp(service: any) {
     app.get('/api/items', requireAuth, makeGetItems(service));
     app.post('/api/items', requireAuth, makeAddItem(service));
     app.put('/api/items/:id', requireAuth, makeUpdateItem(service));
+    app.delete('/api/items', requireAuth, makeDeleteAllItems(service));
     app.delete('/api/items/:id', requireAuth, makeDeleteItem(service));
 
     return app;

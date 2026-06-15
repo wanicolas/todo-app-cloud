@@ -107,4 +107,15 @@ describe('CRUD /api/items', () => {
         const res = await request(app).get('/api/items').set(auth());
         expect(res.body).toEqual([]);
     });
+
+    test('DELETE /api/items purges all items of the user', async () => {
+        await request(app).post('/api/items').set(auth()).send({ name: 'One' });
+        await request(app).post('/api/items').set(auth()).send({ name: 'Two' });
+
+        const del = await request(app).delete('/api/items').set(auth());
+        expect(del.status).toBe(200);
+
+        const res = await request(app).get('/api/items').set(auth());
+        expect(res.body).toEqual([]);
+    });
 });

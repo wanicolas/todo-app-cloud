@@ -41,6 +41,12 @@ class InMemoryRepository implements TodoRepository {
             this.items.delete(id);
         }
     }
+
+    async removeAllItems(userId: string): Promise<void> {
+        for (const [id, item] of this.items) {
+            if (item.userId === userId) this.items.delete(id);
+        }
+    }
 }
 
 module.exports = { InMemoryRepository };

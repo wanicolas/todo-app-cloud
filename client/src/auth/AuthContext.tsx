@@ -23,6 +23,11 @@ interface AuthContextValue {
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, password: string) => Promise<void>;
+    updateProfile: (data: {
+        email?: string;
+        password?: string;
+    }) => Promise<void>;
+    deleteAccount: () => Promise<void>;
     logout: () => void;
 }
 
@@ -94,9 +99,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(user);
     }, []);
 
+    const updateProfile = useCallback(
+        async (data: { email?: string; password?: string }) => {
+            const res = await apiFetch('/api/auth/me', {
+                method: 'PUT',
+                body: JSON.stringify(data),
+                headers: { 'Content-Type': 'application/json' },
+            });
+            const body = await res.json();
+            if (!res.ok) {
+                throw new Error(body.error || 'Update failed');
+            }
+            setUser(body);
+        },
+        [],
+    );
+
+    const deleteAccount = useCallback(async () => {
+        // RGPD erasure: purge the user's todos (backend) before deleting the
+        // account itself (auth), so no orphaned data is left behind.
+        await apiFetch('/api/items', { method: 'DELETE' });
+        const res = await apiFetch('/api/auth/me', { method: 'DELETE' });
+        if (!res.ok && res.status !== 204) {
+            throw new Error('Account deletion failed');
+        }
+        logout();
+    }, [logout]);
+
     return (
         <AuthContext.Provider
-            value={{ user, loading, login, register, logout }}
+            value={{
+                user,
+                loading,
+                login,
+                register,
+                updateProfile,
+                deleteAccount,
+                logout,
+            }}
         >
             {children}
         </AuthContext.Provider>

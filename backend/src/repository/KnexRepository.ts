@@ -80,6 +80,10 @@ class KnexRepository implements TodoRepository {
     async removeItem(userId: string, id: string): Promise<void> {
         await this.db('todo_items').where({ id, user_id: userId }).delete();
     }
+
+    async removeAllItems(userId: string): Promise<void> {
+        await this.db('todo_items').where({ user_id: userId }).delete();
+    }
 }
 
 module.exports = { KnexRepository };

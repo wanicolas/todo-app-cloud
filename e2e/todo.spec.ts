@@ -98,4 +98,24 @@ test.describe('Todo App', () => {
             page.getByText('No items yet! Add one above!'),
         ).toBeVisible();
     });
+
+    test('can delete the account (RGPD erasure)', async ({ page }) => {
+        // Add an item so the cascade purge has something to remove.
+        await page.getByPlaceholder('New Item').fill('To be erased');
+        await page.getByRole('button', { name: 'Add Item' }).click();
+        await expect(page.getByText('To be erased')).toBeVisible();
+
+        await page.getByRole('link', { name: 'My account' }).click();
+
+        // Auto-accept the confirmation dialog.
+        page.on('dialog', (dialog) => dialog.accept());
+        await page
+            .getByRole('button', { name: 'Delete my account' })
+            .click();
+
+        // Back to the login screen once the account is gone.
+        await expect(
+            page.getByRole('button', { name: 'Log in' }),
+        ).toBeVisible();
+    });
 });

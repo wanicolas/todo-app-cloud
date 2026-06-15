@@ -63,3 +63,14 @@ test('a user cannot see another user items', async () => {
     const items = await service.getAllItems(USER);
     expect(items).toEqual([]);
 });
+
+test('removeAllForUser deletes only the given user items', async () => {
+    await service.addItem(USER, 'Mine 1');
+    await service.addItem(USER, 'Mine 2');
+    await service.addItem(OTHER_USER, 'Theirs');
+
+    await service.removeAllForUser(USER);
+
+    expect(await service.getAllItems(USER)).toEqual([]);
+    expect((await service.getAllItems(OTHER_USER)).length).toBe(1);
+});

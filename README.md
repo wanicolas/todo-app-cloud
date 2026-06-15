@@ -160,6 +160,12 @@ Le JWT est signé en HS256 avec `JWT_SECRET`. Le backend todo vérifie lui-même
 signature (pas d'appel au service auth) et restreint chaque todo à son propriétaire
 via la colonne `user_id`. Les endpoints `/api/items*` renvoient `401` sans token valide.
 
+Une page **« Mon compte »** (`/account`) côté front permet à l'utilisateur d'exercer
+ses droits RGPD : modifier email/mot de passe, **exporter ses données** (profil +
+todos, en JSON), et **supprimer son compte**. La suppression purge d'abord les todos
+(`DELETE /api/items`, backend) puis le compte (`DELETE /api/auth/me`, auth), pour ne
+laisser aucune donnée orpheline.
+
 ## Architecture du projet
 
 ```
@@ -186,7 +192,7 @@ via la colonne `user_id`. Les endpoints `/api/items*` renvoient `401` sans token
 ├── client/                   # React SPA (TypeScript)
 │   ├── src/
 │   │   ├── components/       # Greeting, TodoListCard, AddNewItemForm, ItemDisplay
-│   │   ├── pages/            # Login, Register
+│   │   ├── pages/            # Login, Register, Account (RGPD)
 │   │   ├── auth/             # AuthContext, ProtectedRoute
 │   │   └── api/              # Wrapper fetch (injection du JWT)
 │   ├── src/test/             # Setup Vitest
