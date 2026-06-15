@@ -1,18 +1,17 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { Greeting } from './Greeting';
+import { apiFetch } from '../api/client';
+
+vi.mock('../api/client', () => ({ apiFetch: vi.fn() }));
 
 beforeEach(() => {
-    global.fetch = vi.fn();
-});
-
-afterEach(() => {
-    vi.restoreAllMocks();
+    vi.mocked(apiFetch).mockReset();
 });
 
 test('renders greeting after fetch', async () => {
-    fetch.mockResolvedValueOnce({
+    vi.mocked(apiFetch).mockResolvedValueOnce({
         json: () => Promise.resolve({ greeting: 'Hello world!' }),
-    });
+    } as Response);
 
     render(<Greeting />);
 
@@ -20,11 +19,11 @@ test('renders greeting after fetch', async () => {
         expect(screen.getByText('Hello world!')).toBeInTheDocument();
     });
 
-    expect(fetch).toHaveBeenCalledWith('/api/greeting');
+    expect(apiFetch).toHaveBeenCalledWith('/api/greeting');
 });
 
 test('renders nothing before fetch completes', () => {
-    fetch.mockReturnValue(new Promise(() => {}));
+    vi.mocked(apiFetch).mockReturnValue(new Promise(() => {}));
     const { container } = render(<Greeting />);
     expect(container.querySelector('h1')).toBeNull();
 });

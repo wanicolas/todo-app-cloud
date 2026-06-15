@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { apiFetch } from '../api/client';
 import { AddItemForm } from './AddNewItemForm';
 import { ItemDisplay } from './ItemDisplay';
 
@@ -12,7 +13,7 @@ export function TodoListCard() {
     const [items, setItems] = useState<TodoItem[] | null>(null);
 
     useEffect(() => {
-        fetch('/api/items')
+        apiFetch('/api/items')
             .then((r) => r.json())
             .then(setItems);
     }, []);

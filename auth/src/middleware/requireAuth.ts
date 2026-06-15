@@ -1,0 +1,24 @@
+import { Request, Response, NextFunction } from 'express';
+
+const jwt = require('jsonwebtoken');
+
+// Extracts and verifies the Bearer JWT, then attaches the user id to req.userId.
+function requireAuth(req: Request, res: Response, next: NextFunction) {
+    const header = req.headers.authorization || '';
+    const [scheme, token] = header.split(' ');
+
+    if (scheme !== 'Bearer' || !token) {
+        return res.status(401).send({ error: 'Authentication required' });
+    }
+
+    try {
+        const secret = process.env.JWT_SECRET || 'dev-insecure-secret';
+        const payload = jwt.verify(token, secret);
+        (req as any).userId = payload.sub;
+        next();
+    } catch {
+        return res.status(401).send({ error: 'Invalid or expired token' });
+    }
+}
+
+module.exports = requireAuth;

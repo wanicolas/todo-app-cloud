@@ -2,8 +2,9 @@ const makeUpdateItem = require('../../src/routes/updateItem');
 
 const ITEM = { id: 1234, name: 'New title', completed: false };
 
-test('it updates items correctly', async () => {
+test('it updates items for the authenticated user', async () => {
     const req = {
+        userId: 'user-1',
         params: { id: 1234 },
         body: { name: 'New title', completed: false },
     };
@@ -17,7 +18,7 @@ test('it updates items correctly', async () => {
     await handler(req, res);
 
     expect(mockService.updateItem).toHaveBeenCalledTimes(1);
-    expect(mockService.updateItem).toHaveBeenCalledWith(1234, {
+    expect(mockService.updateItem).toHaveBeenCalledWith('user-1', 1234, {
         name: 'New title',
         completed: false,
     });

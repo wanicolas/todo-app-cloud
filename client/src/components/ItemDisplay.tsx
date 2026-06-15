@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash';
 import faCheckSquare from '@fortawesome/fontawesome-free-regular/faCheckSquare';
 import faSquare from '@fortawesome/fontawesome-free-regular/faSquare';
+import { apiFetch } from '../api/client';
 import './ItemDisplay.scss';
 
 interface TodoItem {
@@ -26,7 +27,7 @@ export function ItemDisplay({
     onItemRemoval,
 }: ItemDisplayProps) {
     const toggleCompletion = () => {
-        fetch(`/api/items/${item.id}`, {
+        apiFetch(`/api/items/${item.id}`, {
             method: 'PUT',
             body: JSON.stringify({
                 name: item.name,
@@ -39,7 +40,7 @@ export function ItemDisplay({
     };
 
     const removeItem = () => {
-        fetch(`/api/items/${item.id}`, { method: 'DELETE' }).then(() =>
+        apiFetch(`/api/items/${item.id}`, { method: 'DELETE' }).then(() =>
             onItemRemoval(item),
         );
     };

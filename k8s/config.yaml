@@ -18,3 +18,18 @@ metadata:
 type: Opaque
 stringData:
   MYSQL_PASSWORD: "secret"
+  # Shared HS256 secret: the auth service signs JWTs with it, the backend
+  # verifies them. Replace with a long random value in production.
+  JWT_SECRET: "dev-insecure-secret"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-config
+  labels:
+    app: auth
+data:
+  MYSQL_HOST: "mysql-auth"
+  MYSQL_USER: "root"
+  MYSQL_DB: "auth"
+  JWT_EXPIRES_IN: "1h"
