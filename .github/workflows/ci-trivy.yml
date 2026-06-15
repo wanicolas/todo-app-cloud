@@ -22,22 +22,28 @@ jobs:
         run: docker build -t todo-prod:scan .
 
       - name: Scan backend image
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: todo-backend:scan
           format: table
           severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
 
       - name: Scan client image
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: todo-client:scan
           format: table
           severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
 
       - name: Scan production image
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: todo-prod:scan
           format: table
           severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
