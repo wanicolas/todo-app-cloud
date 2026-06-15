@@ -9,24 +9,37 @@ class InMemoryRepository implements TodoRepository {
         this.items.clear();
     }
 
-    async getItems(): Promise<TodoItem[]> {
-        return Array.from(this.items.values());
+    async getItems(userId: string): Promise<TodoItem[]> {
+        return Array.from(this.items.values()).filter(
+            (item) => item.userId === userId,
+        );
     }
 
-    async getItem(id: string): Promise<TodoItem> {
-        return this.items.get(id)!;
+    async getItem(userId: string, id: string): Promise<TodoItem> {
+        const item = this.items.get(id);
+        return item && item.userId === userId ? item : (undefined as any);
     }
 
     async storeItem(item: TodoItem): Promise<void> {
         this.items.set(item.id, item);
     }
 
-    async updateItem(id: string, item: TodoItem): Promise<void> {
-        this.items.set(id, { ...item, id });
+    async updateItem(
+        userId: string,
+        id: string,
+        item: TodoItem,
+    ): Promise<void> {
+        const existing = this.items.get(id);
+        if (existing && existing.userId === userId) {
+            this.items.set(id, { ...item, id, userId });
+        }
     }
 
-    async removeItem(id: string): Promise<void> {
-        this.items.delete(id);
+    async removeItem(userId: string, id: string): Promise<void> {
+        const existing = this.items.get(id);
+        if (existing && existing.userId === userId) {
+            this.items.delete(id);
+        }
     }
 }
 

@@ -25,6 +25,16 @@ jobs:
             sleep 5
           done
 
+          echo "Waiting for auth service..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3080/api/auth/health > /dev/null 2>&1; then
+              echo "Auth service is ready!"
+              break
+            fi
+            echo "Waiting for auth... ($i/30)"
+            sleep 5
+          done
+
           echo "Waiting for client..."
           for i in $(seq 1 30); do
             if curl -sf http://localhost:3080 2>&1 | grep -q 'root'; then

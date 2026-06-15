@@ -1,24 +1,23 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { TodoListCard } from './TodoListCard';
+import { apiFetch } from '../api/client';
+
+vi.mock('../api/client', () => ({ apiFetch: vi.fn() }));
 
 beforeEach(() => {
-    global.fetch = vi.fn();
-});
-
-afterEach(() => {
-    vi.restoreAllMocks();
+    vi.mocked(apiFetch).mockReset();
 });
 
 test('shows Loading... initially', () => {
-    fetch.mockReturnValue(new Promise(() => {}));
+    vi.mocked(apiFetch).mockReturnValue(new Promise(() => {}));
     render(<TodoListCard />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
 });
 
 test('shows empty state when no items', async () => {
-    fetch.mockResolvedValueOnce({
+    vi.mocked(apiFetch).mockResolvedValueOnce({
         json: () => Promise.resolve([]),
-    });
+    } as Response);
 
     render(<TodoListCard />);
 
@@ -35,9 +34,9 @@ test('renders items after fetch', async () => {
         { id: '2', name: 'Walk the dog', completed: true },
     ];
 
-    fetch.mockResolvedValueOnce({
+    vi.mocked(apiFetch).mockResolvedValueOnce({
         json: () => Promise.resolve(items),
-    });
+    } as Response);
 
     render(<TodoListCard />);
 

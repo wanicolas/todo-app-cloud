@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
+import { apiFetch } from '../api/client';
 
 interface TodoItem {
     id: string;
@@ -27,7 +28,7 @@ export function AddItemForm({ onNewItem }: AddItemFormProps) {
             headers: { 'Content-Type': 'application/json' },
         };
 
-        fetch('/api/items', options)
+        apiFetch('/api/items', options)
             .then((r) => r.json())
             .then((item: TodoItem) => {
                 onNewItem(item);

@@ -1,7 +1,7 @@
 const makeDeleteItem = require('../../src/routes/deleteItem');
 
-test('it removes item correctly', async () => {
-    const req = { params: { id: 12345 } };
+test('it removes item for the authenticated user', async () => {
+    const req = { userId: 'user-1', params: { id: 12345 } };
     const res = { sendStatus: jest.fn() };
 
     const mockService = {
@@ -12,7 +12,7 @@ test('it removes item correctly', async () => {
     await handler(req, res);
 
     expect(mockService.removeItem).toHaveBeenCalledTimes(1);
-    expect(mockService.removeItem).toHaveBeenCalledWith(12345);
+    expect(mockService.removeItem).toHaveBeenCalledWith('user-1', 12345);
     expect(res.sendStatus).toHaveBeenCalledTimes(1);
     expect(res.sendStatus).toHaveBeenCalledWith(200);
 });

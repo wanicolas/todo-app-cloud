@@ -18,6 +18,9 @@ jobs:
       - name: Build client image
         run: docker build -t todo-client:scan ./client
 
+      - name: Build auth image
+        run: docker build -t todo-auth:scan ./auth
+
       - name: Build production image
         run: docker build -t todo-prod:scan .
 
@@ -34,6 +37,15 @@ jobs:
         uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: todo-client:scan
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+      - name: Scan auth image
+        uses: aquasecurity/trivy-action@v0.28.0
+        with:
+          image-ref: todo-auth:scan
           format: table
           severity: CRITICAL,HIGH
           exit-code: 1

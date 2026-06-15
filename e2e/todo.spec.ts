@@ -1,8 +1,32 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Todo App', () => {
+    // Each test registers a brand-new account, so it starts authenticated with
+    // an empty, isolated todo list. Registration redirects to the todo page.
     test.beforeEach(async ({ page }) => {
+        const email = `e2e-${Date.now()}-${Math.floor(
+            performance.now() * 1000,
+        )}@example.com`;
+
+        await page.goto('/register', { waitUntil: 'networkidle' });
+        await page.getByLabel('Email').fill(email);
+        await page.getByLabel('Password').fill('password123');
+        await page.getByRole('button', { name: 'Register' }).click();
+
+        // Land on the todo page (greeting is only shown once authenticated).
+        await expect(page.locator('h1')).toBeVisible();
+    });
+
+    test('redirects unauthenticated users to the login page', async ({
+        page,
+    }) => {
+        // A fresh context with no token should be bounced to /login.
+        await page.context().clearCookies();
+        await page.evaluate(() => localStorage.clear());
         await page.goto('/', { waitUntil: 'networkidle' });
+        await expect(
+            page.getByRole('button', { name: 'Log in' }),
+        ).toBeVisible();
     });
 
     test('displays the greeting', async ({ page }) => {
@@ -68,26 +92,8 @@ test.describe('Todo App', () => {
         await expect(page.getByText(itemName)).not.toBeVisible();
     });
 
-    test('shows empty state when no items exist', async ({ page }) => {
-        // Use the API to clean all items (with retry for CI stability)
-        const items = await page.evaluate(async () => {
-            for (let i = 0; i < 5; i++) {
-                const res = await fetch('/api/items');
-                if (res.ok) return res.json();
-                await new Promise((r) => setTimeout(r, 1000));
-            }
-            return [];
-        });
-        for (const item of items) {
-            await page.evaluate(
-                (id) => fetch(`/api/items/${id}`, { method: 'DELETE' }),
-                item.id,
-            );
-        }
-
-        // Reload to see empty state
-        await page.reload({ waitUntil: 'networkidle' });
-
+    test('shows empty state for a new account', async ({ page }) => {
+        // A freshly registered user has no items yet.
         await expect(
             page.getByText('No items yet! Add one above!'),
         ).toBeVisible();
