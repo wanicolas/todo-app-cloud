@@ -62,7 +62,19 @@ jobs:
           docker compose logs backend 2>&1 | tail -15
 
       - run: npm ci
-      - run: npx playwright install chromium
+
+      - name: Cache Playwright browsers
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: npx playwright install chromium
 
       - name: Run E2E tests
         run: npx playwright test
