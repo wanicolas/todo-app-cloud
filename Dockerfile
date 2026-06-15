@@ -45,6 +45,6 @@ ENV NODE_ENV=production
 COPY --from=backend-build /usr/local/app/package.json /usr/local/app/package-lock.json ./
 RUN npm ci --production && npm cache clean --force
 COPY --from=backend-build /usr/local/app/dist ./dist
-COPY --from=client-build /usr/local/app/dist ./dist/static
+COPY --from=client-build /usr/local/app/dist ./dist/src/static
 EXPOSE 3000
 CMD ["node", "dist/src/index.js"]
