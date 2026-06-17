@@ -15,7 +15,8 @@ RUN npm run build
 RUN npm run test
 
 # Production stage
-FROM base AS production
+FROM node:22-slim AS production
+WORKDIR /usr/local/app
 ENV NODE_ENV=production
 COPY --from=test /usr/local/app/package.json /usr/local/app/package-lock.json ./
 RUN npm ci --production && npm cache clean --force
