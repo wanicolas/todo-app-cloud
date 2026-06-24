@@ -178,7 +178,7 @@ services:
   # ok to hard-code them here.
   ###################################################
   mysql:
-    image: mysql:9.3
+    image: mysql:8.0.21
     volumes:
       - todo-mysql-data:/var/lib/mysql
     environment: 
@@ -197,7 +197,7 @@ services:
   # todo database is what makes auth a true microservice with its own storage.
   ###################################################
   mysql-auth:
-    image: mysql:9.3
+    image: mysql:8.0.21
     volumes:
       - auth-mysql-data:/var/lib/mysql
     environment:
