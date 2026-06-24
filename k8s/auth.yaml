@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: auth
-          image: auth:latest
-          imagePullPolicy: IfNotPresent
+          image: todoapptestnw.azurecr.io/auth:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3001
               name: http
