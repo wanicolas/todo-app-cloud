@@ -5,11 +5,14 @@ const createApp = require('./app');
 const repository = createRepository();
 const service = new TodoService(repository);
 
+let server: any;
+const port = process.env.PORT || 3000;
+
 service
     .init()
     .then(() => {
         const app = createApp(service);
-        app.listen(3000, () => console.log('Listening on port 3000'));
+        server = app.listen(port, () => console.log(`Listening on port ${port}`));
     })
     .catch((err: Error) => {
         console.error(err);
@@ -17,10 +20,27 @@ service
     });
 
 const gracefulShutdown = () => {
-    service
-        .teardown()
-        .catch(() => {})
-        .then(() => process.exit());
+    console.log('Shutdown signal received. Closing HTTP server...');
+    const closeServer = () => {
+        return new Promise<void>((resolve) => {
+            if (server) {
+                server.close(() => {
+                    console.log('HTTP server closed.');
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
+        });
+    };
+
+    closeServer()
+        .then(() => service.teardown())
+        .catch((err) => console.error('Error during teardown:', err))
+        .then(() => {
+            console.log('Teardown complete. Exiting.');
+            process.exit(0);
+        });
 };
 
 process.on('SIGINT', gracefulShutdown);
