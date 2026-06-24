@@ -1,0 +1,28 @@
+# Values for Azure AKS production environment
+global:
+  environment: prod
+
+# Production uses the Managed MySQL Flexible Server on Azure
+mysql:
+  local:
+    enabled: false
+  # Surchargé lors du déploiement avec le vrai DNS Azure MySQL
+  host: "todo-app-mysql.mysql.database.azure.com"
+  authHost: "todo-app-mysql.mysql.database.azure.com"
+  user: "dbadmin"
+  db: "todos"
+  authDb: "auth"
+  ssl: true
+
+# Enable Azure Key Vault CSI driver integration
+keyvault:
+  enabled: true
+  # Surchargé lors du déploiement avec les valeurs générées par Terraform
+  name: "todo-app-kv"
+  tenantId: "YOUR_AZURE_TENANT_ID"
+
+# Enable TLS on the reverse proxy in production
+reverseProxy:
+  tls:
+    enabled: true
+    secretName: "todo-tls-cert"

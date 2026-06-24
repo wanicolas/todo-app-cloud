@@ -12,10 +12,17 @@ export function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [consent, setConsent] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        if (!consent) {
+            setError(
+                'You must consent to the processing of your data to register.',
+            );
+            return;
+        }
         setError(null);
         setSubmitting(true);
         try {
@@ -53,6 +60,15 @@ export function Register() {
                             required
                         />
                         <Form.Text muted>At least 8 characters.</Form.Text>
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="register-consent">
+                        <Form.Check
+                            type="checkbox"
+                            label="I consent to the collection and processing of my personal data (email) in accordance with the GDPR."
+                            checked={consent}
+                            onChange={(e) => setConsent(e.target.checked)}
+                            required
+                        />
                     </Form.Group>
                     <Button
                         type="submit"

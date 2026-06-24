@@ -43,6 +43,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.law.id
   }
 
+  key_vault_secrets_provider {
+    secret_rotation_enabled = true
+  }
+
   tags = {
     Environment = "Test"
   }
@@ -151,11 +155,22 @@ resource "azurerm_mysql_flexible_server_firewall_rule" "allow_azure_services" {
   end_ip_address      = "0.0.0.0"
 }
 
-# Disable secure transport enforcement to match the development knex config
+# Enable secure transport enforcement to protect data in transit
 resource "azurerm_mysql_flexible_server_configuration" "disable_ssl" {
   name                = "require_secure_transport"
   resource_group_name = azurerm_resource_group.rg.name
   server_name         = azurerm_mysql_flexible_server.mysql.name
-  value               = "OFF"
+  value               = "ON"
+}
+
+# Grant secret access to the AKS Secrets Store CSI driver identity
+resource "azurerm_key_vault_access_policy" "aks_csi" {
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_kubernetes_cluster.aks.key_vault_secrets_provider[0].secret_identity[0].object_id
+
+  secret_permissions = [
+    "Get", "List"
+  ]
 }
 

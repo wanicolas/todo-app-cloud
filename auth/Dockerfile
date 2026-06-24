@@ -21,5 +21,7 @@ ENV NODE_ENV=production
 COPY --from=test /usr/local/app/package.json /usr/local/app/package-lock.json ./
 RUN npm ci --production && npm cache clean --force
 COPY --from=test /usr/local/app/dist ./dist
+RUN chown -R node:node /usr/local/app
+USER node
 EXPOSE 3001
 CMD ["node", "dist/src/index.js"]

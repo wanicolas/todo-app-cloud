@@ -15,7 +15,7 @@ FROM dev AS build
 RUN npm run build
 
 # Production stage — serve static assets via Nginx
-FROM nginx:alpine AS production
+FROM nginxinc/nginx-unprivileged:alpine AS production
 COPY --from=build /usr/local/app/dist /usr/share/nginx/html
-EXPOSE 80
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]

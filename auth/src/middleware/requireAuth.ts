@@ -12,7 +12,13 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     }
 
     try {
-        const secret = process.env.JWT_SECRET || 'dev-insecure-secret';
+        let secret = process.env.JWT_SECRET || 'dev-insecure-secret';
+        if (process.env.JWT_SECRET_FILE) {
+            const fs = require('fs');
+            secret = fs
+                .readFileSync(process.env.JWT_SECRET_FILE, 'utf8')
+                .trim();
+        }
         const payload = jwt.verify(token, secret);
         (req as any).userId = payload.sub;
         next();

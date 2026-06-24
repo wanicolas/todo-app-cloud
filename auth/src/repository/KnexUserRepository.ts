@@ -1,5 +1,6 @@
 import knex, { Knex } from 'knex';
 import { User, UserRepository } from '../types';
+import { logger } from '../utils/logger';
 
 function mapRow(row: any): User | undefined {
     if (!row) return undefined;
@@ -28,14 +29,15 @@ class KnexUserRepository implements UserRepository {
                 await this.db.migrate.latest();
                 if (process.env.NODE_ENV !== 'test') {
                     const client = (this.db.client as any).config.client;
-                    console.log(`Connected to ${client} database via Knex`);
+                    logger.info(`Connected to ${client} database via Knex`);
                 }
                 return;
             } catch (err) {
                 if (attempt === maxRetries) throw err;
                 if (process.env.NODE_ENV !== 'test') {
-                    console.log(
+                    logger.warn(
                         `Database not ready, retrying (${attempt}/${maxRetries})...`,
+                        { error: err instanceof Error ? err.message : err },
                     );
                 }
                 await new Promise((r) => setTimeout(r, retryDelay));

@@ -29,7 +29,18 @@ class AuthService {
     constructor(private repository: UserRepository) {}
 
     private get secret(): string {
-        return process.env.JWT_SECRET || 'dev-insecure-secret';
+        let val = process.env.JWT_SECRET || 'dev-insecure-secret';
+        if (process.env.JWT_SECRET_FILE) {
+            try {
+                const fs = require('fs');
+                val = fs
+                    .readFileSync(process.env.JWT_SECRET_FILE, 'utf8')
+                    .trim();
+            } catch {
+                // Fallback to default
+            }
+        }
+        return val;
     }
 
     private get expiresIn(): string {
