@@ -17,6 +17,11 @@ const ITEM = {
 };
 
 let db;
+const mysqlHost = process.env.MYSQL_HOST;
+
+beforeAll(() => {
+    delete process.env.MYSQL_HOST;
+});
 
 beforeEach(async () => {
     if (fs.existsSync(location)) {
@@ -31,6 +36,9 @@ afterEach(async () => {
 });
 
 afterAll(() => {
+    if (mysqlHost) {
+        process.env.MYSQL_HOST = mysqlHost;
+    }
     if (fs.existsSync(location)) {
         fs.unlinkSync(location);
     }

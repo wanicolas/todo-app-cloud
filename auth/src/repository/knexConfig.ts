@@ -24,7 +24,10 @@ function getKnexConfig(sqliteLocation?: string): Knex.Config {
                 password: readSecret('MYSQL_PASSWORD', 'MYSQL_PASSWORD_FILE'),
                 database: readSecret('MYSQL_DB', 'MYSQL_DB_FILE'),
                 charset: 'utf8mb4',
-                ssl: process.env.MYSQL_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
+                ssl:
+                    process.env.MYSQL_SSL === 'true'
+                        ? { rejectUnauthorized: false }
+                        : undefined,
             },
             pool: { min: 0, max: 5 },
             migrations: migrationConfig,

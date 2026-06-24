@@ -18,7 +18,9 @@ export function Register() {
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!consent) {
-            setError('You must consent to the processing of your data to register.');
+            setError(
+                'You must consent to the processing of your data to register.',
+            );
             return;
         }
         setError(null);

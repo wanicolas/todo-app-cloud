@@ -1,5 +1,4 @@
 import express from 'express';
-import path from 'path';
 
 const getGreeting = require('./routes/getGreeting');
 const makeGetItems = require('./routes/getItems');

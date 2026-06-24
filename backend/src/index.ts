@@ -13,7 +13,9 @@ service
     .init()
     .then(() => {
         const app = createApp(service);
-        server = app.listen(port, () => logger.info(`Listening on port ${port}`));
+        server = app.listen(port, () =>
+            logger.info(`Listening on port ${port}`),
+        );
     })
     .catch((err: Error) => {
         logger.error('Failed to initialize server', err);

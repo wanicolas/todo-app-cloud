@@ -33,7 +33,9 @@ class AuthService {
         if (process.env.JWT_SECRET_FILE) {
             try {
                 const fs = require('fs');
-                val = fs.readFileSync(process.env.JWT_SECRET_FILE, 'utf8').trim();
+                val = fs
+                    .readFileSync(process.env.JWT_SECRET_FILE, 'utf8')
+                    .trim();
             } catch {
                 // Fallback to default
             }

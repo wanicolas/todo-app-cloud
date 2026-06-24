@@ -22,7 +22,11 @@ export const logger = {
     error(message: string, err?: any, meta?: Record<string, any>) {
         const errorDetail =
             err instanceof Error
-                ? { errorName: err.name, errorMessage: err.message, stack: err.stack }
+                ? {
+                      errorName: err.name,
+                      errorMessage: err.message,
+                      stack: err.stack,
+                  }
                 : err !== undefined
                   ? { errorDetail: err }
                   : {};

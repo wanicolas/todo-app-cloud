@@ -35,7 +35,7 @@ class KnexRepository implements TodoRepository {
                 if (process.env.NODE_ENV !== 'test') {
                     logger.warn(
                         `Database not ready, retrying (${attempt}/${maxRetries})...`,
-                        { error: err instanceof Error ? err.message : err }
+                        { error: err instanceof Error ? err.message : err },
                     );
                 }
                 await new Promise((r) => setTimeout(r, retryDelay));
