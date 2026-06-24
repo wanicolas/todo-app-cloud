@@ -1,6 +1,7 @@
 const { createRepository } = require('./repository');
 const { TodoService } = require('./service/TodoService');
 const createApp = require('./app');
+const { logger } = require('./utils/logger');
 
 const repository = createRepository();
 const service = new TodoService(repository);
@@ -12,20 +13,20 @@ service
     .init()
     .then(() => {
         const app = createApp(service);
-        server = app.listen(port, () => console.log(`Listening on port ${port}`));
+        server = app.listen(port, () => logger.info(`Listening on port ${port}`));
     })
     .catch((err: Error) => {
-        console.error(err);
+        logger.error('Failed to initialize server', err);
         process.exit(1);
     });
 
 const gracefulShutdown = () => {
-    console.log('Shutdown signal received. Closing HTTP server...');
+    logger.info('Shutdown signal received. Closing HTTP server...');
     const closeServer = () => {
         return new Promise<void>((resolve) => {
             if (server) {
                 server.close(() => {
-                    console.log('HTTP server closed.');
+                    logger.info('HTTP server closed.');
                     resolve();
                 });
             } else {
@@ -36,9 +37,9 @@ const gracefulShutdown = () => {
 
     closeServer()
         .then(() => service.teardown())
-        .catch((err) => console.error('Error during teardown:', err))
+        .catch((err) => logger.error('Error during teardown', err))
         .then(() => {
-            console.log('Teardown complete. Exiting.');
+            logger.info('Teardown complete. Exiting.');
             process.exit(0);
         });
 };
