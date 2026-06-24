@@ -13,6 +13,7 @@ export function Register() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [consent, setConsent] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault();

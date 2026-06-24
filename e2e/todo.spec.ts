@@ -8,9 +8,10 @@ test.describe('Todo App', () => {
             performance.now() * 1000,
         )}@example.com`;
 
-        await page.goto('/register', { waitUntil: 'networkidle' });
-        await page.getByLabel('Email').fill(email);
+        await page.goto('/register', { waitUntil: 'load' });
+        await page.getByLabel('Email', { exact: true }).fill(email);
         await page.getByLabel('Password').fill('password123');
+        await page.getByRole('checkbox').check(); // Consent to GDPR
         await page.getByRole('button', { name: 'Register' }).click();
 
         // Land on the todo page (greeting is only shown once authenticated).
@@ -23,7 +24,7 @@ test.describe('Todo App', () => {
         // A fresh context with no token should be bounced to /login.
         await page.context().clearCookies();
         await page.evaluate(() => localStorage.clear());
-        await page.goto('/', { waitUntil: 'networkidle' });
+        await page.goto('/', { waitUntil: 'load' });
         await expect(
             page.getByRole('button', { name: 'Log in' }),
         ).toBeVisible();
