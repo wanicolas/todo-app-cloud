@@ -1,16 +1,15 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ItemDisplay } from './ItemDisplay';
+import { apiFetch } from '../api/client';
+
+vi.mock('../api/client', () => ({ apiFetch: vi.fn() }));
 
 const ITEM = { id: '1', name: 'Buy milk', completed: false };
 const COMPLETED_ITEM = { id: '2', name: 'Done task', completed: true };
 
 beforeEach(() => {
-    global.fetch = vi.fn();
-});
-
-afterEach(() => {
-    vi.restoreAllMocks();
+    vi.mocked(apiFetch).mockReset();
 });
 
 test('renders item name', () => {
@@ -55,9 +54,9 @@ test('toggle calls PUT and onItemUpdate', async () => {
     const onItemUpdate = vi.fn();
     const updatedItem = { ...ITEM, completed: true };
 
-    fetch.mockResolvedValueOnce({
+    vi.mocked(apiFetch).mockResolvedValueOnce({
         json: () => Promise.resolve(updatedItem),
-    });
+    } as Response);
 
     render(
         <ItemDisplay
@@ -72,7 +71,7 @@ test('toggle calls PUT and onItemUpdate', async () => {
     );
 
     await waitFor(() => {
-        expect(fetch).toHaveBeenCalledWith(
+        expect(apiFetch).toHaveBeenCalledWith(
             '/api/items/1',
             expect.objectContaining({ method: 'PUT' }),
         );
@@ -87,7 +86,7 @@ test('delete calls DELETE and onItemRemoval', async () => {
     const user = userEvent.setup();
     const onItemRemoval = vi.fn();
 
-    fetch.mockResolvedValueOnce({});
+    vi.mocked(apiFetch).mockResolvedValueOnce({} as Response);
 
     render(
         <ItemDisplay
@@ -100,7 +99,7 @@ test('delete calls DELETE and onItemRemoval', async () => {
     await user.click(screen.getByRole('button', { name: 'Remove Item' }));
 
     await waitFor(() => {
-        expect(fetch).toHaveBeenCalledWith('/api/items/1', {
+        expect(apiFetch).toHaveBeenCalledWith('/api/items/1', {
             method: 'DELETE',
         });
     });

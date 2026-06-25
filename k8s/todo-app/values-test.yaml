@@ -1,0 +1,25 @@
+# Values for local Kubernetes testing (e.g. Docker Desktop)
+global:
+  environment: test
+
+# Local MySQL services deployment in the cluster
+mysql:
+  local:
+    enabled: true
+  host: "mysql-local"
+  authHost: "mysql-auth-local"
+  user: "root"
+  db: "todos"
+  authDb: "auth"
+  ssl: false
+
+keyvault:
+  enabled: false
+  secrets:
+    mysqlPassword: "secret-dev-password"
+    jwtSecret: "local-dev-insecure-secret"
+
+# Local reverse proxy runs on HTTP port 80
+reverseProxy:
+  tls:
+    enabled: false

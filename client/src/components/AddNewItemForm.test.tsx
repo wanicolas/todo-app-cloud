@@ -1,13 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AddItemForm } from './AddNewItemForm';
+import { apiFetch } from '../api/client';
+
+vi.mock('../api/client', () => ({ apiFetch: vi.fn() }));
 
 beforeEach(() => {
-    global.fetch = vi.fn();
-});
-
-afterEach(() => {
-    vi.restoreAllMocks();
+    vi.mocked(apiFetch).mockReset();
 });
 
 test('add button is disabled when input is empty', () => {
@@ -30,9 +29,9 @@ test('submits new item and clears input', async () => {
     const onNewItem = vi.fn();
     const mockItem = { id: '1', name: 'Test', completed: false };
 
-    fetch.mockResolvedValueOnce({
+    vi.mocked(apiFetch).mockResolvedValueOnce({
         json: () => Promise.resolve(mockItem),
-    });
+    } as Response);
 
     render(<AddItemForm onNewItem={onNewItem} />);
 

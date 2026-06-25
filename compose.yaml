@@ -75,6 +75,8 @@ services:
       MYSQL_USER: root
       MYSQL_PASSWORD: secret
       MYSQL_DB: todos
+      # Shared secret used to verify JWTs issued by the auth service (HS256).
+      JWT_SECRET: dev-insecure-secret
     depends_on:
       mysql:
         condition: service_healthy
@@ -88,6 +90,44 @@ services:
     labels:
       traefik.http.routers.backend.rule: Host(`localhost`) && PathPrefix(`/api`)
       traefik.http.services.backend.loadbalancer.server.port: 3000
+
+  ###################################################
+  # Service: auth
+  #
+  # Standalone authentication microservice (Express + Knex). It owns its own
+  # MySQL database (mysql-auth) and issues JWTs signed with JWT_SECRET — the
+  # same secret the backend uses to verify them, so no cross-service call is
+  # needed on each request.
+  #
+  # The Traefik router matches /api/auth before the backend's broader /api rule.
+  # A higher priority guarantees auth wins regardless of rule-length heuristics.
+  ###################################################
+  auth:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+      target: dev
+    environment:
+      MYSQL_HOST: mysql-auth
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+      MYSQL_DB: auth
+      JWT_SECRET: dev-insecure-secret
+      JWT_EXPIRES_IN: 1h
+    depends_on:
+      mysql-auth:
+        condition: service_healthy
+    develop:
+      watch:
+        - path: ./auth/src
+          action: sync
+          target: /usr/local/app/src
+        - path: ./auth/package.json
+          action: rebuild
+    labels:
+      traefik.http.routers.auth.rule: Host(`localhost`) && PathPrefix(`/api/auth`)
+      traefik.http.routers.auth.priority: 100
+      traefik.http.services.auth.loadbalancer.server.port: 3001
 
   ###################################################
   # Service: client
@@ -138,12 +178,31 @@ services:
   # ok to hard-code them here.
   ###################################################
   mysql:
-    image: mysql:9.3
+    image: mysql:8.0.21
     volumes:
       - todo-mysql-data:/var/lib/mysql
     environment: 
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: todos
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ###################################################
+  # Service: mysql-auth
+  #
+  # Dedicated database for the auth microservice. Keeping it separate from the
+  # todo database is what makes auth a true microservice with its own storage.
+  ###################################################
+  mysql-auth:
+    image: mysql:8.0.21
+    volumes:
+      - auth-mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: auth
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
@@ -168,6 +227,9 @@ services:
   phpmyadmin:
     image: phpmyadmin
     environment:
+      # ARBITRARY_SERVER_ALLOW lets you pick the server (mysql or mysql-auth)
+      # from the phpMyAdmin login screen to inspect either database.
+      PMA_ARBITRARY: 1
       PMA_HOST: mysql
       PMA_USER: root
       PMA_PASSWORD: secret
@@ -184,3 +246,4 @@ services:
 ###################################################
 volumes:
   todo-mysql-data:
+  auth-mysql-data:

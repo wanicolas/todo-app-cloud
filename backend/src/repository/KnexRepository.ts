@@ -1,5 +1,15 @@
 import knex, { Knex } from 'knex';
 import { TodoItem, TodoRepository } from '../types';
+import { logger } from '../utils/logger';
+
+function mapRow(row: any): TodoItem {
+    return {
+        id: row.id,
+        name: row.name,
+        completed: Boolean(row.completed),
+        userId: row.user_id,
+    };
+}
 
 class KnexRepository implements TodoRepository {
     private db: Knex;
@@ -17,14 +27,15 @@ class KnexRepository implements TodoRepository {
                 await this.db.migrate.latest();
                 if (process.env.NODE_ENV !== 'test') {
                     const client = (this.db.client as any).config.client;
-                    console.log(`Connected to ${client} database via Knex`);
+                    logger.info(`Connected to ${client} database via Knex`);
                 }
                 return;
             } catch (err) {
                 if (attempt === maxRetries) throw err;
                 if (process.env.NODE_ENV !== 'test') {
-                    console.log(
+                    logger.warn(
                         `Database not ready, retrying (${attempt}/${maxRetries})...`,
+                        { error: err instanceof Error ? err.message : err },
                     );
                 }
                 await new Promise((r) => setTimeout(r, retryDelay));
@@ -36,22 +47,16 @@ class KnexRepository implements TodoRepository {
         await this.db.destroy();
     }
 
-    async getItems(): Promise<TodoItem[]> {
-        const rows = await this.db('todo_items').select('*');
-        return rows.map((row) => ({
-            id: row.id,
-            name: row.name,
-            completed: Boolean(row.completed),
-        }));
+    async getItems(userId: string): Promise<TodoItem[]> {
+        const rows = await this.db('todo_items').where({ user_id: userId });
+        return rows.map(mapRow);
     }
 
-    async getItem(id: string): Promise<TodoItem> {
-        const row = await this.db('todo_items').where({ id }).first();
-        return {
-            id: row.id,
-            name: row.name,
-            completed: Boolean(row.completed),
-        };
+    async getItem(userId: string, id: string): Promise<TodoItem> {
+        const row = await this.db('todo_items')
+            .where({ id, user_id: userId })
+            .first();
+        return mapRow(row);
     }
 
     async storeItem(item: TodoItem): Promise<void> {
@@ -59,18 +64,27 @@ class KnexRepository implements TodoRepository {
             id: item.id,
             name: item.name,
             completed: item.completed,
+            user_id: item.userId,
         });
     }
 
-    async updateItem(id: string, item: TodoItem): Promise<void> {
-        await this.db('todo_items').where({ id }).update({
+    async updateItem(
+        userId: string,
+        id: string,
+        item: TodoItem,
+    ): Promise<void> {
+        await this.db('todo_items').where({ id, user_id: userId }).update({
             name: item.name,
             completed: item.completed,
         });
     }
 
-    async removeItem(id: string): Promise<void> {
-        await this.db('todo_items').where({ id }).delete();
+    async removeItem(userId: string, id: string): Promise<void> {
+        await this.db('todo_items').where({ id, user_id: userId }).delete();
+    }
+
+    async removeAllItems(userId: string): Promise<void> {
+        await this.db('todo_items').where({ user_id: userId }).delete();
     }
 }
 

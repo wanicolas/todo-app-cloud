@@ -1,0 +1,92 @@
+# Default values for todo-app.
+# This is a YAML-formatted file.
+
+# Global registry and settings
+global:
+  environment: test # 'test' for local K8s, 'prod' for Azure AKS
+
+# Client Service (React Frontend)
+client:
+  replicaCount: 1
+  image:
+    repository: todoapptestnw.azurecr.io/client
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+
+# Backend Service (Express API)
+backend:
+  replicaCount: 1
+  image:
+    repository: todoapptestnw.azurecr.io/backend
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  env:
+    sqliteDbLocation: "/etc/todos/todo.db"
+
+# Auth Service (Express Auth API)
+auth:
+  replicaCount: 1
+  image:
+    repository: todoapptestnw.azurecr.io/auth
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 3001
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  env:
+    jwtExpiresIn: "1h"
+
+# Reverse Proxy Service (Nginx)
+reverseProxy:
+  replicaCount: 1
+  image:
+    repository: nginx
+    tag: alpine
+    pullPolicy: Always
+  service:
+    type: LoadBalancer
+    port: 80
+    targetPort: 80
+  tls:
+    enabled: false
+    secretName: "todo-tls-cert"
+
+# Database connection configuration
+mysql:
+  local:
+    enabled: false
+  host: "mysql"
+  user: "root"
+  db: "todos"
+  authDb: "auth"
+  ssl: false
+
+# Azure Key Vault Configuration (enabled in values-prod.yaml)
+keyvault:
+  enabled: false
+  name: ""
+  tenantId: ""
+  # Local secret values when Key Vault is disabled
+  secrets:
+    mysqlPassword: "secret"
+    jwtSecret: "dev-insecure-secret"
