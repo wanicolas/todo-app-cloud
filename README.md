@@ -9,7 +9,7 @@ Projet réalisé dans le cadre du module "Développer pour le cloud" — M2 Dev 
 - **Frontend** : React 19, TypeScript, Vite, React Bootstrap, React Router
 - **Backend** : Node.js 22, Express 5, TypeScript
 - **Auth** : microservice dédié (Express 5, TypeScript, JWT HS256, bcrypt) avec sa propre base
-- **Base de données** : MySQL 9.3 (SQLite en fallback local) — une instance par service de données
+- **Base de données** : MySQL 8.0.21 (SQLite en fallback local) — une instance par service de données
 - **Query builder** : Knex.js (migrations versionnées, support multi-dialect)
 - **Proxy** : Traefik v3.6
 - **Tests** : Jest (backend + auth), Vitest (client), Playwright (E2E)
@@ -61,30 +61,36 @@ npm run dev                    # React sur http://localhost:5173
 Le flag `--build` force la reconstruction de l'image (utile si le code a changé) et `--rm` supprime le conteneur après exécution.
 
 ```bash
-# Backend — 21 tests (SQLite automatique)
+# Backend — 29 tests (SQLite automatique)
 docker compose run --build --rm -e MYSQL_HOST= backend npm test
 
-# Client — 13 tests
+# Client — 23 tests
 docker compose run --build --rm client npm test
 ```
 
 ### Via Node.js local
 
 ```bash
-# Backend (Jest) — 21 tests
+# Backend (Jest) — 29 tests
 cd backend
-npm install
+npm install --ignore-scripts   # pour éviter la compilation native sqlite3 si make est manquant
 npm test
 npm run test:coverage          # avec rapport de couverture
 
-# Client (Vitest) — 13 tests
+# Auth (Jest) — 23 tests
+cd auth
+npm install --ignore-scripts
+npm test
+npm run test:coverage
+
+# Client (Vitest) — 23 tests
 cd client
 npm install
 npm test
 npm run test:coverage          # avec rapport de couverture
 ```
 
-### E2E (Playwright) — 6 tests
+### E2E (Playwright) — 8 tests
 
 Les tests E2E nécessitent que l'app tourne via Docker Compose et Node.js local.
 
@@ -92,9 +98,9 @@ Les tests E2E nécessitent que l'app tourne via Docker Compose et Node.js local.
 docker compose up -d           # démarrer les services en arrière-plan
 npm install                    # installer les dépendances racine (Playwright)
 npx playwright install chromium
-npm run test:e2e               # lancer les 6 tests
+npm run test:e2e               # lancer les 8 tests
 npm run test:e2e:headed        # avec navigateur visible
-docker compose down            # arrêter après les tests
+docker compose down -v         # arrêter et nettoyer après les tests
 ```
 
 ## Lint, format et typecheck
@@ -186,24 +192,26 @@ laisser aucune donnée orpheline.
 │   │   ├── repository/       # KnexUserRepository, InMemoryUserRepository
 │   │   ├── migrations/       # Migration table users
 │   │   ├── middleware/       # requireAuth (vérification JWT)
-│   │   └── types.ts          # Interfaces User, UserRepository
 │   ├── spec/                 # Tests Jest (unitaires + intégration)
 │   └── Dockerfile            # Multi-stage (dev, test, production)
 ├── client/                   # React SPA (TypeScript)
 │   ├── src/
 │   │   ├── components/       # Greeting, TodoListCard, AddNewItemForm, ItemDisplay
-│   │   ├── pages/            # Login, Register, Account (RGPD)
+│   │   ├── pages/            # Login, Register (RGPD), Account (RGPD)
 │   │   ├── auth/             # AuthContext, ProtectedRoute
 │   │   └── api/              # Wrapper fetch (injection du JWT)
 │   ├── src/test/             # Setup Vitest
-│   └── Dockerfile            # Multi-stage (dev, build)
+│   └── Dockerfile            # Multi-stage (dev, build, production non-root)
 ├── e2e/                      # Tests Playwright (E2E)
-├── k8s/                      # Manifests Kubernetes (todo-app, auth, mysql, mysql-auth)
-├── .github/workflows/        # CI GitHub Actions (5 pipelines)
+├── k8s/todo-app/             # Chart Helm unifié (client, backend, auth, proxy, mysql-local, secrets CSI)
+├── .github/workflows/        # CI GitHub Actions (5 pipelines, scan Trivy adapté)
 ├── docs/
-│   ├── adr/                  # 9 ADR (décisions techniques)
+│   ├── adr/                  # 11 ADR (décisions techniques)
+│   ├── context_map.md        # Cartographie des contextes métier
+│   ├── glossaire.md          # Glossaire technique des termes
+│   ├── deployment_procedure.md # Guide de déploiement pas-à-pas (Local & Azure AKS)
+│   ├── runbooks.md           # Fiches réflexes et runbooks d'exploitation
 │   └── *.pdf                 # Sujet et grille d'évaluation
-├── Dockerfile                # Image production (backend + client bundlé)
 └── compose.yaml              # Stack Docker (Traefik + front + back + auth + MySQL ×2)
 ```
 
@@ -231,3 +239,5 @@ Les Architecture Decision Records sont dans [`docs/adr/`](docs/adr/) :
 7. [Knex.js](docs/adr/007-orm-knex.md) — query builder unifié, migrations versionnées
 8. [Trivy](docs/adr/008-trivy-scan.md) — scan de vulnérabilités des images Docker
 9. [Authentification microservice + JWT](docs/adr/009-authentification-microservice-jwt.md) — service auth séparé, JWT HS256, todos privés
+10. [Migration vers Helm](docs/adr/010-kubernetes-helm.md) — Orchestration Kubernetes unifiée et paramétrable via Helm
+11. [Sécurisation et Secrets Key Vault](docs/adr/011-azure-terraform-security.md) — Chiffrement SSL, secrets Key Vault CSI et images non-root
