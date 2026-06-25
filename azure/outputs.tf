@@ -39,3 +39,8 @@ output "log_analytics_workspace_name" {
   value = azurerm_log_analytics_workspace.law.name
 }
 
+output "aks_keyvault_secrets_provider_client_id" {
+  value = azurerm_kubernetes_cluster.aks.key_vault_secrets_provider[0].secret_identity[0].client_id
+}
+
+

@@ -20,6 +20,7 @@ keyvault:
   # Surchargé lors du déploiement avec les valeurs générées par Terraform
   name: "todo-app-kv"
   tenantId: "YOUR_AZURE_TENANT_ID"
+  clientId: ""
 
 # Enable TLS on the reverse proxy in production
 reverseProxy:

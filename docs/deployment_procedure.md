@@ -94,14 +94,15 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 kubectl create secret tls todo-tls-cert --key tls.key --cert tls.crt
 ```
 
-Déployez la stack sur AKS à l'aide de Helm, en écrasant les variables de production avec vos ressources Azure réelles :
+Déployez la stack sur AKS à l'aide de Helm, en écrasant les variables de production avec vos ressources Azure réelles (notamment le Client ID de l'identité du Secrets Store CSI d'AKS pour accéder au Key Vault) :
 ```bash
 helm upgrade --install todo-app ./k8s/todo-app \
   -f ./k8s/todo-app/values-prod.yaml \
-  --set mysql.host="<DNS_SERVEUR_MYSQL_TERRAFORM>.mysql.database.azure.com" \
-  --set mysql.authHost="<DNS_SERVEUR_MYSQL_TERRAFORM>.mysql.database.azure.com" \
+  --set mysql.host="<DNS_SERVEUR_MYSQL_TERRAFORM_OU_FQDN>" \
+  --set mysql.authHost="<DNS_SERVEUR_MYSQL_TERRAFORM_OU_FQDN>" \
   --set keyvault.name="<NOM_DE_VOTRE_KEY_VAULT>" \
   --set keyvault.tenantId="<VOTRE_TENANT_ID_AZURE>" \
+  --set keyvault.clientId="<AKS_KEYVAULT_SECRETS_PROVIDER_CLIENT_ID>" \
   --set client.image.repository="<NOM_DE_VOTRE_ACR>.azurecr.io/client" \
   --set backend.image.repository="<NOM_DE_VOTRE_ACR>.azurecr.io/backend" \
   --set auth.image.repository="<NOM_DE_VOTRE_ACR>.azurecr.io/auth"
