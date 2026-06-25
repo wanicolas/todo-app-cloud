@@ -73,6 +73,8 @@ reverseProxy:
 
 # Database connection configuration
 mysql:
+  local:
+    enabled: false
   host: "mysql"
   user: "root"
   db: "todos"
