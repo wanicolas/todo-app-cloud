@@ -89,10 +89,12 @@ export function Account() {
     return (
         <Card className="mt-4">
             <Card.Body>
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <Card.Title className="mb-0">My account</Card.Title>
-                    <Link to="/">← Back to todos</Link>
-                </div>
+                <header className="d-flex justify-content-between align-items-center mb-4">
+                    <Card.Title as="h1" className="h3 mb-0">My account</Card.Title>
+                    <nav aria-label="Back navigation">
+                        <Link to="/">← Back to todos</Link>
+                    </nav>
+                </header>
 
                 {message && <Alert variant="success">{message}</Alert>}
                 {error && <Alert variant="danger">{error}</Alert>}
@@ -123,7 +125,7 @@ export function Account() {
 
                 <hr className="my-4" />
 
-                <h6>Your data (RGPD)</h6>
+                <h2 className="h6">Your data (RGPD)</h2>
                 <div className="d-flex gap-2 mt-2">
                     <Button variant="outline-secondary" onClick={onExport}>
                         Export my data

@@ -16,18 +16,20 @@ function TodoPage() {
 
     return (
         <>
-            <div className="d-flex justify-content-end align-items-center mt-3">
+            <header className="d-flex justify-content-end align-items-center mt-3" role="banner">
                 <span className="text-muted me-3">{user?.email}</span>
-                <Link
-                    to="/account"
-                    className="btn btn-outline-primary btn-sm me-2"
-                >
-                    My account
-                </Link>
-                <Button variant="outline-secondary" size="sm" onClick={logout}>
-                    Log out
-                </Button>
-            </div>
+                <nav aria-label="Account navigation">
+                    <Link
+                        to="/account"
+                        className="btn btn-outline-primary btn-sm me-2"
+                    >
+                        My account
+                    </Link>
+                    <Button variant="outline-secondary" size="sm" onClick={logout}>
+                        Log out
+                    </Button>
+                </nav>
+            </header>
             <Greeting />
             <TodoListCard />
         </>
@@ -36,7 +38,7 @@ function TodoPage() {
 
 function App() {
     return (
-        <Container>
+        <Container as="main">
             <Row>
                 <Col md={{ offset: 3, span: 6 }}>
                     <Routes>
