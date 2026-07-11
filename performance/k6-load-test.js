@@ -22,9 +22,9 @@ export const options = {
 const BASE_URL = __ENV.TARGET_URL || "http://localhost:3080";
 
 export default function () {
-    const uniqueId = `${__VU}-${__ITER}`;
-    const email = `perf-${uniqueId}-${Date.now()}-${Math.floor(Math.random() * 1000000)}@example.com`;
-    const password = 'Password123!';
+  const uniqueId = `${__VU}-${__ITER}`;
+  const email = `perf-${uniqueId}-${Date.now()}-${Math.floor(Math.random() * 1000000)}@example.com`;
+  const password = "Password123!";
 
   const headers = { "Content-Type": "application/json" };
 
@@ -86,10 +86,11 @@ export default function () {
     headers: authHeaders,
   });
 
-    const isTodoCreated = check(resCreateTodo, {
-        'Create Todo - status is 200': (r) => r.status === 200,
-        'Create Todo - returns task details': (r) => JSON.parse(r.body).id !== undefined,
-    });
+  const isTodoCreated = check(resCreateTodo, {
+    "Create Todo - status is 200": (r) => r.status === 200,
+    "Create Todo - returns task details": (r) =>
+      JSON.parse(r.body).id !== undefined,
+  });
 
   let todoId = "";
   if (isTodoCreated) {
@@ -122,11 +123,13 @@ export default function () {
     });
   }
 
-    // 5.2 : Suppression définitive du compte utilisateur
-    const resDeleteAccount = http.del(`${BASE_URL}/api/auth/me`, null, { headers: authHeaders });
-    check(resDeleteAccount, {
-        'Delete Account - status is 204': (r) => r.status === 204,
-    });
+  // 5.2 : Suppression définitive du compte utilisateur
+  const resDeleteAccount = http.del(`${BASE_URL}/api/auth/me`, null, {
+    headers: authHeaders,
+  });
+  check(resDeleteAccount, {
+    "Delete Account - status is 204": (r) => r.status === 204,
+  });
 
   sleep(1);
 }
