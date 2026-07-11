@@ -1,0 +1,107 @@
+# Critères de Performance et de Qualité Logicielle
+
+Ce document définit les exigences et les critères mesurables en termes de performance et de qualité logicielle pour le projet **Todo App Cloud**, répondant aux modalités d'évaluation de la compétence **C2.1.1** du RNCP.
+
+---
+
+## 1. Critères de Performance et SLA (Service Level Agreements)
+
+L'application étant hébergée dans un environnement Cloud distribué (Kubernetes / AKS), elle doit répondre à des critères de rapidité et de tolérance aux pannes strictes. Les seuils de performance retenus (SLA) sont les suivants :
+
+| Indicateur (Metric)                | Seuil Cible (SLA) | Justification                                                                                                                                   |
+| :--------------------------------- | :---------------: | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Temps de réponse p(95)**         |   **< 300 ms**    | 95% des requêtes HTTP (hors requêtes lourdes d'export) doivent être traitées en moins de 300ms pour garantir une expérience utilisateur fluide. |
+| **Taux d'échec des requêtes**      |     **< 1 %**     | Moins de 1% des appels API doivent renvoyer des codes d'erreur HTTP 5xx (erreurs serveurs) sous charge normale.                                 |
+| **Démarrage à froid des services** | **< 5 secondes**  | Permet une mise à l'échelle automatique rapide (Autoscaling) par Kubernetes pour répondre aux pics de trafic.                                   |
+
+_Note : Le centile p(95) est utilisé à la place de la moyenne car il est beaucoup plus représentatif de l'expérience réelle des utilisateurs (il exclut les valeurs aberrantes mais intègre les ralentissements)._
+
+---
+
+## 2. Protocole de Test de Charge (k6)
+
+Afin de valider ces critères, un script de test de charge automatisé a été développé avec l'outil **k6** (voir [k6-load-test.js](../performance/k6-load-test.js)).
+
+### A. Scénario du Test de Charge
+
+Le test simule des vagues d'utilisateurs simultanés effectuant un parcours applicatif complet :
+
+1.  **Consultation publique** : Requête sur le message d'accueil API (`GET /api/greeting`).
+2.  **Création de session** : Inscription d'un nouvel utilisateur (`POST /api/auth/register`) pour obtenir un jeton JWT.
+3.  **Gestion de tâches** : Création d'une tâche personnelle (`POST /api/items`) sous authentification JWT.
+4.  **Lecture** : Récupération de sa liste de tâches (`GET /api/items`).
+5.  **Droit à l'oubli (RGPD)** : Suppression de la tâche (`DELETE /api/items/:id`) puis suppression définitive du compte utilisateur (`DELETE /api/auth/me`) pour nettoyer la base.
+
+### B. Profil de Charge (Stages)
+
+- **Ramp-up (0 à 10s)** : Montée progressive de 0 à 5 utilisateurs virtuels simultanés (VUs) pour tester le démarrage à froid et la mise en cache.
+- **Stress léger (10s à 30s)** : Transition de 5 à 15 VUs simultanés.
+- **Maintien (30s à 50s)** : Palier de charge stable à 15 VUs simultanés pour détecter les fuites de mémoire.
+- **Ramp-down (50s à 60s)** : Descente progressive vers 0 VU.
+
+### C. Seils automatiques (Thresholds k6)
+
+Le script intègre directement les assertions de performance dans ses options :
+
+```javascript
+thresholds: {
+    http_req_duration: ['p(95)<300'], // Temps de réponse
+    http_req_failed: ['rate<0.01'],    // Taux d'erreur
+}
+```
+
+Si l'un des critères n'est pas respecté lors de l'exécution, k6 renvoie un code de sortie en erreur, ce qui permet de bloquer un déploiement en production via la pipeline CI/CD si une régression de performance est détectée.
+
+### D. Exécution des Tests de Charge
+
+Le test de charge peut être exécuté de deux manières (l'application doit être lancée et accessible au préalable) :
+
+#### 1. Avec l'outil k6 installé localement
+
+Si `k6` est installé sur votre poste de travail (via `brew install k6`, `choco install k6` ou `apt install k6`) :
+
+```bash
+# Lancer le test sur l'URL locale par défaut (localhost:3080)
+k6 run performance/k6-load-test.js
+
+# Lancer le test sur une URL spécifique (ex: staging ou production Azure)
+k6 run -e TARGET_URL=https://mon-app.azurewebsites.net performance/k6-load-test.js
+```
+
+#### 2. Sans installation locale (via Docker)
+
+Il est possible d'exécuter k6 à l'aide de son image officielle Docker sans avoir à l'installer localement :
+
+Sur **Linux** (avec réseau partagé pour accéder à localhost) :
+
+```bash
+docker run --rm --network host -i grafana/k6 run - <performance/k6-load-test.js
+```
+
+Sur **macOS et Windows** (avec redirection d'hôte) :
+
+```bash
+docker run --rm -i grafana/k6 run -e TARGET_URL=http://host.docker.internal:3080 - <performance/k6-load-test.js
+```
+
+---
+
+## 3. Critères de Qualité Logicielle
+
+La qualité du code et du produit est assurée par un ensemble d'outils automatisés intégrés à l'environnement de développement et de test :
+
+### A. Analyse Statique et Standardisation
+
+- **TypeScript** : Assure la sécurité du typage et évite les erreurs d'exécution silencieuses.
+- **ESLint** : Valide le respect des conventions de codage et des règles de sécurité (ex. détection des variables inutilisées, injections potentielles).
+- **Prettier** : Formate automatiquement le code pour garantir une lecture homogène du dépôt.
+
+### B. Couverture de Test (Harnais)
+
+- **Backend & Auth (Jest)** : Tests unitaires de logique métier et tests d'intégration supertest. Couverture mesurable via `npm run test:coverage`.
+- **Frontend (Vitest)** : Tests de rendu et d'interaction des composants React.
+- **Bout en bout (Playwright)** : Validation des parcours métiers critiques.
+
+### C. Sécurité logicielle (OWASP & Vulnerability Scanning)
+
+- **Trivy Security Scanning** : Intégration d'un scanneur d'images de conteneurs pour identifier les failles du système d'exploitation de base ou des dépendances avant la mise en production.
