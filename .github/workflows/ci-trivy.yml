@@ -22,7 +22,7 @@ jobs:
         run: docker build -t todo-auth:scan ./auth
 
       - name: Scan backend image
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0.28.0
         with:
           image-ref: todo-backend:scan
           format: table
@@ -31,7 +31,7 @@ jobs:
           ignore-unfixed: true
 
       - name: Scan client image
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0.28.0
         with:
           image-ref: todo-client:scan
           format: table
@@ -40,7 +40,7 @@ jobs:
           ignore-unfixed: true
 
       - name: Scan auth image
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0.28.0
         with:
           image-ref: todo-auth:scan
           format: table
