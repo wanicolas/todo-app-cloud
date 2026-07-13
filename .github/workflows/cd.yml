@@ -1,0 +1,105 @@
+name: CD Deploy to AKS
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target Environment"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  build-and-deploy:
+    name: Build, Scan and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 1. Login to Azure
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 2. Login to Azure Container Registry (ACR)
+      - name: Login to ACR
+        run: |
+          az acr login --name ${{ secrets.ACR_NAME }}
+
+      # 3. Build Docker Images with Git SHA Tags
+      - name: Build Docker Images
+        run: |
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ github.sha }} ./backend
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ github.sha }} ./client
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ github.sha }} ./auth
+
+      # 4. Scan Backend Image with Trivy (Fails build if High/Critical issues found)
+      - name: Scan Backend Image
+        uses: aquasecurity/trivy-action@v0.28.0
+        with:
+          image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ github.sha }}
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+      # 5. Scan Client Image with Trivy (Fails build if High/Critical issues found)
+      - name: Scan Client Image
+        uses: aquasecurity/trivy-action@v0.28.0
+        with:
+          image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ github.sha }}
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+      # 6. Scan Auth Image with Trivy (Fails build if High/Critical issues found)
+      - name: Scan Auth Image
+        uses: aquasecurity/trivy-action@v0.28.0
+        with:
+          image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ github.sha }}
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+      # 7. Push Docker Images to ACR (Only if scans passed successfully)
+      - name: Push Docker Images
+        run: |
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ github.sha }}
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ github.sha }}
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ github.sha }}
+
+      # 8. Retrieve AKS Cluster Credentials
+      - name: Get AKS Credentials
+        run: |
+          az aks get-credentials --resource-group ${{ secrets.RESOURCE_GROUP }} --name ${{ secrets.CLUSTER_NAME }}
+
+      # 9. Deploy Stack to AKS via Helm (Override registry and tags dynamically)
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install todo-app ./k8s/todo-app \
+            -f ./k8s/todo-app/values-prod.yaml \
+            --set client.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/client" \
+            --set client.image.tag="${{ github.sha }}" \
+            --set backend.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/backend" \
+            --set backend.image.tag="${{ github.sha }}" \
+            --set auth.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/auth" \
+            --set auth.image.tag="${{ github.sha }}" \
+            --set mysql.host="${{ secrets.MYSQL_HOST }}" \
+            --set mysql.authHost="${{ secrets.MYSQL_HOST }}" \
+            --set keyvault.name="${{ secrets.KEYVAULT_NAME }}" \
+            --set keyvault.tenantId="${{ secrets.KEYVAULT_TENANT_ID }}" \
+            --set keyvault.clientId="${{ secrets.KEYVAULT_CLIENT_ID }}"
+
+      # 10. Verify Rollout Status to Ensure Zero-Downtime Rolling Update
+      - name: Verify Rollout Status
+        run: |
+          kubectl rollout status deployment/backend
+          kubectl rollout status deployment/auth
+          kubectl rollout status deployment/client

@@ -122,3 +122,37 @@ Récupérez l'adresse IP publique de votre Reverse Proxy pour accéder à l'appl
 kubectl get svc reverse-proxy
 ```
 Visitez l'adresse `https://<IP_PUBLIQUE_REVERSE_PROXY>` (acceptez l'avertissement de sécurité si certificat autosigné).
+
+---
+
+## 6. Étape 5 : Déploiement Continu (GitHub Actions)
+
+Pour automatiser la construction des images, la validation de sécurité et le déploiement sur AKS, un workflow de CD manuel est configuré dans le dépôt : [.github/workflows/cd.yml](file:///.github/workflows/cd.yml).
+
+### A. Configuration des Secrets GitHub
+Pour que le pipeline CD puisse s'exécuter, vous devez ajouter les secrets suivants dans les paramètres de votre dépôt GitHub (Settings > Secrets and variables > Actions) :
+
+| Nom du Secret | Description / Valeur attendue |
+| :--- | :--- |
+| `AZURE_CREDENTIALS` | Le JSON généré par la commande `az ad sp create-for-rbac` (identifiants du Service Principal Azure). |
+| `ACR_NAME` | Nom unique de votre Azure Container Registry (ex: `myregistry`). |
+| `RESOURCE_GROUP` | Nom du groupe de ressources Azure contenant vos services (ex: `rg-todo-app`). |
+| `CLUSTER_NAME` | Nom de votre cluster Azure AKS (ex: `aks-todo-app`). |
+| `MYSQL_HOST` | DNS pleinement qualifié du serveur Azure MySQL Flexible (ex: `todo-app.mysql.database.azure.com`). |
+| `KEYVAULT_NAME` | Nom de votre Azure Key Vault (ex: `kv-todo-app`). |
+| `KEYVAULT_TENANT_ID` | Identifiant du Tenant Azure Active Directory. |
+| `KEYVAULT_CLIENT_ID` | Client ID de l'identité managée utilisée pour le Secrets Store CSI. |
+
+### B. Déclenchement du Déploiement
+Puisque l'application utilise des ressources cloud facturées à l'usage, le pipeline de CD est configuré en mode **manuel** (`workflow_dispatch`) :
+1. Allez sur votre dépôt GitHub.
+2. Cliquez sur l'onglet **Actions**.
+3. Sélectionnez le workflow **CD Deploy to AKS** dans la barre latérale gauche.
+4. Cliquez sur le bouton **Run workflow** (vous pouvez choisir la branche et cibler l'environnement *staging* ou *production*).
+5. Le pipeline va automatiquement :
+   * Compiler les 3 images de microservices.
+   * Lancer un scan de sécurité de vulnérabilité (Trivy). Si des failles critiques sont trouvées, le build s'arrête (DevSecOps).
+   * Pousser les images validées sur l'ACR.
+   * Déployer l'application sur AKS avec Helm en effectuant un *Rolling Update* progressif.
+   * Attendre la confirmation de démarrage des Pods pour s'assurer qu'il n'y a pas d'interruption de service.
+
