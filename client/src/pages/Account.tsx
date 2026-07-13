@@ -90,7 +90,9 @@ export function Account() {
         <Card className="mt-4">
             <Card.Body>
                 <header className="d-flex justify-content-between align-items-center mb-4">
-                    <Card.Title as="h1" className="h3 mb-0">My account</Card.Title>
+                    <Card.Title as="h1" className="h3 mb-0">
+                        My account
+                    </Card.Title>
                     <nav aria-label="Back navigation">
                         <Link to="/">← Back to todos</Link>
                     </nav>

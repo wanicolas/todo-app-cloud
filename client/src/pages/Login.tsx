@@ -31,7 +31,9 @@ export function Login() {
     return (
         <Card className="mt-5">
             <Card.Body>
-                <Card.Title as="h1" className="text-center h3 mb-4">Log in</Card.Title>
+                <Card.Title as="h1" className="text-center h3 mb-4">
+                    Log in
+                </Card.Title>
                 {error && <Alert variant="danger">{error}</Alert>}
                 <Form onSubmit={onSubmit}>
                     <Form.Group className="mb-3" controlId="login-email">

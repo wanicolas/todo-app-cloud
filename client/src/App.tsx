@@ -16,7 +16,10 @@ function TodoPage() {
 
     return (
         <>
-            <header className="d-flex justify-content-end align-items-center mt-3" role="banner">
+            <header
+                className="d-flex justify-content-end align-items-center mt-3"
+                role="banner"
+            >
                 <span className="text-muted me-3">{user?.email}</span>
                 <nav aria-label="Account navigation">
                     <Link
@@ -25,7 +28,11 @@ function TodoPage() {
                     >
                         My account
                     </Link>
-                    <Button variant="outline-secondary" size="sm" onClick={logout}>
+                    <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={logout}
+                    >
                         Log out
                     </Button>
                 </nav>
