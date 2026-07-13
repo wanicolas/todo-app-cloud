@@ -1,4 +1,4 @@
-FROM node:22.14.0 AS base
+FROM node:22.23.1 AS base
 WORKDIR /usr/local/app
 
 # Dev stage — nodemon + tsx hot-reload
@@ -15,7 +15,7 @@ RUN npm run build
 RUN npm run test
 
 # Production stage
-FROM node:22.14.0-alpine AS production
+FROM node:22.23.1-alpine AS production
 WORKDIR /usr/local/app
 ENV NODE_ENV=production
 COPY --from=test /usr/local/app/package.json /usr/local/app/package-lock.json ./
