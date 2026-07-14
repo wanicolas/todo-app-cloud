@@ -122,3 +122,57 @@ Récupérez l'adresse IP publique de votre Reverse Proxy pour accéder à l'appl
 kubectl get svc reverse-proxy
 ```
 Visitez l'adresse `https://<IP_PUBLIQUE_REVERSE_PROXY>` (acceptez l'avertissement de sécurité si certificat autosigné).
+
+---
+
+## 6. Étape 5 : Déploiement Continu (GitHub Actions)
+
+Pour automatiser la construction des images, la validation de sécurité et le déploiement sur AKS, un workflow de CD automatisé est configuré dans le dépôt : [.github/workflows/cd.yml](file:///.github/workflows/cd.yml).
+
+### A. Sécurisation par Authentification OIDC (OpenID Connect)
+Conformément aux bonnes pratiques DevSecOps et de sécurité Cloud (Entra ID / Azure AD), le pipeline n'utilise **aucun mot de passe ou secret d'API statique**. Il utilise une fédération d'identité temporaire et gratuite.
+
+#### 1. Création de l'application d'authentification sur Azure
+Générez un Service Principal sur votre abonnement Azure :
+```bash
+az ad sp create-for-rbac --name "github-actions-aks-cd" \
+  --role contributor \
+  --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>
+```
+
+#### 2. Configuration de la fédération d'identité (Trust Relationship)
+Dans le portail Azure :
+1. Allez sur **Microsoft Entra ID** > **App registrations** > Sélectionnez votre application `github-actions-aks-cd`.
+2. Cliquez sur **Certificates & secrets** > onglet **Federated credentials** > **Add credential**.
+3. Choisissez le scénario **GitHub Actions deploying Azure resources**.
+4. Saisissez votre organisation/nom d'utilisateur GitHub, le nom de votre dépôt, et le type d'entité :
+   *   Pour la préproduction (Staging) : choisissez l'entité **Branch** et saisissez `develop`.
+   *   Pour la production : choisissez l'entité **Tag** et saisissez le filtre `v*` (ex: `v1.0.0`).
+
+### B. Configuration des Secrets GitHub
+Ajoutez les variables publiques et identifiants suivants dans les paramètres de votre dépôt GitHub (Settings > Secrets and variables > Actions) :
+
+| Nom du Secret | Description / Valeur attendue |
+| :--- | :--- |
+| `AZURE_CLIENT_ID` | L'identifiant (Client ID) de l'application `github-actions-aks-cd` créée dans Entra ID. |
+| `AZURE_TENANT_ID` | L'identifiant de votre locataire (Tenant ID) Azure Active Directory. |
+| `AZURE_SUBSCRIPTION_ID` | L'identifiant de votre abonnement (Subscription ID) Azure. |
+| `ACR_NAME` | Nom unique de votre Azure Container Registry (ex: `myregistry`). |
+| `RESOURCE_GROUP` | Nom du groupe de ressources Azure contenant vos services (ex: `rg-todo-app`). |
+| `CLUSTER_NAME` | Nom de votre cluster Azure AKS (ex: `aks-todo-app`). |
+| `MYSQL_HOST` | DNS pleinement qualifié du serveur Azure MySQL Flexible (requis uniquement pour la prod). |
+| `KEYVAULT_NAME` | Nom de votre Azure Key Vault (requis uniquement pour la prod). |
+| `KEYVAULT_TENANT_ID` | Identifiant du Tenant Azure Active Directory (requis uniquement pour la prod). |
+| `KEYVAULT_CLIENT_ID` | Client ID de l'identité managée du Secrets Store CSI (requis uniquement pour la prod). |
+
+### C. Déclenchement du Déploiement (GitFlow & GitOps)
+Le pipeline de CD se déclenche automatiquement selon les événements du dépôt Git ou sur demande :
+
+1.  **Déploiement en Staging (Automatique)** :
+    *   *Déclencheur* : Un push ou une fusion de Pull Request réussie sur la branche `develop`.
+    *   *Comportement* : Les images sont construites, validées par Trivy, poussées sur l'ACR avec le tag `develop-<commit_sha>` et déployées sur AKS dans le namespace `staging` à l'aide de la configuration légère [values-staging.yaml](file:///home/nicolaswalter/Ynov/Cloud/todo-app-cloud/k8s/todo-app/values-staging.yaml) (BDD MySQL locale au cluster, Key Vault désactivé pour économiser les coûts).
+2.  **Déploiement en Production (Automatique)** :
+    *   *Déclencheur* : La création et le push d'un tag de version Git correspondant au format `v*` (ex: `v1.0.0`, `v2.1.0-rc1`).
+    *   *Comportement* : Les images sont taguées avec le nom exact de la version, scannées par Trivy, poussées sur l'ACR et déployées dans le namespace `production` avec la configuration sécurisée [values-prod.yaml](file:///home/nicolaswalter/Ynov/Cloud/todo-app-cloud/k8s/todo-app/values-prod.yaml) (Key Vault CSI active, TLS/HTTPS forcé, MySQL managé).
+3.  **Déploiement Manuel (On-Demand)** :
+    *   *Déclencheur* : Via l'onglet **Actions** de GitHub, en cliquant sur **CD Deploy to AKS** puis **Run workflow** (avec sélection de la branche et de l'environnement).

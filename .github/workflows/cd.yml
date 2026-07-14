@@ -1,0 +1,206 @@
+name: CD Deploy to AKS
+
+on:
+  push:
+    branches: [develop] # Déploiement automatique sur Staging lors de push sur develop
+    tags: ["v*"] # Déploiement automatique sur Production lors d'un tag de version v* (ex: v1.0.0)
+  workflow_dispatch: # Déclenchement manuel
+    inputs:
+      environment:
+        description: "Target Environment"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - staging
+          - production
+
+# Requis pour l'authentification OIDC (fédération d'identité sans mot de passe)
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build, Scan and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      # 1. Définition dynamique des variables d'environnement selon le déclencheur
+      - name: Set Environment Variables
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ENV="${{ github.event.inputs.environment }}"
+            TAG="manual-${{ github.sha }}"
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            ENV="production"
+            TAG="${{ github.ref_name }}"
+          else
+            ENV="staging"
+            TAG="develop-${{ github.sha }}"
+          fi
+
+          echo "DEPLOY_ENV=$ENV" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+
+          if [ "$ENV" = "production" ]; then
+            echo "VALUES_FILE=values-prod.yaml" >> $GITHUB_ENV
+            echo "NAMESPACE=production" >> $GITHUB_ENV
+          else
+            echo "VALUES_FILE=values-staging.yaml" >> $GITHUB_ENV
+            echo "NAMESPACE=staging" >> $GITHUB_ENV
+          fi
+
+      # 2. Login to Azure via OIDC (Pas de secrets statiques)
+      - name: Azure Login
+        uses: azure/login@v3.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # 3. Login to Azure Container Registry (ACR)
+      - name: Login to ACR
+        run: |
+          az acr login --name ${{ secrets.ACR_NAME }}
+
+      # 3.5. Determine changes
+      - name: Check for changes
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            client:
+              - 'client/**'
+            auth:
+              - 'auth/**'
+
+      # 4. Build Docker Images conditionally
+      # Si pas de changement, on pull l'image 'latest' existante pour la tagger avec la version courante.
+      # Cela évite un rebuild long, tout en fournissant l'image avec le bon tag attendu par Helm.
+      - name: Build Backend
+        run: |
+          if [ "${{ steps.filter.outputs.backend }}" = "true" ] || [ "${{ github.event_name }}" != "push" ]; then
+            docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest ./backend
+          else
+            docker pull ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest || true
+            if [ "$(docker images -q ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest 2> /dev/null)" == "" ]; then
+              docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest ./backend
+            else
+              docker tag ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }}
+            fi
+          fi
+
+      - name: Build Client
+        run: |
+          if [ "${{ steps.filter.outputs.client }}" = "true" ] || [ "${{ github.event_name }}" != "push" ]; then
+            docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/client:latest ./client
+          else
+            docker pull ${{ secrets.ACR_NAME }}.azurecr.io/client:latest || true
+            if [ "$(docker images -q ${{ secrets.ACR_NAME }}.azurecr.io/client:latest 2> /dev/null)" == "" ]; then
+              docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/client:latest ./client
+            else
+              docker tag ${{ secrets.ACR_NAME }}.azurecr.io/client:latest ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }}
+            fi
+          fi
+
+      - name: Build Auth
+        run: |
+          if [ "${{ steps.filter.outputs.auth }}" = "true" ] || [ "${{ github.event_name }}" != "push" ]; then
+            docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest ./auth
+          else
+            docker pull ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest || true
+            if [ "$(docker images -q ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest 2> /dev/null)" == "" ]; then
+              docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest ./auth
+            else
+              docker tag ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }}
+            fi
+          fi
+
+      # 5. Scan Backend Image with Trivy
+      - name: Scan Backend Image
+        uses: aquasecurity/trivy-action@v0.36.0.28.0
+        with:
+          image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }}
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+      # 6. Scan Client Image with Trivy
+      - name: Scan Client Image
+        uses: aquasecurity/trivy-action@v0.36.0.28.0
+        with:
+          image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }}
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+      # 7. Scan Auth Image with Trivy
+      - name: Scan Auth Image
+        uses: aquasecurity/trivy-action@v0.36.0.28.0
+        with:
+          image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }}
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+      # 8. Push Docker Images to ACR
+      - name: Push Docker Images
+        run: |
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/client:latest
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest
+
+      # 9. Retrieve AKS Cluster Credentials
+      - name: Get AKS Credentials
+        run: |
+          az aks get-credentials --resource-group ${{ secrets.RESOURCE_GROUP }} --name ${{ secrets.CLUSTER_NAME }}
+
+      # 10. Deploy Stack to AKS via Helm
+      - name: Deploy with Helm
+        run: |
+          if [ "${{ env.DEPLOY_ENV }}" = "production" ]; then
+            helm upgrade --install todo-app ./k8s/todo-app \
+              --namespace ${{ env.NAMESPACE }} \
+              --create-namespace \
+              -f ./k8s/todo-app/${{ env.VALUES_FILE }} \
+              --set client.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/client" \
+              --set client.image.tag="${{ env.IMAGE_TAG }}" \
+              --set backend.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/backend" \
+              --set backend.image.tag="${{ env.IMAGE_TAG }}" \
+              --set auth.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/auth" \
+              --set auth.image.tag="${{ env.IMAGE_TAG }}" \
+              --set mysql.host="${{ secrets.MYSQL_HOST }}" \
+              --set mysql.authHost="${{ secrets.MYSQL_HOST }}" \
+              --set keyvault.name="${{ secrets.KEYVAULT_NAME }}" \
+              --set keyvault.tenantId="${{ secrets.KEYVAULT_TENANT_ID }}" \
+              --set keyvault.clientId="${{ secrets.KEYVAULT_CLIENT_ID }}"
+          else
+            helm upgrade --install todo-app ./k8s/todo-app \
+              --namespace ${{ env.NAMESPACE }} \
+              --create-namespace \
+              -f ./k8s/todo-app/${{ env.VALUES_FILE }} \
+              --set client.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/client" \
+              --set client.image.tag="${{ env.IMAGE_TAG }}" \
+              --set backend.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/backend" \
+              --set backend.image.tag="${{ env.IMAGE_TAG }}" \
+              --set auth.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/auth" \
+              --set auth.image.tag="${{ env.IMAGE_TAG }}"
+          fi
+
+      # 11. Verify Rollout Status to Ensure Zero-Downtime Rolling Update
+      - name: Verify Rollout Status
+        run: |
+          kubectl rollout status deployment/backend -n ${{ env.NAMESPACE }}
+          kubectl rollout status deployment/auth -n ${{ env.NAMESPACE }}
+          kubectl rollout status deployment/client -n ${{ env.NAMESPACE }}
