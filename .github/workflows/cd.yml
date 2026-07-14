@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # 1. Définition dynamique des variables d'environnement selon le déclencheur
       - name: Set Environment Variables
@@ -66,14 +66,62 @@ jobs:
         run: |
           az acr login --name ${{ secrets.ACR_NAME }}
 
-      # 4. Build Docker Images with specific Tags
-      - name: Build Docker Images
-        run: |
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }} ./backend
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }} ./client
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }} ./auth
+      # 3.5. Determine changes
+      - name: Check for changes
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            client:
+              - 'client/**'
+            auth:
+              - 'auth/**'
 
-      # 5. Scan Backend Image with Trivy (Fails build if High/Critical issues found)
+      # 4. Build Docker Images conditionally
+      # Si pas de changement, on pull l'image 'latest' existante pour la tagger avec la version courante.
+      # Cela évite un rebuild long, tout en fournissant l'image avec le bon tag attendu par Helm.
+      - name: Build Backend
+        run: |
+          if [ "${{ steps.filter.outputs.backend }}" = "true" ] || [ "${{ github.event_name }}" != "push" ]; then
+            docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest ./backend
+          else
+            docker pull ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest || true
+            if [ "$(docker images -q ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest 2> /dev/null)" == "" ]; then
+              docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest ./backend
+            else
+              docker tag ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }}
+            fi
+          fi
+
+      - name: Build Client
+        run: |
+          if [ "${{ steps.filter.outputs.client }}" = "true" ] || [ "${{ github.event_name }}" != "push" ]; then
+            docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/client:latest ./client
+          else
+            docker pull ${{ secrets.ACR_NAME }}.azurecr.io/client:latest || true
+            if [ "$(docker images -q ${{ secrets.ACR_NAME }}.azurecr.io/client:latest 2> /dev/null)" == "" ]; then
+              docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/client:latest ./client
+            else
+              docker tag ${{ secrets.ACR_NAME }}.azurecr.io/client:latest ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }}
+            fi
+          fi
+
+      - name: Build Auth
+        run: |
+          if [ "${{ steps.filter.outputs.auth }}" = "true" ] || [ "${{ github.event_name }}" != "push" ]; then
+            docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest ./auth
+          else
+            docker pull ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest || true
+            if [ "$(docker images -q ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest 2> /dev/null)" == "" ]; then
+              docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }} -t ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest ./auth
+            else
+              docker tag ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }}
+            fi
+          fi
+
+      # 5. Scan Backend Image with Trivy
       - name: Scan Backend Image
         uses: aquasecurity/trivy-action@v0.36.0.28.0
         with:
@@ -103,19 +151,22 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
 
-      # 8. Push Docker Images to ACR (Only if scans passed successfully)
+      # 8. Push Docker Images to ACR
       - name: Push Docker Images
         run: |
           docker push ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest
           docker push ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/client:latest
           docker push ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest
 
       # 9. Retrieve AKS Cluster Credentials
       - name: Get AKS Credentials
         run: |
           az aks get-credentials --resource-group ${{ secrets.RESOURCE_GROUP }} --name ${{ secrets.CLUSTER_NAME }}
 
-      # 10. Deploy Stack to AKS via Helm (Conditional parameters based on environment)
+      # 10. Deploy Stack to AKS via Helm
       - name: Deploy with Helm
         run: |
           if [ "${{ env.DEPLOY_ENV }}" = "production" ]; then
