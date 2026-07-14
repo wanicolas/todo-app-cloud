@@ -15,9 +15,9 @@ class InMemoryRepository implements TodoRepository {
         );
     }
 
-    async getItem(userId: string, id: string): Promise<TodoItem> {
+    async getItem(userId: string, id: string): Promise<TodoItem | null> {
         const item = this.items.get(id);
-        return item && item.userId === userId ? item : (undefined as any);
+        return item && item.userId === userId ? item : null;
     }
 
     async storeItem(item: TodoItem): Promise<void> {

@@ -29,18 +29,28 @@ class AuthService {
     constructor(private repository: UserRepository) {}
 
     private get secret(): string {
-        let val = process.env.JWT_SECRET || 'dev-insecure-secret';
         if (process.env.JWT_SECRET_FILE) {
             try {
                 const fs = require('fs');
-                val = fs
+                return fs
                     .readFileSync(process.env.JWT_SECRET_FILE, 'utf8')
                     .trim();
-            } catch {
-                // Fallback to default
+            } catch (err) {
+                if (process.env.NODE_ENV === 'production') {
+                    throw new Error(
+                        'Critical: JWT secret file is unreadable in production.',
+                        { cause: err },
+                    );
+                }
             }
         }
-        return val;
+        if (process.env.JWT_SECRET) {
+            return process.env.JWT_SECRET;
+        }
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error('Critical: JWT secret is missing in production.');
+        }
+        return 'dev-insecure-secret';
     }
 
     private get expiresIn(): string {

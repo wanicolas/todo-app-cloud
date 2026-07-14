@@ -27,7 +27,7 @@ class TodoService {
         userId: string,
         id: string,
         data: { name: string; completed: boolean },
-    ): Promise<TodoItem> {
+    ): Promise<TodoItem | null> {
         await this.repository.updateItem(userId, id, { id, userId, ...data });
         return this.repository.getItem(userId, id);
     }

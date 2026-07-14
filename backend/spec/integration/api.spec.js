@@ -18,6 +18,9 @@ const repository = new KnexRepository(getKnexConfig(dbPath));
 const service = new TodoService(repository);
 const app = createApp(service);
 
+const knex = require('knex');
+const testDb = knex(getKnexConfig(dbPath));
+
 const token = jwt.sign({ sub: 'user-1' }, 'test-secret');
 const otherToken = jwt.sign({ sub: 'user-2' }, 'test-secret');
 const auth = (t = token) => ({ Authorization: `Bearer ${t}` });
@@ -26,7 +29,12 @@ beforeAll(async () => {
     await service.init();
 });
 
+beforeEach(async () => {
+    await testDb('todo_items').del();
+});
+
 afterAll(async () => {
+    await testDb.destroy();
     await service.teardown();
     if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
 });
@@ -54,8 +62,6 @@ describe('authentication', () => {
 });
 
 describe('CRUD /api/items', () => {
-    let createdItemId;
-
     test('GET /api/items returns empty array initially', async () => {
         const res = await request(app).get('/api/items').set(auth());
         expect(res.status).toBe(200);
@@ -72,21 +78,33 @@ describe('CRUD /api/items', () => {
         expect(res.body.name).toBe('Buy milk');
         expect(res.body.completed).toBe(false);
         expect(res.body.id).toBeDefined();
-        createdItemId = res.body.id;
     });
 
     test('GET /api/items returns the created item', async () => {
+        await request(app)
+            .post('/api/items')
+            .set(auth())
+            .send({ name: 'Buy milk' });
         const res = await request(app).get('/api/items').set(auth());
         expect(res.body.length).toBe(1);
         expect(res.body[0].name).toBe('Buy milk');
     });
 
     test('another user does not see the item', async () => {
+        await request(app)
+            .post('/api/items')
+            .set(auth())
+            .send({ name: 'Buy milk' });
         const res = await request(app).get('/api/items').set(auth(otherToken));
         expect(res.body).toEqual([]);
     });
 
     test('PUT /api/items/:id updates an item', async () => {
+        const createRes = await request(app)
+            .post('/api/items')
+            .set(auth())
+            .send({ name: 'Buy milk' });
+        const createdItemId = createRes.body.id;
         const res = await request(app)
             .put(`/api/items/${createdItemId}`)
             .set(auth())
@@ -97,6 +115,11 @@ describe('CRUD /api/items', () => {
     });
 
     test('DELETE /api/items/:id removes an item', async () => {
+        const createRes = await request(app)
+            .post('/api/items')
+            .set(auth())
+            .send({ name: 'Buy milk' });
+        const createdItemId = createRes.body.id;
         const res = await request(app)
             .delete(`/api/items/${createdItemId}`)
             .set(auth());
@@ -104,6 +127,12 @@ describe('CRUD /api/items', () => {
     });
 
     test('GET /api/items is empty after deletion', async () => {
+        const createRes = await request(app)
+            .post('/api/items')
+            .set(auth())
+            .send({ name: 'Buy milk' });
+        const createdItemId = createRes.body.id;
+        await request(app).delete(`/api/items/${createdItemId}`).set(auth());
         const res = await request(app).get('/api/items').set(auth());
         expect(res.body).toEqual([]);
     });

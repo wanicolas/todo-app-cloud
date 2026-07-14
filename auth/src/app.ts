@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 
 const requireAuth = require('./middleware/requireAuth');
 const makeRegister = require('./routes/register');
@@ -13,12 +14,19 @@ function createApp(service: any) {
 
     app.use(express.json());
 
+    const authLimiter = rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 5,
+        message: 'Too many requests from this IP, please try again later',
+        skip: () => process.env.NODE_ENV === 'test',
+    });
+
     // Liveness/readiness probe target.
     app.get('/api/auth/health', (_req, res) => res.send({ status: 'ok' }));
 
     // Public endpoints.
-    app.post('/api/auth/register', makeRegister(service));
-    app.post('/api/auth/login', makeLogin(service));
+    app.post('/api/auth/register', authLimiter, makeRegister(service));
+    app.post('/api/auth/login', authLimiter, makeLogin(service));
 
     // Protected endpoints (RGPD account management).
     app.get('/api/auth/me', requireAuth, makeGetMe(service));

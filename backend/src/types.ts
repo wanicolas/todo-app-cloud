@@ -9,7 +9,7 @@ export interface TodoRepository {
     init(): Promise<void>;
     teardown(): Promise<void>;
     getItems(userId: string): Promise<TodoItem[]>;
-    getItem(userId: string, id: string): Promise<TodoItem>;
+    getItem(userId: string, id: string): Promise<TodoItem | null>;
     storeItem(item: TodoItem): Promise<void>;
     updateItem(userId: string, id: string, item: TodoItem): Promise<void>;
     removeItem(userId: string, id: string): Promise<void>;

@@ -32,5 +32,9 @@ export async function apiFetch(
         window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
     }
 
+    if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+    }
+
     return response;
 }

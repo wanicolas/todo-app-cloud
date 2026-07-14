@@ -2,7 +2,8 @@ import knex, { Knex } from 'knex';
 import { TodoItem, TodoRepository } from '../types';
 import { logger } from '../utils/logger';
 
-function mapRow(row: any): TodoItem {
+function mapRow(row: any): TodoItem | null {
+    if (!row) return null;
     return {
         id: row.id,
         name: row.name,
@@ -52,7 +53,7 @@ class KnexRepository implements TodoRepository {
         return rows.map(mapRow);
     }
 
-    async getItem(userId: string, id: string): Promise<TodoItem> {
+    async getItem(userId: string, id: string): Promise<TodoItem | null> {
         const row = await this.db('todo_items')
             .where({ id, user_id: userId })
             .first();
