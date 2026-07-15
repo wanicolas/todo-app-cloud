@@ -9,7 +9,10 @@ afterEach(() => {
 });
 
 test('adds credentials include option to fetch', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce({ ok: true, status: 200 } as Response);
+    vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+    } as Response);
 
     await apiFetch('/api/items');
 
@@ -18,7 +21,10 @@ test('adds credentials include option to fetch', async () => {
 });
 
 test('emits an event on 401', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce({ ok: false, status: 401 } as Response);
+    vi.mocked(fetch).mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+    } as Response);
     const onUnauthorized = vi.fn();
     window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
 
@@ -31,4 +37,3 @@ test('emits an event on 401', async () => {
     expect(onUnauthorized).toHaveBeenCalled();
     window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
 });
-

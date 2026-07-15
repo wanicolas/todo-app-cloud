@@ -9,7 +9,11 @@ export async function apiFetch(
 ): Promise<Response> {
     const headers = new Headers(options.headers || {});
 
-    const response = await fetch(path, { ...options, headers, credentials: 'include' });
+    const response = await fetch(path, {
+        ...options,
+        headers,
+        credentials: 'include',
+    });
 
     if (response.status === 401) {
         window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));

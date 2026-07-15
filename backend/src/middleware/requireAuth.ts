@@ -38,7 +38,9 @@ export default function requireAuth(
     try {
         const payload = jwt.verify(token, secret);
         const sub =
-            typeof payload === 'string' ? undefined : (payload as jwt.JwtPayload).sub;
+            typeof payload === 'string'
+                ? undefined
+                : (payload as jwt.JwtPayload).sub;
         if (typeof sub !== 'string' || sub.length === 0) {
             return res.status(401).send({ error: 'Invalid or expired token' });
         }

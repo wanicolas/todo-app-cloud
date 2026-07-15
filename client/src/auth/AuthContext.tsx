@@ -6,10 +6,7 @@ import {
     useState,
     ReactNode,
 } from 'react';
-import {
-    apiFetch,
-    UNAUTHORIZED_EVENT,
-} from '../api/client';
+import { apiFetch, UNAUTHORIZED_EVENT } from '../api/client';
 
 export interface User {
     id: string;
@@ -75,11 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = useCallback(async (email: string, password: string) => {
-        const { user } = await authenticate(
-            '/api/auth/login',
-            email,
-            password,
-        );
+        const { user } = await authenticate('/api/auth/login', email, password);
         setUser(user);
     }, []);
 
