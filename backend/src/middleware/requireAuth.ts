@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import * as fs from 'fs';
 
-// Verifies the Bearer JWT with the shared secret (same as the auth service),
+// Verifies the JWT stored in the `auth_token` cookie (same shared secret as the auth service),
 // then attaches the authenticated user id to req.userId. No network call.
 export default function requireAuth(
     req: Request,
