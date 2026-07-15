@@ -50,7 +50,9 @@ class KnexRepository implements TodoRepository {
 
     async getItems(userId: string): Promise<TodoItem[]> {
         const rows = await this.db('todo_items').where({ user_id: userId });
-        return rows.map(mapRow);
+        return rows
+            .map(mapRow)
+            .filter((item): item is TodoItem => item !== null);
     }
 
     async getItem(userId: string, id: string): Promise<TodoItem | null> {
