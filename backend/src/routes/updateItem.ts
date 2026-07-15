@@ -8,11 +8,11 @@ export default function makeUpdateItem(service: TodoService) {
         if (
             typeof name !== 'string' ||
             name.trim() === '' ||
-            name.length > 255
+            name.length > 255 ||
+            typeof completed !== 'boolean'
         ) {
-            return res.status(400).send({ error: 'Invalid name' });
+            return res.status(400).send({ error: 'Invalid item data' });
         }
-
         const item = await service.updateItem(
             (req as any).userId,
             req.params.id as string,
