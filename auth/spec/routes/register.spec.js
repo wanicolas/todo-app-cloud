@@ -14,7 +14,11 @@ test('returns 201 with the created user and sets cookie', async () => {
     await makeRegister(service)(req, res);
 
     expect(service.register).toHaveBeenCalledWith('a@b.com', 'password123');
-    expect(res.cookie).toHaveBeenCalledWith('auth_token', 'jwt', expect.any(Object));
+    expect(res.cookie).toHaveBeenCalledWith(
+        'auth_token',
+        'jwt',
+        expect.any(Object),
+    );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.send).toHaveBeenCalledWith({ user: expected.user });
 });

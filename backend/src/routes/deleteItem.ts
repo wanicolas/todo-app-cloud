@@ -8,4 +8,3 @@ export default function makeDeleteItem(service: TodoService) {
         res.sendStatus(200);
     };
 }
-

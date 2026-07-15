@@ -1,7 +1,5 @@
 const { TodoService } = require('../../src/service/TodoService');
-const {
-    KnexRepository,
-} = require('../../src/repository/KnexRepository');
+const { KnexRepository } = require('../../src/repository/KnexRepository');
 const { getKnexConfig } = require('../../src/repository/knexConfig');
 const os = require('os');
 const path = require('path');
@@ -14,7 +12,10 @@ let service;
 let dbPath;
 
 beforeEach(async () => {
-    dbPath = path.join(os.tmpdir(), `todoservice-${Date.now()}-${Math.random()}.db`);
+    dbPath = path.join(
+        os.tmpdir(),
+        `todoservice-${Date.now()}-${Math.random()}.db`,
+    );
     const repository = new KnexRepository(getKnexConfig(dbPath));
     service = new TodoService(repository);
     await service.init();

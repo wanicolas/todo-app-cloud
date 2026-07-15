@@ -30,5 +30,3 @@ export default function createApp(service: TodoService) {
 
     return app;
 }
-
-

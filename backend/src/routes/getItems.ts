@@ -8,4 +8,3 @@ export default function makeGetItems(service: TodoService) {
         res.send(items);
     };
 }
-

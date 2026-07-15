@@ -29,4 +29,3 @@ export default function makeUpdateItem(service: TodoService) {
         res.send(item);
     };
 }
-

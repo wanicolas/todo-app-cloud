@@ -1,4 +1,6 @@
-const makeAddItem = require('../../src/routes/addItem').default || require('../../src/routes/addItem');
+const makeAddItem =
+    require('../../src/routes/addItem').default ||
+    require('../../src/routes/addItem');
 
 test('it stores item correctly for the authenticated user', async () => {
     const name = 'A sample item';

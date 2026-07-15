@@ -4,7 +4,11 @@ import * as fs from 'fs';
 
 // Verifies the Bearer JWT with the shared secret (same as the auth service),
 // then attaches the authenticated user id to req.userId. No network call.
-export default function requireAuth(req: Request, res: Response, next: NextFunction) {
+export default function requireAuth(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
     const token = req.cookies.auth_token;
 
     if (!token) {
@@ -21,7 +25,7 @@ export default function requireAuth(req: Request, res: Response, next: NextFunct
             if (process.env.NODE_ENV === 'production') {
                 throw new Error(
                     'Critical: JWT secret file is unreadable in production.',
-                    { cause: err }
+                    { cause: err },
                 );
             }
         }
@@ -39,5 +43,3 @@ export default function requireAuth(req: Request, res: Response, next: NextFunct
         return res.status(401).send({ error: 'Invalid or expired token' });
     }
 }
-
-

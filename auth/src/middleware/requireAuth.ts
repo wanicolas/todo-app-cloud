@@ -3,7 +3,11 @@ import jwt from 'jsonwebtoken';
 import * as fs from 'fs';
 
 // Extracts and verifies the auth_token cookie, then attaches the user id to req.userId.
-export default function requireAuth(req: Request, res: Response, next: NextFunction) {
+export default function requireAuth(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) {
     const token = req.cookies?.auth_token;
 
     if (!token) {

@@ -1,4 +1,6 @@
-const makeUpdateItem = require('../../src/routes/updateItem').default || require('../../src/routes/updateItem');
+const makeUpdateItem =
+    require('../../src/routes/updateItem').default ||
+    require('../../src/routes/updateItem');
 
 const ITEM = { id: 1234, name: 'New title', completed: false };
 

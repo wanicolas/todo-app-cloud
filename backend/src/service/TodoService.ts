@@ -18,7 +18,12 @@ class TodoService {
     }
 
     async addItem(userId: string, name: string): Promise<TodoItem> {
-        const item: TodoItem = { id: randomUUID(), name, completed: false, userId };
+        const item: TodoItem = {
+            id: randomUUID(),
+            name,
+            completed: false,
+            userId,
+        };
         await this.repository.storeItem(item);
         return item;
     }
