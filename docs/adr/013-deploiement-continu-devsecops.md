@@ -22,9 +22,11 @@ Nous avons décidé de restructurer le déploiement continu en y appliquant les 
    - Création de `values-staging.yaml` : Pour réduire les coûts dans l'environnement de test, la base MySQL managée est désactivée au profit d'un conteneur MySQL local interne au cluster, et l'intégration Key Vault est désactivée.
    - Utilisation de `values-prod.yaml` : La Production utilise la base de données Azure MySQL Flexible hautement disponible, le chiffrement SSL forcé et l'intégration Azure Key Vault via Secrets Store CSI.
 5. **Optimisation des conteneurs (Alpine Linux)** : Remplacement des images de production `node:slim` par des images minimales **`node:alpine`** et **`nginx:alpine`**, réduisant la taille des images finales afin d'accélérer l'auto-scaling d'AKS (Cold Start réduit) et de réduire la surface d'attaque système.
-6. **Scan de vulnérabilités Trivy & Dependabot** :
-   - Trivy scanne les images construites dans le pipeline CD et bloque immédiatement le déploiement (`exit-code: 1`) si une faille critique ou haute _avec correctif connu_ est détectée.
-   - Configuration de **Dependabot** (`.github/dependabot.yml`) pour scanner hebdomadairement et proposer des PR de mise à jour automatique pour npm, les images Docker et les workflows GitHub Actions.
+6. **Build Docker conditionnel & Retagging intelligent** : Pour éviter de recompiler l'ensemble de la stack à chaque déploiement (gain de temps de build), intégration de `dorny/paths-filter`. Si le code d'un conteneur n'a pas changé, le pipeline télécharge (pull) l'image `latest` de l'ACR et lui applique le nouveau tag (`IMAGE_TAG`), évitant un build complet inutile.
+7. **Politique DevSecOps équilibrée (Scans Trivy & Dependabot)** :
+   * **Dans la CD et Production** : Trivy bloque immédiatement le déploiement (`exit-code: 1`) si une faille critique ou haute *avec correctif connu* est détectée.
+   * **Dans les PRs de développement (CI)** : Le scan Trivy s'exécute et rapporte les failles pour visibilité mais ne bloque pas le merge, afin d'assurer une bonne *Developer Experience (DX)* et de ne pas paralyser le développement fonctionnel. La barrière de sécurité ultime reste au niveau de la CD finale.
+   * **Maintien en Condition de Sécurité (MCS)** : Configuration de **Dependabot** (`.github/dependabot.yml`) pour automatiser le patch hebdomadaire de toutes les dépendances.
 
 ## Conséquences
 
