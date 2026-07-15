@@ -10,6 +10,7 @@ export default function makeLogin(service: AuthService) {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
+                path: '/',
             });
             res.send({ user });
         } catch (err) {
