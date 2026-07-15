@@ -16,6 +16,7 @@ import { AuthService } from './service/AuthService';
 export default function createApp(service: AuthService) {
     const app = express();
 
+    app.set('trust proxy', 1);
     app.use(helmet());
     app.use(cookieParser());
     app.use(express.json());
@@ -24,7 +25,7 @@ export default function createApp(service: AuthService) {
         windowMs: 15 * 60 * 1000,
         max: 5,
         message: 'Too many requests from this IP, please try again later',
-        skip: () => process.env.NODE_ENV === 'test',
+        skip: () => process.env.NODE_ENV !== 'production',
     });
 
     // Liveness/readiness probe target.

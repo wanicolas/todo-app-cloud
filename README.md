@@ -123,28 +123,28 @@ npm run format-check           # Prettier
 
 5 pipelines GitHub Actions dans `.github/workflows/` :
 
-| Pipeline | Déclencheur | Contenu |
-|---|---|---|
+| Pipeline       | Déclencheur            | Contenu                                               |
+| -------------- | ---------------------- | ----------------------------------------------------- |
 | **ci-backend** | push/PR sur `backend/` | lint, typecheck, format, build, tests avec couverture |
-| **ci-client** | push/PR sur `client/` | lint, typecheck, format, build, tests avec couverture |
-| **ci-auth** | push/PR sur `auth/` | lint, typecheck, format, build, tests avec couverture |
-| **ci-e2e** | PR vers main/develop | Docker Compose + Playwright |
-| **ci-trivy** | push main/develop | Scan de vulnérabilités Trivy sur les images Docker |
+| **ci-client**  | push/PR sur `client/`  | lint, typecheck, format, build, tests avec couverture |
+| **ci-auth**    | push/PR sur `auth/`    | lint, typecheck, format, build, tests avec couverture |
+| **ci-e2e**     | PR vers main/develop   | Docker Compose + Playwright                           |
+| **ci-trivy**   | push main/develop      | Scan de vulnérabilités Trivy sur les images Docker    |
 
 ## Variables d'environnement
 
 Voir `.env.example` pour la liste complète.
 
-| Variable | Description | Défaut |
-|---|---|---|
-| `MYSQL_HOST` | Hôte MySQL | — (si absent → SQLite) |
-| `MYSQL_USER` | Utilisateur MySQL | — |
-| `MYSQL_PASSWORD` | Mot de passe MySQL | — |
-| `MYSQL_DB` | Nom de la base | — |
-| `SQLITE_DB_LOCATION` | Chemin du fichier SQLite | `/etc/todos/todo.db` |
-| `JWT_SECRET` | Secret partagé HS256 (auth signe, backend vérifie) | `dev-insecure-secret` |
-| `JWT_EXPIRES_IN` | Durée de validité des tokens | `1h` |
-| `NODE_ENV` | Environnement Node | `development` |
+| Variable             | Description                                        | Défaut                 |
+| -------------------- | -------------------------------------------------- | ---------------------- |
+| `MYSQL_HOST`         | Hôte MySQL                                         | — (si absent → SQLite) |
+| `MYSQL_USER`         | Utilisateur MySQL                                  | —                      |
+| `MYSQL_PASSWORD`     | Mot de passe MySQL                                 | —                      |
+| `MYSQL_DB`           | Nom de la base                                     | —                      |
+| `SQLITE_DB_LOCATION` | Chemin du fichier SQLite                           | `/etc/todos/todo.db`   |
+| `JWT_SECRET`         | Secret partagé HS256 (auth signe, backend vérifie) | `dev-insecure-secret`  |
+| `JWT_EXPIRES_IN`     | Durée de validité des tokens                       | `1h`                   |
+| `NODE_ENV`           | Environnement Node                                 | `development`          |
 
 Docker Compose configure ces variables automatiquement pour les services backend et auth.
 Le service `auth` se connecte à sa propre instance MySQL (`mysql-auth`, base `auth`).
@@ -153,14 +153,14 @@ Le service `auth` se connecte à sa propre instance MySQL (`mysql-auth`, base `a
 
 L'accès à l'application requiert un compte. Le microservice `auth` expose, sous `/api/auth` :
 
-| Méthode | Endpoint | Accès | Description |
-|---|---|---|---|
-| `POST` | `/api/auth/register` | public | Création de compte (email + mot de passe), renvoie un JWT |
-| `POST` | `/api/auth/login` | public | Connexion, renvoie un JWT |
-| `GET` | `/api/auth/me` | JWT | Profil de l'utilisateur courant |
-| `PUT` | `/api/auth/me` | JWT | Modifier email / mot de passe |
-| `DELETE` | `/api/auth/me` | JWT | Suppression de compte (droit à l'oubli, RGPD) |
-| `GET` | `/api/auth/me/export` | JWT | Export des données du compte (portabilité, RGPD) |
+| Méthode  | Endpoint              | Accès  | Description                                               |
+| -------- | --------------------- | ------ | --------------------------------------------------------- |
+| `POST`   | `/api/auth/register`  | public | Création de compte (email + mot de passe), renvoie un JWT |
+| `POST`   | `/api/auth/login`     | public | Connexion, renvoie un JWT                                 |
+| `GET`    | `/api/auth/me`        | JWT    | Profil de l'utilisateur courant                           |
+| `PUT`    | `/api/auth/me`        | JWT    | Modifier email / mot de passe                             |
+| `DELETE` | `/api/auth/me`        | JWT    | Suppression de compte (droit à l'oubli, RGPD)             |
+| `GET`    | `/api/auth/me/export` | JWT    | Export des données du compte (portabilité, RGPD)          |
 
 Le JWT est signé en HS256 avec `JWT_SECRET`. Le backend todo vérifie lui-même la
 signature (pas d'appel au service auth) et restreint chaque todo à son propriétaire
@@ -228,16 +228,4 @@ une factory choisit le repository selon l'environnement, puis construit le servi
 
 ## Décisions techniques (ADR)
 
-Les Architecture Decision Records sont dans [`docs/adr/`](docs/adr/) :
-
-1. [Git Flow](docs/adr/001-git-flow.md) — branches main/develop, features via PR
-2. [TypeScript progressif](docs/adr/002-typescript-progressif.md) — migration incrémentale
-3. [Stratégie de tests](docs/adr/003-strategie-tests.md) — 3 niveaux (unit, integ, E2E)
-4. [CI multi-pipeline](docs/adr/004-ci-multi-pipeline.md) — pipelines séparés backend/client/E2E
-5. [ESLint TypeScript](docs/adr/005-eslint-typescript.md) — configs séparées backend/client
-6. [Architecture en couches](docs/adr/006-architecture-couches-di.md) — routes → service → repository + DI
-7. [Knex.js](docs/adr/007-orm-knex.md) — query builder unifié, migrations versionnées
-8. [Trivy](docs/adr/008-trivy-scan.md) — scan de vulnérabilités des images Docker
-9. [Authentification microservice + JWT](docs/adr/009-authentification-microservice-jwt.md) — service auth séparé, JWT HS256, todos privés
-10. [Migration vers Helm](docs/adr/010-kubernetes-helm.md) — Orchestration Kubernetes unifiée et paramétrable via Helm
-11. [Sécurisation et Secrets Key Vault](docs/adr/011-azure-terraform-security.md) — Chiffrement SSL, secrets Key Vault CSI et images non-root
+Les Architecture Decision Records sont dans [`docs/adr/`](docs/adr/)
