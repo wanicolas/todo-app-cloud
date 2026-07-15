@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import requireAuth from './middleware/requireAuth';
 import makeRegister from './routes/register';
 import makeLogin from './routes/login';
+import makeLogout from './routes/logout';
 import makeGetMe from './routes/getMe';
 import makeUpdateMe from './routes/updateMe';
 import makeDeleteMe from './routes/deleteMe';
@@ -32,6 +33,7 @@ export default function createApp(service: AuthService) {
     // Public endpoints.
     app.post('/api/auth/register', authLimiter, makeRegister(service));
     app.post('/api/auth/login', authLimiter, makeLogin(service));
+    app.post('/api/auth/logout', makeLogout());
 
     // Protected endpoints (RGPD account management).
     app.get('/api/auth/me', requireAuth, makeGetMe(service));

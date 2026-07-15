@@ -65,6 +65,16 @@ describe('auth lifecycle', () => {
         expect(cookie).toBeDefined();
     });
 
+    test('POST /api/auth/logout clears the auth cookie', async () => {
+        const res = await request(app).post('/api/auth/logout');
+        expect(res.status).toBe(204);
+        expect(res.headers['set-cookie']).toBeDefined();
+        expect(res.headers['set-cookie'][0]).toContain('auth_token=');
+        expect(res.headers['set-cookie'][0]).toContain(
+            'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        );
+    });
+
     test('POST /api/auth/login rejects bad credentials (401)', async () => {
         const res = await request(app)
             .post('/api/auth/login')
