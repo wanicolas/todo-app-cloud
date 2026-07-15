@@ -1,7 +1,7 @@
-const { createRepository } = require('./repository');
-const { TodoService } = require('./service/TodoService');
-const createApp = require('./app');
-const { logger } = require('./utils/logger');
+import { createRepository } from './repository';
+import { TodoService } from './service/TodoService';
+import createApp from './app';
+import { logger } from './utils/logger';
 
 const repository = createRepository();
 const service = new TodoService(repository);

@@ -1,21 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
-
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
+import * as fs from 'fs';
 
 // Verifies the Bearer JWT with the shared secret (same as the auth service),
 // then attaches the authenticated user id to req.userId. No network call.
-function requireAuth(req: Request, res: Response, next: NextFunction) {
-    const header = req.headers.authorization || '';
-    const [scheme, token] = header.split(' ');
+export default function requireAuth(req: Request, res: Response, next: NextFunction) {
+    const token = req.cookies.auth_token;
 
-    if (scheme !== 'Bearer' || !token) {
+    if (!token) {
         return res.status(401).send({ error: 'Authentication required' });
     }
 
     let secret = 'dev-insecure-secret';
     if (process.env.JWT_SECRET_FILE) {
         try {
-            const fs = require('fs');
             secret = fs
                 .readFileSync(process.env.JWT_SECRET_FILE, 'utf8')
                 .trim();
@@ -42,4 +40,4 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     }
 }
 
-module.exports = requireAuth;
+

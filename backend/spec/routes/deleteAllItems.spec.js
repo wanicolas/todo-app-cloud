@@ -1,4 +1,4 @@
-const makeDeleteAllItems = require('../../src/routes/deleteAllItems');
+const makeDeleteAllItems = require('../../src/routes/deleteAllItems').default || require('../../src/routes/deleteAllItems');
 
 test('it removes all items for the authenticated user', async () => {
     const req = { userId: 'user-1' };

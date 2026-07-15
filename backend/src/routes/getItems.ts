@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 
-function makeGetItems(service: any) {
+import { TodoService } from '../service/TodoService';
+
+export default function makeGetItems(service: TodoService) {
     return async (req: Request, res: Response) => {
         const items = await service.getAllItems((req as any).userId);
         res.send(items);
     };
 }
 
-module.exports = makeGetItems;

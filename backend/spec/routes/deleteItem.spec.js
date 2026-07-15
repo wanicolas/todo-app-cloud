@@ -1,4 +1,4 @@
-const makeDeleteItem = require('../../src/routes/deleteItem');
+const makeDeleteItem = require('../../src/routes/deleteItem').default || require('../../src/routes/deleteItem');
 
 test('it removes item for the authenticated user', async () => {
     const req = { userId: 'user-1', params: { id: 12345 } };

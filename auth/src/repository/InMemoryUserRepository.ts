@@ -31,4 +31,4 @@ class InMemoryUserRepository implements UserRepository {
     }
 }
 
-module.exports = { InMemoryUserRepository };
+export { InMemoryUserRepository };

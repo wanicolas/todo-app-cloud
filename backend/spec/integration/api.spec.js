@@ -11,7 +11,7 @@ const jwt = require('jsonwebtoken');
 const { KnexRepository } = require('../../src/repository/KnexRepository');
 const { getKnexConfig } = require('../../src/repository/knexConfig');
 const { TodoService } = require('../../src/service/TodoService');
-const createApp = require('../../src/app');
+const createApp = require('../../src/app').default || require('../../src/app');
 const request = require('supertest');
 
 const repository = new KnexRepository(getKnexConfig(dbPath));
@@ -23,7 +23,7 @@ const testDb = knex(getKnexConfig(dbPath));
 
 const token = jwt.sign({ sub: 'user-1' }, 'test-secret');
 const otherToken = jwt.sign({ sub: 'user-2' }, 'test-secret');
-const auth = (t = token) => ({ Authorization: `Bearer ${t}` });
+const auth = (t = token) => ({ Cookie: `auth_token=${t}` });
 
 beforeAll(async () => {
     await service.init();
@@ -56,7 +56,7 @@ describe('authentication', () => {
     test('GET /api/items with an invalid token returns 401', async () => {
         const res = await request(app)
             .get('/api/items')
-            .set({ Authorization: 'Bearer not-a-jwt' });
+            .set({ Cookie: 'auth_token=not-a-jwt' });
         expect(res.status).toBe(401);
     });
 });

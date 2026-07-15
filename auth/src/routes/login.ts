@@ -1,13 +1,17 @@
 import { Request, Response } from 'express';
+import { AuthError, AuthService } from '../service/AuthService';
 
-const { AuthError } = require('../service/AuthService');
-
-function makeLogin(service: any) {
+export default function makeLogin(service: AuthService) {
     return async (req: Request, res: Response) => {
         try {
             const { email, password } = req.body;
-            const result = await service.login(email, password);
-            res.send(result);
+            const { user, token } = await service.login(email, password);
+            res.cookie('auth_token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+            });
+            res.send({ user });
         } catch (err) {
             if (err instanceof AuthError) {
                 return res.status(err.status).send({ error: err.message });
@@ -16,5 +20,3 @@ function makeLogin(service: any) {
         }
     };
 }
-
-module.exports = makeLogin;

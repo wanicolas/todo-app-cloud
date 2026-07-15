@@ -89,4 +89,4 @@ class KnexRepository implements TodoRepository {
     }
 }
 
-module.exports = { KnexRepository };
+export { KnexRepository };

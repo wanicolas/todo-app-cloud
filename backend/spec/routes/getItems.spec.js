@@ -1,4 +1,4 @@
-const makeGetItems = require('../../src/routes/getItems');
+const makeGetItems = require('../../src/routes/getItems').default || require('../../src/routes/getItems');
 
 const ITEMS = [{ id: 12345 }];
 

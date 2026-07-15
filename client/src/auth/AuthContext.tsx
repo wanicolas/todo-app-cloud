@@ -8,8 +8,6 @@ import {
 } from 'react';
 import {
     apiFetch,
-    getToken,
-    setToken,
     UNAUTHORIZED_EVENT,
 } from '../api/client';
 
@@ -28,7 +26,7 @@ interface AuthContextValue {
         password?: string;
     }) => Promise<void>;
     deleteAccount: () => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -37,7 +35,7 @@ async function authenticate(
     path: string,
     email: string,
     password: string,
-): Promise<{ user: User; token: string }> {
+): Promise<{ user: User }> {
     const res = await apiFetch(path, {
         method: 'POST',
         body: JSON.stringify({ email, password }),
@@ -54,20 +52,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const logout = useCallback(() => {
-        setToken(null);
+    const logout = useCallback(async () => {
+        try {
+            await apiFetch('/api/auth/logout', { method: 'POST' });
+        } catch (e) {
+            // Ignore error on logout
+        }
         setUser(null);
     }, []);
 
-    // Restore the session from a stored token on first load.
+    // Restore the session from the HttpOnly cookie on first load.
     useEffect(() => {
-        if (!getToken()) {
-            setLoading(false);
-            return;
-        }
         apiFetch('/api/auth/me')
             .then((res) => (res.ok ? res.json() : null))
             .then((data) => setUser(data))
+            .catch(() => setUser(null))
             .finally(() => setLoading(false));
     }, []);
 
@@ -80,22 +79,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = useCallback(async (email: string, password: string) => {
-        const { user, token } = await authenticate(
+        const { user } = await authenticate(
             '/api/auth/login',
             email,
             password,
         );
-        setToken(token);
         setUser(user);
     }, []);
 
     const register = useCallback(async (email: string, password: string) => {
-        const { user, token } = await authenticate(
+        const { user } = await authenticate(
             '/api/auth/register',
             email,
             password,
         );
-        setToken(token);
         setUser(user);
     }, []);
 
@@ -123,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!res.ok && res.status !== 204) {
             throw new Error('Account deletion failed');
         }
-        logout();
+        await logout();
     }, [logout]);
 
     return (

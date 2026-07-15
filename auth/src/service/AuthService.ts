@@ -1,8 +1,9 @@
 import { PublicUser, User, UserRepository } from '../types';
 
-const { v4: uuid } = require('uuid');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import { randomUUID } from 'crypto';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import * as fs from 'fs';
 
 const BCRYPT_ROUNDS = 10;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -31,7 +32,6 @@ class AuthService {
     private get secret(): string {
         if (process.env.JWT_SECRET_FILE) {
             try {
-                const fs = require('fs');
                 return fs
                     .readFileSync(process.env.JWT_SECRET_FILE, 'utf8')
                     .trim();
@@ -79,7 +79,7 @@ class AuthService {
 
     private sign(user: User): string {
         return jwt.sign({ sub: user.id, email: user.email }, this.secret, {
-            expiresIn: this.expiresIn,
+            expiresIn: this.expiresIn as any,
         });
     }
 
@@ -97,7 +97,7 @@ class AuthService {
 
         const now = new Date().toISOString();
         const user: User = {
-            id: uuid(),
+            id: randomUUID(),
             email: normalizedEmail,
             passwordHash: await bcrypt.hash(password, BCRYPT_ROUNDS),
             createdAt: now,
@@ -180,4 +180,4 @@ class AuthService {
     }
 }
 
-module.exports = { AuthService, AuthError };
+export { AuthService, AuthError };

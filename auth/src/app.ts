@@ -1,17 +1,22 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
-const requireAuth = require('./middleware/requireAuth');
-const makeRegister = require('./routes/register');
-const makeLogin = require('./routes/login');
-const makeGetMe = require('./routes/getMe');
-const makeUpdateMe = require('./routes/updateMe');
-const makeDeleteMe = require('./routes/deleteMe');
-const makeExportMe = require('./routes/exportMe');
+import requireAuth from './middleware/requireAuth';
+import makeRegister from './routes/register';
+import makeLogin from './routes/login';
+import makeGetMe from './routes/getMe';
+import makeUpdateMe from './routes/updateMe';
+import makeDeleteMe from './routes/deleteMe';
+import makeExportMe from './routes/exportMe';
+import { AuthService } from './service/AuthService';
 
-function createApp(service: any) {
+export default function createApp(service: AuthService) {
     const app = express();
 
+    app.use(helmet());
+    app.use(cookieParser());
     app.use(express.json());
 
     const authLimiter = rateLimit({
@@ -36,5 +41,3 @@ function createApp(service: any) {
 
     return app;
 }
-
-module.exports = createApp;

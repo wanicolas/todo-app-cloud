@@ -12,7 +12,7 @@ const {
 } = require('../../src/repository/KnexUserRepository');
 const { getKnexConfig } = require('../../src/repository/knexConfig');
 const { AuthService } = require('../../src/service/AuthService');
-const createApp = require('../../src/app');
+const { default: createApp } = require('../../src/app');
 const request = require('supertest');
 
 const repository = new KnexUserRepository(getKnexConfig(dbPath));
@@ -31,7 +31,7 @@ afterAll(async () => {
 describe('auth lifecycle', () => {
     const email = 'integration@example.com';
     const password = 'password123';
-    let token;
+    let cookie;
 
     test('GET /api/auth/health', async () => {
         const res = await request(app).get('/api/auth/health');
@@ -44,7 +44,7 @@ describe('auth lifecycle', () => {
             .post('/api/auth/register')
             .send({ email, password });
         expect(res.status).toBe(201);
-        expect(res.body.token).toBeDefined();
+        expect(res.headers['set-cookie']).toBeDefined();
         expect(res.body.user.email).toBe(email);
         expect(res.body.user.passwordHash).toBeUndefined();
     });
@@ -61,8 +61,8 @@ describe('auth lifecycle', () => {
             .post('/api/auth/login')
             .send({ email, password });
         expect(res.status).toBe(200);
-        token = res.body.token;
-        expect(token).toBeDefined();
+        cookie = res.headers['set-cookie'];
+        expect(cookie).toBeDefined();
     });
 
     test('POST /api/auth/login rejects bad credentials (401)', async () => {
@@ -80,7 +80,7 @@ describe('auth lifecycle', () => {
     test('GET /api/auth/me returns the profile', async () => {
         const res = await request(app)
             .get('/api/auth/me')
-            .set('Authorization', `Bearer ${token}`);
+            .set('Cookie', cookie);
         expect(res.status).toBe(200);
         expect(res.body.email).toBe(email);
     });
@@ -88,7 +88,7 @@ describe('auth lifecycle', () => {
     test('GET /api/auth/me/export returns the user data', async () => {
         const res = await request(app)
             .get('/api/auth/me/export')
-            .set('Authorization', `Bearer ${token}`);
+            .set('Cookie', cookie);
         expect(res.status).toBe(200);
         expect(res.body.email).toBe(email);
         expect(res.headers['content-disposition']).toContain('my-data.json');
@@ -97,7 +97,7 @@ describe('auth lifecycle', () => {
     test('PUT /api/auth/me updates the password', async () => {
         const res = await request(app)
             .put('/api/auth/me')
-            .set('Authorization', `Bearer ${token}`)
+            .set('Cookie', cookie)
             .send({ password: 'newpassword1' });
         expect(res.status).toBe(200);
 
@@ -110,7 +110,7 @@ describe('auth lifecycle', () => {
     test('DELETE /api/auth/me erases the account', async () => {
         const res = await request(app)
             .delete('/api/auth/me')
-            .set('Authorization', `Bearer ${token}`);
+            .set('Cookie', cookie);
         expect(res.status).toBe(204);
 
         const login = await request(app)

@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 
-function makeUpdateItem(service: any) {
+import { TodoService } from '../service/TodoService';
+
+export default function makeUpdateItem(service: TodoService) {
     return async (req: Request, res: Response) => {
         const { name, completed } = req.body;
         if (
@@ -13,7 +15,7 @@ function makeUpdateItem(service: any) {
 
         const item = await service.updateItem(
             (req as any).userId,
-            req.params.id,
+            req.params.id as string,
             {
                 name: name.trim(),
                 completed,
@@ -28,4 +30,3 @@ function makeUpdateItem(service: any) {
     };
 }
 
-module.exports = makeUpdateItem;
