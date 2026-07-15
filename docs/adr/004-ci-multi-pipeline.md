@@ -1,7 +1,7 @@
 # ADR-004 : CI multi-pipeline
 
 **Date** : avril 2026  
-**Statut** : Dépassé (Superseded) par [ADR-014](file:///home/nicolaswalter/Ynov/Cloud/todo-app-cloud/docs/adr/014-ci-monorepo-merge-gate.md)
+**Statut** : Dépassé (Superseded) par [ADR-014](014-ci-monorepo-merge-gate.md)
 
 ## Contexte
 
