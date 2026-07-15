@@ -194,7 +194,7 @@ Le pipeline de CD se déclenche automatiquement selon les événements du dépô
 
 1.  **Déploiement en Staging (Automatique)** :
     - _Déclencheur_ : Un push ou une fusion de Pull Request réussie sur la branche `develop`.
-    - _Comportement_ : Les images sont construites, validées par Trivy, poussées sur l'ACR avec le tag `develop-<commit_sha>` et déployées sur AKS dans le namespace `staging` à l'aide de la configuration légère [values-staging.yaml](k8s/todo-app/values-staging.yaml) (BDD MySQL locale au cluster, Key Vault désactivé pour économiser les coûts).
+    - _Comportement_ : Les images sont construites, validées par Trivy, poussées sur l'ACR avec le tag `develop-<commit_sha>` et déployées sur AKS dans le namespace `staging` à l'aide de la configuration légère [values-staging.yaml](../k8s/todo-app/values-staging.yaml) (BDD MySQL locale au cluster, Key Vault désactivé pour économiser les coûts).
 2.  **Déploiement en Production (Automatique)** :
     - _Déclencheur_ : La création et le push d'un tag de version Git correspondant au format `v*` (ex: `v1.0.0`, `v2.1.0-rc1`).
     - _Comportement_ : Les images sont taguées avec le nom exact de la version, scannées par Trivy, poussées sur l'ACR et déployées dans le namespace `production` avec la configuration sécurisée [values-prod.yaml](../k8s/todo-app/values-prod.yaml) (Key Vault CSI active, TLS/HTTPS forcé, MySQL managé).
