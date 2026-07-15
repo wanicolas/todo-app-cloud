@@ -41,11 +41,7 @@ async function authenticate(
         body: JSON.stringify({ email, password }),
         headers: { 'Content-Type': 'application/json' },
     });
-    const data = await res.json();
-    if (!res.ok) {
-        throw new Error(data.error || 'Authentication failed');
-    }
-    return data;
+    return res.json();
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
