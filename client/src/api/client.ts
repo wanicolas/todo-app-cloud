@@ -16,7 +16,15 @@ export async function apiFetch(
     }
 
     if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        let details = '';
+        try {
+            details = await response.clone().text();
+        } catch {
+            // ignore
+        }
+        throw new Error(
+            `API error: ${response.status}${details ? ` - ${details}` : ''}`,
+        );
     }
 
     return response;
