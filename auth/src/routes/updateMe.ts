@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
+import { AuthError, AuthService } from '../service/AuthService';
 
-const { AuthError } = require('../service/AuthService');
-
-function makeUpdateMe(service: any) {
+export default function makeUpdateMe(service: AuthService) {
     return async (req: Request, res: Response) => {
         try {
             const { email, password } = req.body;
@@ -19,5 +18,3 @@ function makeUpdateMe(service: any) {
         }
     };
 }
-
-module.exports = makeUpdateMe;

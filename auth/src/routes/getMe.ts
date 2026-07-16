@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
+import { AuthError, AuthService } from '../service/AuthService';
 
-const { AuthError } = require('../service/AuthService');
-
-function makeGetMe(service: any) {
+export default function makeGetMe(service: AuthService) {
     return async (req: Request, res: Response) => {
         try {
             const user = await service.getProfile((req as any).userId);
@@ -15,5 +14,3 @@ function makeGetMe(service: any) {
         }
     };
 }
-
-module.exports = makeGetMe;

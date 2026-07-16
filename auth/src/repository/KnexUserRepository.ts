@@ -86,4 +86,4 @@ class KnexUserRepository implements UserRepository {
     }
 }
 
-module.exports = { KnexUserRepository };
+export { KnexUserRepository };

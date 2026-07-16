@@ -1,10 +1,7 @@
 import { UserRepository } from '../types';
+import { KnexUserRepository } from './KnexUserRepository';
+import { getKnexConfig } from './knexConfig';
 
-const { KnexUserRepository } = require('./KnexUserRepository');
-const { getKnexConfig } = require('./knexConfig');
-
-function createRepository(sqliteLocation?: string): UserRepository {
+export function createRepository(sqliteLocation?: string): UserRepository {
     return new KnexUserRepository(getKnexConfig(sqliteLocation));
 }
-
-module.exports = { createRepository };

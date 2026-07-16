@@ -1,7 +1,7 @@
-const { createRepository } = require('./repository');
-const { AuthService } = require('./service/AuthService');
-const createApp = require('./app');
-const { logger } = require('./utils/logger');
+import { createRepository } from './repository';
+import { AuthService } from './service/AuthService';
+import createApp from './app';
+import { logger } from './utils/logger';
 
 const repository = createRepository();
 const service = new AuthService(repository);

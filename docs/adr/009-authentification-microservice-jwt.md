@@ -1,7 +1,7 @@
 # ADR-009 : Authentification en microservice séparé avec JWT
 
-**Date** : avril 2026
-**Statut** : Accepté
+**Date** : avril 2026  
+**Statut** : Dépassé (Superseded) par [ADR-015](015-sessions-http-only-esmodules.md)
 
 ## Contexte
 

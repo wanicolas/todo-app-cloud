@@ -1,21 +1,29 @@
 const { TodoService } = require('../../src/service/TodoService');
-const {
-    InMemoryRepository,
-} = require('../../src/repository/InMemoryRepository');
+const { KnexRepository } = require('../../src/repository/KnexRepository');
+const { getKnexConfig } = require('../../src/repository/knexConfig');
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
 
 const USER = 'user-1';
 const OTHER_USER = 'user-2';
 
 let service;
+let dbPath;
 
 beforeEach(async () => {
-    const repository = new InMemoryRepository();
+    dbPath = path.join(
+        os.tmpdir(),
+        `todoservice-${Date.now()}-${Math.random()}.db`,
+    );
+    const repository = new KnexRepository(getKnexConfig(dbPath));
     service = new TodoService(repository);
     await service.init();
 });
 
 afterEach(async () => {
     await service.teardown();
+    if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
 });
 
 test('addItem creates an item with id, name and userId', async () => {

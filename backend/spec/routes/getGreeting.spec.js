@@ -1,4 +1,6 @@
-const getGreeting = require('../../src/routes/getGreeting');
+const getGreeting =
+    require('../../src/routes/getGreeting').default ||
+    require('../../src/routes/getGreeting');
 
 test('it returns greeting correctly', async () => {
     const req = {};

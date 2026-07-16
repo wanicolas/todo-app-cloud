@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
+import { AuthError, AuthService } from '../service/AuthService';
 
-const { AuthError } = require('../service/AuthService');
-
-function makeDeleteMe(service: any) {
+export default function makeDeleteMe(service: AuthService) {
     return async (req: Request, res: Response) => {
         try {
             await service.deleteAccount((req as any).userId);
@@ -15,5 +14,3 @@ function makeDeleteMe(service: any) {
         }
     };
 }
-
-module.exports = makeDeleteMe;

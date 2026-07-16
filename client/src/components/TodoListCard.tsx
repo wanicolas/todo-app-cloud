@@ -15,7 +15,11 @@ export function TodoListCard() {
     useEffect(() => {
         apiFetch('/api/items')
             .then((r) => r.json())
-            .then(setItems);
+            .then(setItems)
+            .catch((err) => {
+                console.error(err);
+                setItems([]);
+            });
     }, []);
 
     const onNewItem = useCallback(

@@ -1,6 +1,6 @@
 import { TodoItem, TodoRepository } from '../types';
 
-const { v4: uuid } = require('uuid');
+import { randomUUID } from 'crypto';
 
 class TodoService {
     constructor(private repository: TodoRepository) {}
@@ -18,7 +18,12 @@ class TodoService {
     }
 
     async addItem(userId: string, name: string): Promise<TodoItem> {
-        const item: TodoItem = { id: uuid(), name, completed: false, userId };
+        const item: TodoItem = {
+            id: randomUUID(),
+            name,
+            completed: false,
+            userId,
+        };
         await this.repository.storeItem(item);
         return item;
     }
@@ -27,7 +32,7 @@ class TodoService {
         userId: string,
         id: string,
         data: { name: string; completed: boolean },
-    ): Promise<TodoItem> {
+    ): Promise<TodoItem | null> {
         await this.repository.updateItem(userId, id, { id, userId, ...data });
         return this.repository.getItem(userId, id);
     }
@@ -42,4 +47,4 @@ class TodoService {
     }
 }
 
-module.exports = { TodoService };
+export { TodoService };

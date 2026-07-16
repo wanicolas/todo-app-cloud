@@ -1,7 +1,7 @@
 import type { Knex } from 'knex';
 
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
 function readSecret(envVar: string, fileVar: string): string | undefined {
     const filePath = process.env[fileVar];
@@ -52,4 +52,4 @@ function getKnexConfig(sqliteLocation?: string): Knex.Config {
     };
 }
 
-module.exports = { getKnexConfig };
+export { getKnexConfig };

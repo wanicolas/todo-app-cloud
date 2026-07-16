@@ -36,13 +36,18 @@ export function ItemDisplay({
             headers: { 'Content-Type': 'application/json' },
         })
             .then((r) => r.json())
-            .then(onItemUpdate);
+            .then((updatedItem) => {
+                if (updatedItem) {
+                    onItemUpdate(updatedItem);
+                }
+            })
+            .catch((err) => console.error(err));
     };
 
     const removeItem = () => {
-        apiFetch(`/api/items/${item.id}`, { method: 'DELETE' }).then(() =>
-            onItemRemoval(item),
-        );
+        apiFetch(`/api/items/${item.id}`, { method: 'DELETE' })
+            .then(() => onItemRemoval(item))
+            .catch((err) => console.error(err));
     };
 
     return (
