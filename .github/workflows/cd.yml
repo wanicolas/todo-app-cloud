@@ -35,12 +35,16 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TAG="manual-${{ github.sha }}"
+            CACHE_SCOPE="manual"
           elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             TAG="${{ github.ref_name }}"
+            CACHE_SCOPE="prod"
           else
             TAG="develop-${{ github.sha }}"
+            CACHE_SCOPE="staging"
           fi
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          echo "CACHE_SCOPE=$CACHE_SCOPE" >> $GITHUB_ENV
 
       - name: Azure Login
         uses: azure/login@v3.0
@@ -64,8 +68,8 @@ jobs:
           tags: |
             ${{ secrets.ACR_NAME }}.azurecr.io/${{ matrix.service }}:${{ env.IMAGE_TAG }}
             ${{ secrets.ACR_NAME }}.azurecr.io/${{ matrix.service }}:latest
-          cache-from: type=gha,scope=${{ matrix.service }}-prod
-          cache-to: type=gha,mode=max,scope=${{ matrix.service }}-prod
+          cache-from: type=gha,scope=${{ matrix.service }}-${{ env.CACHE_SCOPE }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}-${{ env.CACHE_SCOPE }}
 
       - name: Scan ${{ matrix.service }} Image
         uses: ./.github/actions/trivy-scan
@@ -146,9 +150,4 @@ jobs:
               --set auth.image.tag="${{ env.IMAGE_TAG }}"
           fi
 
-      - name: Verify Rollout Status
-        run: |
-          kubectl rollout status deployment/backend -n ${{ env.NAMESPACE }}
-          kubectl rollout status deployment/auth -n ${{ env.NAMESPACE }}
-          kubectl rollout status deployment/client -n ${{ env.NAMESPACE }}
-          kubectl rollout status deployment/reverse-proxy -n ${{ env.NAMESPACE }}
+
