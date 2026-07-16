@@ -1,0 +1,46 @@
+name: "Node CI Checks"
+description: "Sets up Node, installs dependencies, and runs all CI checks (lint, typecheck, format, build, test)"
+inputs:
+  working-directory:
+    description: "The directory of the Node.js project (e.g., backend, client, auth)"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v7.0.0
+      with:
+        node-version: 22
+        cache: npm
+        cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+    - name: Install Dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm ci
+
+    - name: Run Linter
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm run lint
+
+    - name: Run Typecheck
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm run typecheck
+
+    - name: Run Format Check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm run format-check
+
+    - name: Build
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm run build
+
+    - name: Run Tests & Coverage
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm run test:coverage
