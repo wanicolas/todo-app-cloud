@@ -21,14 +21,65 @@ permissions:
   contents: read
 
 jobs:
-  build-and-deploy:
-    name: Build, Scan and Deploy
+  build-and-scan:
+    name: Build and Scan Images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [backend, client, auth]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7.0.0
+
+      - name: Set Environment Variables
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="manual-${{ github.sha }}"
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            TAG="${{ github.ref_name }}"
+          else
+            TAG="develop-${{ github.sha }}"
+          fi
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+
+      - name: Azure Login
+        uses: azure/login@v3.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to ACR
+        run: |
+          az acr login --name ${{ secrets.ACR_NAME }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.2.0
+
+      - name: Build and Push ${{ matrix.service }}
+        uses: docker/build-push-action@v7.3.0
+        with:
+          context: ./${{ matrix.service }}
+          push: true
+          tags: |
+            ${{ secrets.ACR_NAME }}.azurecr.io/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+            ${{ secrets.ACR_NAME }}.azurecr.io/${{ matrix.service }}:latest
+          cache-from: type=gha,scope=${{ matrix.service }}-prod
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}-prod
+
+      - name: Scan ${{ matrix.service }} Image
+        uses: ./.github/actions/trivy-scan
+        with:
+          image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+
+  deploy:
+    name: Deploy to AKS
+    needs: build-and-scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7.0.0
 
-      # 1. Définition dynamique des variables d'environnement selon le déclencheur
       - name: Set Environment Variables
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -53,7 +104,6 @@ jobs:
             echo "NAMESPACE=staging" >> $GITHUB_ENV
           fi
 
-      # 2. Login to Azure via OIDC (Pas de secrets statiques)
       - name: Azure Login
         uses: azure/login@v3.0
         with:
@@ -61,72 +111,10 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # 3. Login to Azure Container Registry (ACR)
-      - name: Login to ACR
-        run: |
-          az acr login --name ${{ secrets.ACR_NAME }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4.2.0
-
-      # 4. Build and Push Docker Images with Caching
-      - name: Build and Push Backend
-        uses: docker/build-push-action@v7.3.0
-        with:
-          context: ./backend
-          push: true
-          tags: |
-            ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }}
-            ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest
-          cache-from: type=gha,scope=backend-prod
-          cache-to: type=gha,mode=max,scope=backend-prod
-
-      - name: Build and Push Client
-        uses: docker/build-push-action@v7.3.0
-        with:
-          context: ./client
-          push: true
-          tags: |
-            ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }}
-            ${{ secrets.ACR_NAME }}.azurecr.io/client:latest
-          cache-from: type=gha,scope=client-prod
-          cache-to: type=gha,mode=max,scope=client-prod
-
-      - name: Build and Push Auth
-        uses: docker/build-push-action@v7.3.0
-        with:
-          context: ./auth
-          push: true
-          tags: |
-            ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }}
-            ${{ secrets.ACR_NAME }}.azurecr.io/auth:latest
-          cache-from: type=gha,scope=auth-prod
-          cache-to: type=gha,mode=max,scope=auth-prod
-
-      # 5. Scan Backend Image with Trivy
-      - name: Scan Backend Image
-        uses: ./.github/actions/trivy-scan
-        with:
-          image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }}
-
-      # 6. Scan Client Image with Trivy
-      - name: Scan Client Image
-        uses: ./.github/actions/trivy-scan
-        with:
-          image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }}
-
-      # 7. Scan Auth Image with Trivy
-      - name: Scan Auth Image
-        uses: ./.github/actions/trivy-scan
-        with:
-          image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }}
-
-      # 9. Retrieve AKS Cluster Credentials
       - name: Get AKS Credentials
         run: |
           az aks get-credentials --resource-group ${{ secrets.RESOURCE_GROUP }} --name ${{ secrets.CLUSTER_NAME }}
 
-      # 10. Deploy Stack to AKS via Helm
       - name: Deploy with Helm
         run: |
           if [ "${{ env.DEPLOY_ENV }}" = "production" ]; then
@@ -158,9 +146,9 @@ jobs:
               --set auth.image.tag="${{ env.IMAGE_TAG }}"
           fi
 
-      # 11. Verify Rollout Status to Ensure Zero-Downtime Rolling Update
       - name: Verify Rollout Status
         run: |
           kubectl rollout status deployment/backend -n ${{ env.NAMESPACE }}
           kubectl rollout status deployment/auth -n ${{ env.NAMESPACE }}
           kubectl rollout status deployment/client -n ${{ env.NAMESPACE }}
+          kubectl rollout status deployment/reverse-proxy -n ${{ env.NAMESPACE }}

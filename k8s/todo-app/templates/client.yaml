@@ -19,9 +19,15 @@ spec:
         - name: client
           image: "{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}"
           imagePullPolicy: {{ .Values.client.image.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 8080
               name: http
+          resources:
+            {{- toYaml .Values.client.resources | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /

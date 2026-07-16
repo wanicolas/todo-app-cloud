@@ -119,17 +119,23 @@ npm run typecheck              # tsc --noEmit
 npm run format-check           # Prettier
 ```
 
-## CI/CD
+## CI/CD & DevSecOps
 
-5 pipelines GitHub Actions dans `.github/workflows/` :
+L'architecture s'appuie sur 2 pipelines unifiés dans `.github/workflows/` :
 
-| Pipeline       | Déclencheur            | Contenu                                               |
-| -------------- | ---------------------- | ----------------------------------------------------- |
-| **ci-backend** | push/PR sur `backend/` | lint, typecheck, format, build, tests avec couverture |
-| **ci-client**  | push/PR sur `client/`  | lint, typecheck, format, build, tests avec couverture |
-| **ci-auth**    | push/PR sur `auth/`    | lint, typecheck, format, build, tests avec couverture |
-| **ci-e2e**     | PR vers main/develop   | Docker Compose + Playwright                           |
-| **ci-trivy**   | push main/develop      | Scan de vulnérabilités Trivy sur les images Docker    |
+| Pipeline | Déclencheur | Contenu |
+| --- | --- | --- |
+| **ci.yml** | push/PR sur n'importe quelle branche | Orchestration intelligente (Lint/Typecheck → Build Docker avec cache Buildx → Scans Trivy → Tests E2E Playwright). |
+| **cd.yml** | push sur `develop` ou tag `v*` | Build/Scan matriciel (parallèle) des images → Push ACR → Déploiement Helm sur AKS (OIDC sans mot de passe). |
+
+### Cloud & Kubernetes Hardening (Azure / AKS)
+
+L'infrastructure a été durcie pour respecter les standards **Zero Trust** et **DevSecOps** :
+- **Isolation Réseau** : La base de données MySQL est isolée dans un réseau privé (Azure VNet + Private DNS Zone) et n'est plus accessible depuis Internet.
+- **Gestion des Secrets** : Azure Key Vault utilise désormais **Azure RBAC** avec l'identité CSI du cluster, et la protection anti-suppression (purge protection) est activée.
+- **Sécurité des Pods** : Les conteneurs tournent en mode **Non-Root** (`runAsNonRoot: true`) et sans escalade de privilèges.
+- **Pare-feu Kubernetes** : Des **NetworkPolicies** stricts sont appliqués. Seul le reverse-proxy (Nginx) peut recevoir du trafic public et router vers les microservices.
+- **Haute Disponibilité** : Tous les services sont configurés avec **HPA** (autoscaling dynamique) et **PDB** (Pod Disruption Budgets) pour garantir le Zéro-Downtime lors des maintenances Azure.
 
 ## Variables d'environnement
 
