@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v7
+        uses: actions/checkout@7.0.0
 
       # 1. Définition dynamique des variables d'environnement selon le déclencheur
       - name: Set Environment Variables
@@ -105,33 +105,21 @@ jobs:
 
       # 5. Scan Backend Image with Trivy
       - name: Scan Backend Image
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: ./.github/actions/trivy-scan
         with:
           image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }}
-          format: table
-          severity: CRITICAL,HIGH
-          exit-code: 1
-          ignore-unfixed: true
 
       # 6. Scan Client Image with Trivy
       - name: Scan Client Image
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: ./.github/actions/trivy-scan
         with:
           image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/client:${{ env.IMAGE_TAG }}
-          format: table
-          severity: CRITICAL,HIGH
-          exit-code: 1
-          ignore-unfixed: true
 
       # 7. Scan Auth Image with Trivy
       - name: Scan Auth Image
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: ./.github/actions/trivy-scan
         with:
           image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/auth:${{ env.IMAGE_TAG }}
-          format: table
-          severity: CRITICAL,HIGH
-          exit-code: 1
-          ignore-unfixed: true
 
       # 9. Retrieve AKS Cluster Credentials
       - name: Get AKS Credentials
@@ -142,7 +130,7 @@ jobs:
       - name: Deploy with Helm
         run: |
           if [ "${{ env.DEPLOY_ENV }}" = "production" ]; then
-            helm upgrade --install todo-app ./k8s/todo-app \
+            helm upgrade --install todo-app ./k8s/todo-app --atomic \
               --namespace ${{ env.NAMESPACE }} \
               --create-namespace \
               -f ./k8s/todo-app/${{ env.VALUES_FILE }} \
@@ -158,7 +146,7 @@ jobs:
               --set keyvault.tenantId="${{ secrets.KEYVAULT_TENANT_ID }}" \
               --set keyvault.clientId="${{ secrets.KEYVAULT_CLIENT_ID }}"
           else
-            helm upgrade --install todo-app ./k8s/todo-app \
+            helm upgrade --install todo-app ./k8s/todo-app --atomic \
               --namespace ${{ env.NAMESPACE }} \
               --create-namespace \
               -f ./k8s/todo-app/${{ env.VALUES_FILE }} \
