@@ -9,40 +9,27 @@ on:
 jobs:
   trivy:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [backend, client, auth]
     steps:
       - uses: actions/checkout@v7
 
-      - name: Build backend image
-        run: docker build -t todo-backend:scan ./backend
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.2.0
 
-      - name: Build client image
-        run: docker build -t todo-client:scan ./client
+      - name: Build ${{ matrix.service }} image
+        uses: docker/build-push-action@v7.3.0
+        with:
+          context: ./${{ matrix.service }}
+          load: true
+          tags: todo-${{ matrix.service }}:scan
+          cache-from: type=gha,scope=${{ matrix.service }}
 
-      - name: Build auth image
-        run: docker build -t todo-auth:scan ./auth
-
-      - name: Scan backend image
+      - name: Scan ${{ matrix.service }} image
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: todo-backend:scan
-          format: table
-          severity: CRITICAL,HIGH
-          exit-code: 1
-          ignore-unfixed: true
-
-      - name: Scan client image
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: todo-client:scan
-          format: table
-          severity: CRITICAL,HIGH
-          exit-code: 1
-          ignore-unfixed: true
-
-      - name: Scan auth image
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: todo-auth:scan
+          image-ref: todo-${{ matrix.service }}:scan
           format: table
           severity: CRITICAL,HIGH
           exit-code: 1
