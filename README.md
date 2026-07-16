@@ -13,7 +13,7 @@ Projet réalisé dans le cadre du module "Développer pour le cloud" — M2 Dev 
 - **Query builder** : Knex.js (migrations versionnées, support multi-dialect)
 - **Proxy** : Traefik v3.6
 - **Tests** : Jest (backend + auth), Vitest (client), Playwright (E2E)
-- **CI** : GitHub Actions (5 pipelines : backend, client, auth, E2E, Trivy)
+- **CI** : GitHub Actions (2 pipelines centralisés : ci.yml et cd.yml)
 
 ## Prérequis
 
@@ -123,14 +123,15 @@ npm run format-check           # Prettier
 
 L'architecture s'appuie sur 2 pipelines unifiés dans `.github/workflows/` :
 
-| Pipeline | Déclencheur | Contenu |
-| --- | --- | --- |
+| Pipeline   | Déclencheur                          | Contenu                                                                                                            |
+| ---------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
 | **ci.yml** | push/PR sur n'importe quelle branche | Orchestration intelligente (Lint/Typecheck → Build Docker avec cache Buildx → Scans Trivy → Tests E2E Playwright). |
-| **cd.yml** | push sur `develop` ou tag `v*` | Build/Scan matriciel (parallèle) des images → Push ACR → Déploiement Helm sur AKS (OIDC sans mot de passe). |
+| **cd.yml** | push sur `develop` ou tag `v*`       | Build/Scan matriciel (parallèle) des images → Push ACR → Déploiement Helm sur AKS (OIDC sans mot de passe).        |
 
 ### Cloud & Kubernetes Hardening (Azure / AKS)
 
 L'infrastructure a été durcie pour respecter les standards **Zero Trust** et **DevSecOps** :
+
 - **Isolation Réseau** : La base de données MySQL est isolée dans un réseau privé (Azure VNet + Private DNS Zone) et n'est plus accessible depuis Internet.
 - **Gestion des Secrets** : Azure Key Vault utilise désormais **Azure RBAC** avec l'identité CSI du cluster, et la protection anti-suppression (purge protection) est activée.
 - **Sécurité des Pods** : Les conteneurs tournent en mode **Non-Root** (`runAsNonRoot: true`) et sans escalade de privilèges.
@@ -186,7 +187,7 @@ laisser aucune donnée orpheline.
 │   ├── src/
 │   │   ├── routes/           # Controllers (factories avec injection du service)
 │   │   ├── service/          # TodoService (logique métier)
-│   │   ├── repository/       # KnexRepository, InMemoryRepository + factory
+│   │   ├── repository/       # KnexRepository + factory (SQLite / MySQL)
 │   │   ├── migrations/       # Migrations Knex (schéma BDD)
 │   │   └── types.ts          # Interfaces TodoItem, TodoRepository
 │   ├── spec/                 # Tests Jest (unitaires + intégration + service)
@@ -210,9 +211,9 @@ laisser aucune donnée orpheline.
 │   └── Dockerfile            # Multi-stage (dev, build, production non-root)
 ├── e2e/                      # Tests Playwright (E2E)
 ├── k8s/todo-app/             # Chart Helm unifié (client, backend, auth, proxy, mysql-local, secrets CSI)
-├── .github/workflows/        # CI GitHub Actions (5 pipelines, scan Trivy adapté)
+├── .github/workflows/        # CI/CD GitHub Actions unifiée (pipelines ci.yml et cd.yml)
 ├── docs/
-│   ├── adr/                  # 11 ADR (décisions techniques)
+│   ├── adr/                  # ADR (décisions techniques)
 │   ├── context_map.md        # Cartographie des contextes métier
 │   ├── glossaire.md          # Glossaire technique des termes
 │   ├── deployment_procedure.md # Guide de déploiement pas-à-pas (Local & Azure AKS)
@@ -225,8 +226,7 @@ laisser aucune donnée orpheline.
 
 ```
 Routes (controllers)  →  TodoService  →  TodoRepository (interface)
-                                              ├── KnexRepository (SQLite / MySQL via Knex.js)
-                                              └── InMemoryRepository (tests)
+                                              └── KnexRepository (SQLite / MySQL via Knex.js)
 ```
 
 L'injection de dépendances se fait par constructeur, sans framework. Le câblage est dans `index.ts` :
