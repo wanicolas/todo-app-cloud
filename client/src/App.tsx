@@ -10,6 +10,8 @@ import { ProtectedRoute } from './auth/ProtectedRoute';
 import { Account } from './pages/Account';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function TodoPage() {
     const { user, logout } = useAuth();
@@ -46,6 +48,7 @@ function TodoPage() {
 function App() {
     return (
         <Container as="main">
+            <ToastContainer position="top-right" autoClose={3000} />
             <Row>
                 <Col md={{ offset: 3, span: 6 }}>
                     <Routes>
