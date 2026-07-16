@@ -67,7 +67,7 @@ auth:
 reverseProxy:
   replicaCount: 1
   image:
-    repository: nginx
+    repository: nginxinc/nginx-unprivileged
     tag: alpine
     pullPolicy: Always
   service:
@@ -110,6 +110,7 @@ autoscaling:
   minReplicas: 2
   maxReplicas: 5
   targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
 
 # Pod Disruption Budget (PDB)
 pdb:

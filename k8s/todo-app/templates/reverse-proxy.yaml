@@ -122,6 +122,8 @@ spec:
           imagePullPolicy: {{ .Values.reverseProxy.image.pullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
           ports:
             - containerPort: 80
               name: http

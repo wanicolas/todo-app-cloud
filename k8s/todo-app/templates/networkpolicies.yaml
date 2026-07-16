@@ -41,3 +41,33 @@ spec:
     - podSelector:
         matchLabels:
           app: reverse-proxy
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - ports:
+    - protocol: UDP
+      port: 53
+  - to:
+    - ipBlock:
+        cidr: 10.0.2.0/24
+  - to:
+    - podSelector:
+        matchLabels:
+          app: backend
+  - to:
+    - podSelector:
+        matchLabels:
+          app: client
+  - to:
+    - podSelector:
+        matchLabels:
+          app: auth
