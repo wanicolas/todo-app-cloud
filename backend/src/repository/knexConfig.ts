@@ -15,8 +15,9 @@ function getKnexConfig(sqliteLocation?: string): Knex.Config {
         loadExtensions: ['.ts', '.js'],
     };
 
-    if (process.env.MYSQL_HOST) {
-        return {
+    console.log('NODE_ENV is:', process.env.NODE_ENV);
+    if (process.env.NODE_ENV !== 'test' && process.env.MYSQL_HOST) {
+        const config: Knex.Config = {
             client: 'mysql2',
             connection: {
                 host: readSecret('MYSQL_HOST', 'MYSQL_HOST_FILE'),
@@ -32,6 +33,8 @@ function getKnexConfig(sqliteLocation?: string): Knex.Config {
             pool: { min: 0, max: 5 },
             migrations: migrationConfig,
         };
+        console.log('Using MySQL:', (config.connection as { host?: string }).host);
+        return config;
     }
 
     const filename =
@@ -44,12 +47,14 @@ function getKnexConfig(sqliteLocation?: string): Knex.Config {
         fs.mkdirSync(dirName, { recursive: true });
     }
 
-    return {
+    const config = {
         client: 'sqlite3',
         connection: { filename },
         useNullAsDefault: true,
         migrations: migrationConfig,
     };
+    console.log('Using SQLite:', filename);
+    return config;
 }
 
 export { getKnexConfig };

@@ -14,7 +14,7 @@ export default function makeUpdateItem(service: TodoService) {
             return res.status(400).send({ error: 'Invalid item data' });
         }
         const item = await service.updateItem(
-            (req as any).userId,
+            (req as unknown as { userId: string }).userId,
             req.params.id as string,
             {
                 name: name.trim(),

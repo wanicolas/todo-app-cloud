@@ -2,14 +2,14 @@ import knex, { Knex } from 'knex';
 import { User, UserRepository } from '../types';
 import { logger } from '../utils/logger';
 
-function mapRow(row: any): User | undefined {
+function mapRow(row: Record<string, unknown> | undefined): User | undefined {
     if (!row) return undefined;
     return {
-        id: row.id,
-        email: row.email,
-        passwordHash: row.password_hash,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
+        id: row.id as string,
+        email: row.email as string,
+        passwordHash: row.password_hash as string,
+        createdAt: row.created_at as string,
+        updatedAt: row.updated_at as string,
     };
 }
 
@@ -28,7 +28,7 @@ class KnexUserRepository implements UserRepository {
             try {
                 await this.db.migrate.latest();
                 if (process.env.NODE_ENV !== 'test') {
-                    const client = (this.db.client as any).config.client;
+                    const client = (this.db.client as { config: { client: string } }).config.client;
                     logger.info(`Connected to ${client} database via Knex`);
                 }
                 return;

@@ -1,5 +1,5 @@
 export const logger = {
-    info(message: string, meta?: Record<string, any>) {
+    info(message: string, meta?: Record<string, unknown>) {
         console.log(
             JSON.stringify({
                 timestamp: new Date().toISOString(),
@@ -9,7 +9,7 @@ export const logger = {
             }),
         );
     },
-    warn(message: string, meta?: Record<string, any>) {
+    warn(message: string, meta?: Record<string, unknown>) {
         console.warn(
             JSON.stringify({
                 timestamp: new Date().toISOString(),
@@ -19,7 +19,7 @@ export const logger = {
             }),
         );
     },
-    error(message: string, err?: any, meta?: Record<string, any>) {
+    error(message: string, err?: unknown, meta?: Record<string, unknown>) {
         const errorDetail =
             err instanceof Error
                 ? {

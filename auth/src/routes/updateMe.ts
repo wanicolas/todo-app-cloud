@@ -5,7 +5,7 @@ export default function makeUpdateMe(service: AuthService) {
     return async (req: Request, res: Response) => {
         try {
             const { email, password } = req.body;
-            const user = await service.updateProfile((req as any).userId, {
+            const user = await service.updateProfile((req as Request & { userId: string }).userId, {
                 email,
                 password,
             });

@@ -4,7 +4,7 @@ import { TodoService } from '../service/TodoService';
 
 export default function makeGetItems(service: TodoService) {
     return async (req: Request, res: Response) => {
-        const items = await service.getAllItems((req as any).userId);
+        const items = await service.getAllItems((req as unknown as { userId: string }).userId);
         res.send(items);
     };
 }

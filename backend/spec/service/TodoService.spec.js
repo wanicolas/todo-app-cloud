@@ -5,6 +5,8 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 
+delete process.env.MYSQL_HOST;
+
 const USER = 'user-1';
 const OTHER_USER = 'user-2';
 

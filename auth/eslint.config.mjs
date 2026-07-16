@@ -7,10 +7,4 @@ export default tseslint.config(
     {
         ignores: ['dist/', 'node_modules/', 'spec/'],
     },
-    {
-        rules: {
-            '@typescript-eslint/no-require-imports': 'off',
-            '@typescript-eslint/no-explicit-any': 'off',
-        },
-    },
 );
