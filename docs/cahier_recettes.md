@@ -1,6 +1,4 @@
-# Cahier de Recettes - Todo App Cloud
-
-**Statut global** : Validé
+# Cahier de Recettes
 
 Ce document recense l'ensemble des scénarios de test exécutés pour valider le bon fonctionnement technique, fonctionnel et de sécurité de l'application.
 

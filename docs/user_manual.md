@@ -1,4 +1,4 @@
-# Manuel d'Utilisation - Todo App Cloud
+# Manuel d'Utilisation
 
 Ce manuel décrit les fonctionnalités de l'application **Todo App Cloud** et la manière de les utiliser au quotidien.
 

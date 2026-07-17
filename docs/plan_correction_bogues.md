@@ -1,4 +1,4 @@
-# Plan de Correction des Bogues - Todo App Cloud
+# Plan de Correction des Bogues
 
 Ce document décrit les anomalies identifiées lors de la phase de recette technique et applicative du projet, ainsi que les correctifs appliqués.
 

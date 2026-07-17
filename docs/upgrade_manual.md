@@ -1,4 +1,4 @@
-# Manuel de Mise à Jour - Todo App Cloud
+# Manuel de Mise à Jour
 
 Ce document décrit les procédures pour appliquer des mises à jour applicatives et d'infrastructure sur le projet **Todo App Cloud** en production.
 

@@ -1,4 +1,4 @@
-# Procédure de Déploiement - Todo App Cloud
+# Procédure de Déploiement
 
 Cette procédure explique pas à pas comment déployer l'infrastructure sur Azure, packager et pousser les images de conteneurs, et installer l'application sur le cluster AKS à l'aide de Helm.
 
