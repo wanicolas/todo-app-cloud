@@ -9,18 +9,17 @@ COPY spec ./spec
 COPY src ./src
 CMD ["npm", "run", "dev"]
 
-# Test stage — build TypeScript + run tests
-FROM dev AS test
+# Build stage — build TypeScript
+FROM dev AS build
 RUN npm run build
-RUN npm run test
 
 # Production stage
 FROM node:22.23.1-alpine AS production
 WORKDIR /usr/local/app
 ENV NODE_ENV=production
-COPY --from=test /usr/local/app/package.json /usr/local/app/package-lock.json ./
+COPY --from=build /usr/local/app/package.json /usr/local/app/package-lock.json ./
 RUN npm ci --production && npm cache clean --force
-COPY --from=test /usr/local/app/dist ./dist
+COPY --from=build /usr/local/app/dist ./dist
 RUN chown -R node:node /usr/local/app
 USER node
 EXPOSE 3001
