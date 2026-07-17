@@ -18,6 +18,9 @@
   #text(size: 12pt, weight: "bold")[#it.body]
 ]
 
+// Style des liens
+#show link: set text(fill: rgb("#0055cc"))
+
 // Style des blocs de code
 #show raw: set text(font: "JetBrains Mono", size: 9pt)
 #show raw.where(block: true): it => block(
@@ -39,8 +42,8 @@
 // -------------------------------------------------------------
 #page(header: none, footer: none)[
   #align(center + horizon)[
-    #rect(width: 100%, height: 2pt, fill: rgb("#000000"))
-    #v(2em)
+    #text(size: 14pt, weight: "light")[Nicolas Walter]
+    #v(2pt)
     #text(size: 26pt, weight: "bold")[Concevoir et développer des applications logicielles]
     #v(1em)
     #text(size: 14pt, style: "italic")[Projet : Todo App Cloud]
@@ -54,8 +57,6 @@
       *Date :* 20 Juillet 2026 \
       *Réf. Évaluation :* Bloc 2 (Certification RNCP39583)
     ]
-    #v(3em)
-    #rect(width: 100%, height: 2pt, fill: rgb("#000000"))
   ]
 ]
 
@@ -69,23 +70,45 @@
       text(size: 8.5pt, fill: rgb("#777777"), font: "Hanken Grotesk")[Dossier Technique (Bloc 2) — Todo App Cloud],
       text(size: 8.5pt, fill: rgb("#777777"), font: "Hanken Grotesk")[Nicolas Walter],
     )
-    #v(0.5em)
     #line(length: 100%, stroke: 0.5pt + rgb("#d0d0d0"))
   ],
   footer: [
     #line(length: 100%, stroke: 0.5pt + rgb("#d0d0d0"))
-    #v(0.5em)
-    #align(center)[
-      #context {
-        let page-num = counter(page).get().first()
-        let total-pages = counter(page).final().first()
-        text(size: 9pt, fill: rgb("#777777"), font: "Hanken Grotesk")[
-          Page #page-num sur #total-pages
-        ]
-      }
-    ]
+    #grid(
+      columns: (1fr, 1fr, 1fr),
+      align(left)[#text(size: 8pt, fill: rgb("#999999"), font: "Hanken Grotesk")[Document d'évaluation]],
+      align(center)[
+        #context {
+          let page-num = counter(page).get().first()
+          let total-pages = counter(page).final().first()
+          text(size: 9pt, fill: rgb("#777777"), font: "Hanken Grotesk")[
+            Page #page-num sur #total-pages
+          ]
+        }
+      ],
+      align(right)[#text(size: 8pt, fill: rgb("#999999"), font: "Hanken Grotesk")[Année 2025-2026]],
+    )
   ],
 )
+
+// -------------------------------------------------------------
+// RÉSUMÉ EXÉCUTIF
+// -------------------------------------------------------------
+#page(header: none)[
+  #v(2em)
+  #text(size: 18pt, weight: "bold")[Résumé Exécutif]
+  #v(1.5em)
+  Ce dossier technique détaille la refonte Cloud-Native et DevSecOps de l'application #link("https://github.com/docker/getting-started-todo-app")[Todo App] des tutoriels Docker. Réalisé dans le cadre scolaire durant les cours "Développer pour le cloud" et amélioré pour la certification RNCP (Bloc 2), ce projet démontre la maîtrise d'une architecture microservices complète.
+
+  *Stack Technique & Approche :*
+  - *Développement :* Frontend React, Backend et Auth en Node.js (Express/Knex), avec typage strict (TypeScript).
+  - *Infrastructure (IaC) :* Provisionnement Azure via Terraform (Cluster AKS, Registre ACR, KeyVault, MySQL Managé).
+  - *Sécurité (Zero Trust) :* Authentification OIDC (sans mot de passe), RBAC Azure, secrets montés via CSI driver, réseaux virtuels (VNet) et bases de données isolées d'Internet.
+  - *Qualité & CI/CD :* Couverture par tests unitaires (Jest, Vitest) et End-to-End (Playwright), scans de vulnérabilités (Trivy, Dependabot) et déploiement continu automatisé (GitHub Actions) via Helm.
+
+  Le résultat est une solution logicielle hautement disponible, résiliente, conforme aux exigences de sécurité de l'OWASP Top 10 et aux standards d'accessibilité.
+  #pagebreak()
+]
 
 // -------------------------------------------------------------
 // TABLE DES MATIÈRES
@@ -115,7 +138,7 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
 Dans cette section, nous présentons la structure globale du monorepo, l'organisation en microservices, les technologies utilisées et le détail de notre cartographie applicative.
 
-#render(read("docs/context_map.md"))
+#render(read("../context_map.md"))
 
 #pagebreak()
 
@@ -126,7 +149,7 @@ Nous décrivons ici la gestion des environnements locaux et cloud, ainsi que la 
 == Déploiement multi-environnement
 Nous avons configuré des profils distincts pour isoler le Staging (préproduction économique) et la Production (hautement disponible et sécurisée). Les détails des configurations Helm de ces environnements sont décrits ci-dessous.
 
-#render(read("docs/performance_criteria.md"))
+#render(read("../performance_criteria.md"))
 
 #pagebreak()
 
@@ -134,7 +157,7 @@ Nous avons configuré des profils distincts pour isoler le Staging (préproducti
 
 Conformément à la compétence *C2.2.3*, nous présentons ici les standards choisis (RGAA/OPQUAST) et les mesures prises pour rendre l'application accessible aux personnes en situation de handicap.
 
-#render(read("docs/accessibility.md"))
+#render(read("../accessibility.md"))
 
 #pagebreak()
 
@@ -142,7 +165,7 @@ Conformément à la compétence *C2.2.3*, nous présentons ici les standards cho
 
 Nous détaillons ci-dessous le protocole complet de déploiement continu automatisé sur Azure AKS, sécurisé par authentification OIDC.
 
-#render(read("docs/deployment_procedure.md"))
+#render(read("../deployment_procedure.md"))
 
 #pagebreak()
 
@@ -150,7 +173,7 @@ Nous détaillons ci-dessous le protocole complet de déploiement continu automat
 
 Cette section présente le cahier de recettes validant les fonctionnalités, la sécurité applicative (OWASP) et les performances du logiciel.
 
-#render(read("docs/cahier_recettes.md"))
+#render(read("../cahier_recettes.md"))
 
 #pagebreak()
 
@@ -158,7 +181,7 @@ Cette section présente le cahier de recettes validant les fonctionnalités, la 
 
 Nous décrivons le registre des bogues identifiés lors de la recette applicative et les mesures de correction appliquées.
 
-#render(read("docs/plan_correction_bogues.md"))
+#render(read("../plan_correction_bogues.md"))
 
 #pagebreak()
 
@@ -167,20 +190,47 @@ Nous décrivons le registre des bogues identifiés lors de la recette applicativ
 Pour assurer la traçabilité et le suivi par les équipes opérationnelles, nous fournissons ici le manuel d'utilisation (incluant les aspects RGPD/droit à l'oubli) et le manuel de mise à jour/rollback de l'application.
 
 == Manuel d'Utilisation
-#render(read("docs/user_manual.md"))
+#render(read("../user_manual.md"))
 
 #v(2em)
 
 == Manuel de Mise à Jour et Exploitation
-#render(read("docs/upgrade_manual.md"))
+#render(read("../upgrade_manual.md"))
 
 #v(2em)
 
 == Runbooks d'Exploitation
-#render(read("docs/runbooks.md"))
+#render(read("../runbooks.md"))
 
 #v(2em)
 
 == Glossaire Technique
-#render(read("docs/glossaire.md"))
+#render(read("../glossaire.md"))
 
+// -------------------------------------------------------------
+// PAGE DE FIN (4ème de couverture)
+// -------------------------------------------------------------
+#pagebreak()
+#page(header: none, footer: none)[
+  #align(center + horizon)[
+    #text(size: 20pt, weight: "bold", fill: rgb("#1a1a1a"))[Merci de votre lecture.]
+    #v(3em)
+    #rect(width: 30%, height: 0.5pt, fill: rgb("#888888"))
+    #v(3em)
+    #text(size: 12pt)[
+      *Candidat :* Nicolas Walter \
+      *Projet :* Todo App Cloud \
+      *Certification :* Bloc 2 - RNCP39583
+    ]
+    #v(2em)
+    #link("https://github.com/wanicolas/todo-app-cloud")[#text(
+      size: 11pt,
+    )[Consulter le code source sur GitHub]]
+
+    #v(6em)
+    #text(size: 9pt, fill: rgb("#888888"))[
+      Ce document a été généré automatiquement à partir de la documentation interne en Markdown du projet \
+      (Approche _Documentation as Code_) et compilé avec le moteur de composition #link("https://typst.app")[Typst].
+    ]
+  ]
+]
