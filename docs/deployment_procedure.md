@@ -4,7 +4,7 @@ Cette procédure explique pas à pas comment déployer l'infrastructure sur Azur
 
 ---
 
-## 1. Prérequis
+## Prérequis
 
 Assurez-vous de disposer des outils suivants sur votre poste :
 
@@ -15,7 +15,7 @@ Assurez-vous de disposer des outils suivants sur votre poste :
 
 ---
 
-## 2. Étape 1 : Provisionner l'infrastructure sur Azure (Terraform)
+## Étape 1 : Provisionner l'infrastructure sur Azure (Terraform)
 
 Accédez au dossier Terraform et initialisez le projet :
 
@@ -46,7 +46,7 @@ cd ..
 
 ---
 
-## 3. Étape 2 : Construire et pousser les images Docker (ACR)
+## Étape 2 : Construire et pousser les images Docker (ACR)
 
 Connectez-vous au registre Azure Container Registry (ACR) :
 
@@ -77,9 +77,9 @@ docker push <NOM_DE_VOTRE_ACR>.azurecr.io/client:latest
 
 ---
 
-## 4. Étape 3 : Déploiement de l'application (Helm)
+## Étape 3 : Déploiement de l'application (Helm)
 
-### A. Déploiement Local (pour tester sur Docker Desktop / minikube)
+### Déploiement Local (pour tester sur Docker Desktop / minikube)
 
 Assurez-vous que votre contexte Kubernetes pointe sur votre cluster local :
 
@@ -88,7 +88,7 @@ Assurez-vous que votre contexte Kubernetes pointe sur votre cluster local :
 helm upgrade --install todo-app ./k8s/todo-app -f ./k8s/todo-app/values-test.yaml
 ```
 
-### B. Déploiement en Production (sur Azure AKS)
+### Déploiement en Production (sur Azure AKS)
 
 Récupérez les identifiants de connexion de votre cluster AKS :
 
@@ -124,7 +124,7 @@ helm upgrade --install todo-app ./k8s/todo-app \
 
 ---
 
-## 5. Étape 4 : Vérification et accès
+## Étape 4 : Vérification et accès
 
 Vérifiez l'état de démarrage de vos pods :
 
@@ -142,15 +142,15 @@ Visitez l'adresse `https://<IP_PUBLIQUE_REVERSE_PROXY>` (acceptez l'avertissemen
 
 ---
 
-## 6. Étape 5 : Déploiement Continu (GitHub Actions)
+## Étape 5 : Déploiement Continu (GitHub Actions)
 
 Pour automatiser la construction des images, la validation de sécurité et le déploiement sur AKS, un workflow de CD automatisé est configuré dans le dépôt : [.github/workflows/cd.yml](file:///.github/workflows/cd.yml).
 
-### A. Sécurisation par Authentification OIDC (OpenID Connect)
+### Sécurisation par Authentification OIDC (OpenID Connect)
 
 Conformément aux bonnes pratiques DevSecOps et de sécurité Cloud (Entra ID / Azure AD), le pipeline n'utilise **aucun mot de passe ou secret d'API statique**. Il utilise une fédération d'identité temporaire et gratuite.
 
-#### 1. Création de l'application d'authentification sur Azure
+#### Création de l'application d'authentification sur Azure
 
 Générez un Service Principal sur votre abonnement Azure :
 
@@ -160,7 +160,7 @@ az ad sp create-for-rbac --name "github-actions-aks-cd" \
   --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>
 ```
 
-#### 2. Configuration de la fédération d'identité (Trust Relationship)
+#### Configuration de la fédération d'identité (Trust Relationship)
 
 Dans le portail Azure :
 
@@ -171,7 +171,7 @@ Dans le portail Azure :
    - Pour la préproduction (Staging) : choisissez l'entité **Branch** et saisissez `main`.
    - Pour la production : choisissez l'entité **Tag** et saisissez le filtre `v*` (ex: `v1.0.0`).
 
-### B. Configuration des Secrets GitHub
+### Configuration des Secrets GitHub
 
 Ajoutez les variables publiques et identifiants suivants dans les paramètres de votre dépôt GitHub (Settings > Secrets and variables > Actions) :
 
@@ -188,7 +188,7 @@ Ajoutez les variables publiques et identifiants suivants dans les paramètres de
 | `KEYVAULT_TENANT_ID`    | Identifiant du Tenant Azure Active Directory (requis uniquement pour la prod).            |
 | `KEYVAULT_CLIENT_ID`    | Client ID de l'identité managée du Secrets Store CSI (requis uniquement pour la prod).    |
 
-### C. Déclenchement du Déploiement (GitFlow & GitOps)
+### Déclenchement du Déploiement (GitFlow & GitOps)
 
 Le pipeline de CD se déclenche automatiquement selon les événements du dépôt Git ou sur demande :
 

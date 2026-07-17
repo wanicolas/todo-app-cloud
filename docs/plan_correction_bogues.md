@@ -2,7 +2,7 @@
 
 Ce document décrit les anomalies identifiées lors de la phase de recette technique et applicative du projet, ainsi que les correctifs appliqués.
 
-## 1. Suivi et Qualification des Anomalies
+## Suivi et Qualification des Anomalies
 
 Nous utilisons une classification par sévérité pour traiter les bogues :
 
@@ -10,7 +10,7 @@ Nous utilisons une classification par sévérité pour traiter les bogues :
 - **Majeur** : Une fonctionnalité métier essentielle échoue ou comporte une faille de sécurité importante.
 - **Mineur** : Problème esthétique ou d'utilisabilité sans impact sur la stabilité.
 
-## 2. Registre des Bogues et Correctifs Appliqués
+## Registre des Bogues et Correctifs Appliqués
 
 ### B-01 : Crash des tests en environnement Docker (SQLite3 / GLIBC)
 
@@ -36,7 +36,7 @@ Nous utilisons une classification par sévérité pour traiter les bogues :
 - **Analyse** : Ce fallback automatique permettait à un attaquant de forger de faux jetons en production si le fichier secret n'était pas monté correctement dans Kubernetes.
 - **Correction** : Modification de `AuthService.ts` pour lever explicitement une exception critique (`throw Error`) si la configuration de production est invalide, empêchant le conteneur de démarrer et alertant l'équipe d'exploitation.
 
-## 3. Plan d'Amélioration Continue (Maintien en Condition)
+## Plan d'Amélioration Continue (Maintien en Condition)
 
 Pour éviter la régression de la qualité du code :
 

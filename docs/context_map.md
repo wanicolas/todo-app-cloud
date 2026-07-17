@@ -17,12 +17,12 @@ graph TD
 
 ## Bounded Contexts (Contextes Métier)
 
-### 1. Contexte d'Authentification (Auth Service)
+### Contexte d'Authentification (Auth Service)
 *   **Responsabilité** : Gestion du cycle de vie des comptes utilisateurs (création, connexion, modifications du profil) et conformité RGPD (portabilité des données utilisateur et suppression définitive du compte).
 *   **Modèle de données** : Gère la table `users` dans sa base de données dédiée (`auth`).
 *   **Langage omniprésent** : *User, Email, Password Hash, Register, Login, Export, Delete Account.*
 
-### 2. Contexte des Tâches (Todo Service / Backend)
+### Contexte des Tâches (Todo Service / Backend)
 *   **Responsabilité** : Gestion de la liste de tâches des utilisateurs (création, mise à jour de l'état complété, filtrage, suppression globale).
 *   **Modèle de données** : Gère la table `todo_items` dans sa base de données dédiée (`todos`).
 *   **Langage omniprésent** : *Todo Item, Task Name, Completed State, Owner (user_id).*

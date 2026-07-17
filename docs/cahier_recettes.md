@@ -4,7 +4,7 @@
 
 Ce document recense l'ensemble des scénarios de test exécutés pour valider le bon fonctionnement technique, fonctionnel et de sécurité de l'application.
 
-## 1. Stratégie de Test & Couverture
+## Stratégie de Test & Couverture
 
 L'application s'appuie sur une pyramide des tests automatisés et manuels :
 
@@ -13,7 +13,7 @@ L'application s'appuie sur une pyramide des tests automatisés et manuels :
 3. **Tests de Charge & Performance** : Script k6 simulant des parcours utilisateurs sous charge réseau.
 4. **Tests de Sécurité** : Scans de vulnérabilités Trivy (images Docker) et Dependabot (code).
 
-## 2. Matrice des Scénarios de Test Fonctionnels
+## Matrice des Scénarios de Test Fonctionnels
 
 | ID        | Titre du Scénario            | Conditions préalables              | Description des actions                                                                            | Résultat attendu                                                                                  | Statut   |
 | :-------- | :--------------------------- | :--------------------------------- | :------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ | :------- |
@@ -28,7 +28,7 @@ L'application s'appuie sur une pyramide des tests automatisés et manuels :
 | **TC-09** | Isolation des données (IDOR) | Deux utilisateurs A et B actifs    | L'utilisateur A tente de lire ou modifier les tâches de l'utilisateur B via des requêtes directes. | Le serveur renvoie une erreur `403 Forbidden` ou `404 Not Found`.                                 | **PASS** |
 | **TC-10** | Suppression de compte (RGPD) | Utilisateur avec 5 tâches en base  | Aller dans "Mon compte" et cliquer sur "Supprimer mon compte".                                     | L'utilisateur est supprimé d'Auth, et toutes ses tâches associées sont purgées (droit à l'oubli). | **PASS** |
 
-## 3. Scénarios de Test de Sécurité (DevSecOps)
+## Scénarios de Test de Sécurité (DevSecOps)
 
 | ID         | Cible de Sécurité            | Outil / Procédure              | Risque analysé                                                | Résultat constaté                                                       | Statut   |
 | :--------- | :--------------------------- | :----------------------------- | :------------------------------------------------------------ | :---------------------------------------------------------------------- | :------- |
@@ -36,7 +36,7 @@ L'application s'appuie sur une pyramide des tests automatisés et manuels :
 | **SEC-02** | Injection de dépendances     | Scan Trivy en pipeline CD      | Paquets ou images contenant des vulnérabilités HIGH/CRITICAL. | Build bloqué en cas de faille exploitable non corrigée.                 | **PASS** |
 | **SEC-03** | Brute force sur mot de passe | Requêtes répétées sur `/login` | Épuisement de CPU ou découverte de mot de passe.              | Le middleware de rate-limiting bloque l'IP après 5 tentatives échouées. | **PASS** |
 
-## 4. Scénarios de Test de Performance & SLA
+## Scénarios de Test de Performance & SLA
 
 | ID          | Métrique testée                         | Outil                         | Seuil (SLA)         | Résultat constaté            | Statut   |
 | :---------- | :-------------------------------------- | :---------------------------- | :------------------ | :--------------------------- | :------- |
