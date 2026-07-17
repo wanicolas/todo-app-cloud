@@ -1,6 +1,8 @@
-# ADR-001 : GitHub Flow simplifié
+# ADR-001 : Choix du Git Flow et Stratégie de Branches
 
-**Date** : mars 2026
+> **Note** : Ce document est **obsolète**. Nous avons migré vers une approche **Trunk-Based Development (GitHub Flow)**. La branche `develop` a été supprimée. Toutes les _Pull Requests_ de _Feature Branches_ ciblent désormais directement `main`.
+
+**Date** : avril 2026
 **Statut** : Accepté
 
 ## Contexte
@@ -11,7 +13,7 @@ Git Flow classique (avec release, hotfix, etc.) est trop lourd pour un projet de
 
 ## Décision
 
-On utilise un GitHub Flow simplifié :
+On utilise un GitFlow simplifié :
 
 - `main` = branche stable, ce qui est livrable
 - `develop` = branche de dev, où on merge les features

@@ -2,7 +2,7 @@ name: CD Deploy to AKS
 
 on:
   push:
-    branches: [develop] # Déploiement automatique sur Staging lors de push sur develop
+    branches: [main] # Déploiement automatique sur Staging lors de push sur main
     tags: ["v*"] # Déploiement automatique sur Production lors d'un tag de version v* (ex: v1.0.0)
   workflow_dispatch: # Déclenchement manuel
     inputs:
@@ -40,14 +40,14 @@ jobs:
             TAG="${{ github.ref_name }}"
             CACHE_SCOPE="prod"
           else
-            TAG="develop-${{ github.sha }}"
+            TAG="main-${{ github.sha }}"
             CACHE_SCOPE="staging"
           fi
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
           echo "CACHE_SCOPE=$CACHE_SCOPE" >> $GITHUB_ENV
 
       - name: Azure Login
-        uses: azure/login@v3.0
+        uses: azure/login@v3.0.0
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -94,7 +94,7 @@ jobs:
             TAG="${{ github.ref_name }}"
           else
             ENV="staging"
-            TAG="develop-${{ github.sha }}"
+            TAG="main-${{ github.sha }}"
           fi
 
           echo "DEPLOY_ENV=$ENV" >> $GITHUB_ENV
@@ -109,7 +109,7 @@ jobs:
           fi
 
       - name: Azure Login
-        uses: azure/login@v3.0
+        uses: azure/login@v3.0.0
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -149,5 +149,3 @@ jobs:
               --set auth.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/auth" \
               --set auth.image.tag="${{ env.IMAGE_TAG }}"
           fi
-
-

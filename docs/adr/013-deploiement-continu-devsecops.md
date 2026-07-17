@@ -15,7 +15,7 @@ Nous avons décidé de restructurer le déploiement continu en y appliquant les 
 
 1. **Authentification OIDC (OpenID Connect) sans secret** : Remplacement des secrets d'API statiques dans GitHub par une fédération d'identité d'application Entra ID (Azure AD Workload Identity). GitHub Actions s'authentifie auprès d'Azure de manière temporaire à l'aide d'un jeton d'identité cryptographique à courte durée de vie (`permissions: id-token: write`).
 2. **Déploiement automatisé basé sur le cycle Git (GitFlow)** :
-   - **Staging (Préproduction)** : Déploiement automatique déclenché lors de chaque push ou fusion sur la branche `develop`.
+   - **Staging (Préproduction)** : Déploiement automatique déclenché lors de chaque push ou fusion sur la branche `main`.
    - **Production** : Déploiement automatique déclenché uniquement lors de la publication d'un tag de version `v*` (ex: `v1.0.0`) sur la branche principale `main`.
 3. **Isolation par namespaces Kubernetes** : L'environnement de Staging et de Production tournent de manière isolée sur le même cluster AKS à l'aide de namespaces distincts (`--namespace staging` vs `--namespace production`).
 4. **Fichiers de valeurs Helm dédiés & Éco-conception** :
