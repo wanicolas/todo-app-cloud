@@ -128,6 +128,14 @@ L'architecture s'appuie sur 2 pipelines unifiés dans `.github/workflows/` :
 | **ci.yml** | push/PR sur n'importe quelle branche | Orchestration intelligente (Lint/Typecheck → Build Docker avec cache Buildx → Scans Trivy → Tests E2E Playwright). |
 | **cd.yml** | push sur `main` ou tag `v*`          | Build/Scan matriciel (parallèle) des images → Push ACR → Déploiement Helm sur AKS (OIDC sans mot de passe).        |
 
+### Séparation des responsabilités (IaC vs CD)
+
+Conformément aux bonnes pratiques DevSecOps, la gestion de l'infrastructure et le déploiement applicatif sont strictement séparés :
+
+- **Infrastructure as Code (Terraform)** : Construit les fondations sur Azure (Cluster AKS, MySQL, KeyVault, Registre ACR). Cette étape est découplée du cycle de vie de l'application.
+- **Livraison Applicative (Docker + Helm)** : La pipeline `cd.yml` s'exécute à chaque mise à jour du code. Elle se connecte au cluster existant et utilise Helm pour déployer la nouvelle version en y injectant les points de terminaison de l'infrastructure (fournis via les secrets GitHub).
+  > **Note pour l'évaluation / Fork :** Ce dépôt est configuré comme une vitrine DevSecOps. La pipeline CD est active mais échouera intentionnellement si les accès au Cloud ne sont pas fournis (pour des raisons de coûts). Pour tester ce projet sur votre propre compte Azure, consultez la [Procédure de déploiement](docs/deployment_procedure.md) qui liste les secrets (OIDC, nom du cluster, etc.) à configurer dans GitHub pour que le déploiement Helm s'exécute avec succès.
+
 ### Cloud & Kubernetes Hardening (Azure / AKS)
 
 L'infrastructure a été durcie pour respecter les standards **Zero Trust** et **DevSecOps** :

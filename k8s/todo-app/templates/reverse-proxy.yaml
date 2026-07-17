@@ -134,6 +134,12 @@ spec:
           resources:
             {{- toYaml .Values.reverseProxy.resources | nindent 12 }}
           volumeMounts:
+           - name: tmp
+              mountPath: /tmp
+            - name: run
+              mountPath: /var/run
+            - name: cache
+              mountPath: /var/cache/nginx
             - name: config-volume
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
@@ -143,6 +149,12 @@ spec:
               readOnly: true
             {{- end }}
       volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
         - name: config-volume
           configMap:
             name: reverse-proxy-config
