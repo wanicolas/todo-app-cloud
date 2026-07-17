@@ -61,36 +61,36 @@ npm run dev                    # React sur http://localhost:5173
 Le flag `--build` force la reconstruction de l'image (utile si le code a changé) et `--rm` supprime le conteneur après exécution.
 
 ```bash
-# Backend — 29 tests
+# Backend
 docker compose run --build --rm -e MYSQL_HOST= backend npm test
 
-# Client — 23 tests
+# Client
 docker compose run --build --rm client npm test
 ```
 
 ### Via Node.js local
 
 ```bash
-# Backend (Jest) — 29 tests
+# Backend (Jest)
 cd backend
 npm install
 npm test
 npm run test:coverage          # avec rapport de couverture
 
-# Auth (Jest) — 23 tests
+# Auth (Jest)
 cd auth
 npm install --ignore-scripts
 npm test
 npm run test:coverage
 
-# Client (Vitest) — 23 tests
+# Client (Vitest)
 cd client
 npm install
 npm test
 npm run test:coverage          # avec rapport de couverture
 ```
 
-### E2E (Playwright) — 8 tests
+### E2E (Playwright)
 
 Les tests E2E nécessitent que l'app tourne via Docker Compose et Node.js local.
 
@@ -126,7 +126,7 @@ L'architecture s'appuie sur 2 pipelines unifiés dans `.github/workflows/` :
 | Pipeline   | Déclencheur                          | Contenu                                                                                                            |
 | ---------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
 | **ci.yml** | push/PR sur n'importe quelle branche | Orchestration intelligente (Lint/Typecheck → Build Docker avec cache Buildx → Scans Trivy → Tests E2E Playwright). |
-| **cd.yml** | push sur `develop` ou tag `v*`       | Build/Scan matriciel (parallèle) des images → Push ACR → Déploiement Helm sur AKS (OIDC sans mot de passe).        |
+| **cd.yml** | push sur `main` ou tag `v*`          | Build/Scan matriciel (parallèle) des images → Push ACR → Déploiement Helm sur AKS (OIDC sans mot de passe).        |
 
 ### Cloud & Kubernetes Hardening (Azure / AKS)
 
@@ -142,16 +142,16 @@ L'infrastructure a été durcie pour respecter les standards **Zero Trust** et *
 
 Voir `.env.example` pour la liste complète.
 
-| Variable             | Description                                        | Défaut                 |
-| -------------------- | -------------------------------------------------- | ---------------------- |
-| `MYSQL_HOST`         | Hôte MySQL                                         | `127.0.0.1`            |
-| `MYSQL_USER`         | Utilisateur MySQL                                  | —                      |
-| `MYSQL_PASSWORD`     | Mot de passe MySQL                                 | —                      |
-| `MYSQL_DB`           | Nom de la base                                     | —                      |
+| Variable         | Description        | Défaut      |
+| ---------------- | ------------------ | ----------- |
+| `MYSQL_HOST`     | Hôte MySQL         | `127.0.0.1` |
+| `MYSQL_USER`     | Utilisateur MySQL  | —           |
+| `MYSQL_PASSWORD` | Mot de passe MySQL | —           |
+| `MYSQL_DB`       | Nom de la base     | —           |
 
-| `JWT_SECRET`         | Secret partagé HS256 (auth signe, backend vérifie) | `dev-insecure-secret`  |
-| `JWT_EXPIRES_IN`     | Durée de validité des tokens                       | `1h`                   |
-| `NODE_ENV`           | Environnement Node                                 | `development`          |
+| `JWT_SECRET` | Secret partagé HS256 (auth signe, backend vérifie) | `dev-insecure-secret` |
+| `JWT_EXPIRES_IN` | Durée de validité des tokens | `1h` |
+| `NODE_ENV` | Environnement Node | `development` |
 
 Docker Compose configure ces variables automatiquement pour les services backend et auth.
 Le service `auth` se connecte à sa propre instance MySQL (`mysql-auth`, base `auth`).
