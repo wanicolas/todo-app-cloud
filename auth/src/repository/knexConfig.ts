@@ -20,6 +20,7 @@ function getKnexConfig(sqliteLocation?: string): Knex.Config {
             client: 'mysql2',
             connection: {
                 host: readSecret('MYSQL_HOST', 'MYSQL_HOST_FILE'),
+                port: process.env.MYSQL_PORT ? parseInt(process.env.MYSQL_PORT, 10) : 3306,
                 user: readSecret('MYSQL_USER', 'MYSQL_USER_FILE'),
                 password: readSecret('MYSQL_PASSWORD', 'MYSQL_PASSWORD_FILE'),
                 database: readSecret('MYSQL_DB', 'MYSQL_DB_FILE'),

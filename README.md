@@ -9,7 +9,7 @@ Projet réalisé dans le cadre du module "Développer pour le cloud" — M2 Dev 
 - **Frontend** : React 19, TypeScript, Vite, React Bootstrap, React Router
 - **Backend** : Node.js 22, Express 5, TypeScript
 - **Auth** : microservice dédié (Express 5, TypeScript, JWT HS256, bcrypt) avec sa propre base
-- **Base de données** : MySQL 8.0.21 (SQLite en fallback local) — une instance par service de données
+- **Base de données** : MySQL 8.0.21 — une instance par service de données
 - **Query builder** : Knex.js (migrations versionnées, support multi-dialect)
 - **Proxy** : Traefik v3.6
 - **Tests** : Jest (backend + auth), Vitest (client), Playwright (E2E)
@@ -40,13 +40,13 @@ docker compose up --watch
 docker compose down
 ```
 
-### Sans Docker (dev local, SQLite)
+### Sans Docker (dev local)
 
 ```bash
 # Terminal 1 — Backend
 cd backend
 npm install
-npm run dev                    # API sur http://localhost:3000 (SQLite auto)
+npm run dev                    # API sur http://localhost:3000
 
 # Terminal 2 — Client
 cd client
@@ -61,7 +61,7 @@ npm run dev                    # React sur http://localhost:5173
 Le flag `--build` force la reconstruction de l'image (utile si le code a changé) et `--rm` supprime le conteneur après exécution.
 
 ```bash
-# Backend — 29 tests (SQLite automatique)
+# Backend — 29 tests
 docker compose run --build --rm -e MYSQL_HOST= backend npm test
 
 # Client — 23 tests
@@ -73,7 +73,7 @@ docker compose run --build --rm client npm test
 ```bash
 # Backend (Jest) — 29 tests
 cd backend
-npm install --ignore-scripts   # pour éviter la compilation native sqlite3 si make est manquant
+npm install
 npm test
 npm run test:coverage          # avec rapport de couverture
 
@@ -144,11 +144,11 @@ Voir `.env.example` pour la liste complète.
 
 | Variable             | Description                                        | Défaut                 |
 | -------------------- | -------------------------------------------------- | ---------------------- |
-| `MYSQL_HOST`         | Hôte MySQL                                         | — (si absent → SQLite) |
+| `MYSQL_HOST`         | Hôte MySQL                                         | `127.0.0.1`            |
 | `MYSQL_USER`         | Utilisateur MySQL                                  | —                      |
 | `MYSQL_PASSWORD`     | Mot de passe MySQL                                 | —                      |
 | `MYSQL_DB`           | Nom de la base                                     | —                      |
-| `SQLITE_DB_LOCATION` | Chemin du fichier SQLite                           | `/etc/todos/todo.db`   |
+
 | `JWT_SECRET`         | Secret partagé HS256 (auth signe, backend vérifie) | `dev-insecure-secret`  |
 | `JWT_EXPIRES_IN`     | Durée de validité des tokens                       | `1h`                   |
 | `NODE_ENV`           | Environnement Node                                 | `development`          |
@@ -187,7 +187,7 @@ laisser aucune donnée orpheline.
 │   ├── src/
 │   │   ├── routes/           # Controllers (factories avec injection du service)
 │   │   ├── service/          # TodoService (logique métier)
-│   │   ├── repository/       # KnexRepository + factory (SQLite / MySQL)
+│   │   ├── repository/       # KnexRepository + factory (MySQL)
 │   │   ├── migrations/       # Migrations Knex (schéma BDD)
 │   │   └── types.ts          # Interfaces TodoItem, TodoRepository
 │   ├── spec/                 # Tests Jest (unitaires + intégration + service)
@@ -226,7 +226,7 @@ laisser aucune donnée orpheline.
 
 ```
 Routes (controllers)  →  TodoService  →  TodoRepository (interface)
-                                              └── KnexRepository (SQLite / MySQL via Knex.js)
+                                              └── KnexRepository (MySQL via Knex.js)
 ```
 
 L'injection de dépendances se fait par constructeur, sans framework. Le câblage est dans `index.ts` :

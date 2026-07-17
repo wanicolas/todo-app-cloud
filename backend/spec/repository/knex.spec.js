@@ -2,7 +2,11 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-const location = path.join(os.tmpdir(), `todo-knex-${Date.now()}.db`);
+process.env.MYSQL_HOST = '127.0.0.1';
+process.env.MYSQL_PORT = '3306';
+process.env.MYSQL_USER = 'root';
+process.env.MYSQL_PASSWORD = 'secret';
+process.env.MYSQL_DB = 'todos';
 
 const { KnexRepository } = require('../../src/repository/KnexRepository');
 const { getKnexConfig } = require('../../src/repository/knexConfig');
@@ -17,31 +21,21 @@ const ITEM = {
 };
 
 let db;
-const mysqlHost = process.env.MYSQL_HOST;
-
-beforeAll(() => {
-    delete process.env.MYSQL_HOST;
-});
+const knex = require('knex');
+const testDb = knex(getKnexConfig());
 
 beforeEach(async () => {
-    if (fs.existsSync(location)) {
-        fs.unlinkSync(location);
-    }
-    db = new KnexRepository(getKnexConfig(location));
+    db = new KnexRepository(getKnexConfig());
     await db.init();
+    await testDb('todo_items').del();
 });
 
 afterEach(async () => {
     await db.teardown();
 });
 
-afterAll(() => {
-    if (mysqlHost) {
-        process.env.MYSQL_HOST = mysqlHost;
-    }
-    if (fs.existsSync(location)) {
-        fs.unlinkSync(location);
-    }
+afterAll(async () => {
+    await testDb.destroy();
 });
 
 test('it initializes correctly', async () => {

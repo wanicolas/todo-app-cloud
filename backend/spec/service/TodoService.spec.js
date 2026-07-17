@@ -5,27 +5,32 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 
-delete process.env.MYSQL_HOST;
+process.env.MYSQL_HOST = '127.0.0.1';
+process.env.MYSQL_PORT = '3306';
+process.env.MYSQL_USER = 'root';
+process.env.MYSQL_PASSWORD = 'secret';
+process.env.MYSQL_DB = 'todos';
 
 const USER = 'user-1';
 const OTHER_USER = 'user-2';
 
 let service;
-let dbPath;
+const knex = require('knex');
+const testDb = knex(getKnexConfig());
 
 beforeEach(async () => {
-    dbPath = path.join(
-        os.tmpdir(),
-        `todoservice-${Date.now()}-${Math.random()}.db`,
-    );
-    const repository = new KnexRepository(getKnexConfig(dbPath));
+    const repository = new KnexRepository(getKnexConfig());
     service = new TodoService(repository);
     await service.init();
+    await testDb('todo_items').del();
 });
 
 afterEach(async () => {
     await service.teardown();
-    if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
+});
+
+afterAll(async () => {
+    await testDb.destroy();
 });
 
 test('addItem creates an item with id, name and userId', async () => {

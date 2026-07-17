@@ -1,5 +1,7 @@
 # ADR-006 : Architecture en couches avec injection de dépendances
 
+> **Note** : L'implémentation `SqliteRepository` mentionnée ici a été supprimée suite à l'[ADR 016](./016-migration-full-mysql.md) pour basculer exclusivement sur MySQL.
+
 **Date** : avril 2026
 **Statut** : Accepté
 

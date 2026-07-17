@@ -40,8 +40,6 @@ backend:
     requests:
       cpu: 50m
       memory: 128Mi
-  env:
-    sqliteDbLocation: "/etc/todos/todo.db"
 
 # Auth Service (Express Auth API)
 auth:

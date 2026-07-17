@@ -1,4 +1,6 @@
-# ADR-003 : Stratégie de tests à 3 niveaux
+# ADR-003 : Stratégie de tests et d'assurance qualité
+
+> **Note** : Cette décision a été partiellement supplantée par l'[ADR 016](./016-migration-full-mysql.md) qui abandonne SQLite au profit exclusif de MySQL pour une meilleure parité Dev/Prod.
 
 **Date** : avril 2026
 **Statut** : Accepté

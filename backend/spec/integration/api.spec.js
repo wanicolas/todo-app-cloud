@@ -2,9 +2,12 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-// Set up temp SQLite DB and a deterministic JWT secret before any app code loads
-const dbPath = path.join(os.tmpdir(), `todo-integration-${Date.now()}.db`);
-delete process.env.MYSQL_HOST;
+// Set up MySQL environment and a deterministic JWT secret before any app code loads
+process.env.MYSQL_HOST = '127.0.0.1';
+process.env.MYSQL_PORT = '3306';
+process.env.MYSQL_USER = 'root';
+process.env.MYSQL_PASSWORD = 'secret';
+process.env.MYSQL_DB = 'todos';
 process.env.JWT_SECRET = 'test-secret';
 
 const jwt = require('jsonwebtoken');
@@ -14,12 +17,12 @@ const { TodoService } = require('../../src/service/TodoService');
 const createApp = require('../../src/app').default || require('../../src/app');
 const request = require('supertest');
 
-const repository = new KnexRepository(getKnexConfig(dbPath));
+const repository = new KnexRepository(getKnexConfig());
 const service = new TodoService(repository);
 const app = createApp(service);
 
 const knex = require('knex');
-const testDb = knex(getKnexConfig(dbPath));
+const testDb = knex(getKnexConfig());
 
 const token = jwt.sign({ sub: 'user-1' }, 'test-secret');
 const otherToken = jwt.sign({ sub: 'user-2' }, 'test-secret');
@@ -36,7 +39,6 @@ beforeEach(async () => {
 afterAll(async () => {
     await testDb.destroy();
     await service.teardown();
-    if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
 });
 
 describe('GET /api/greeting', () => {
