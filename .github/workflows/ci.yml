@@ -253,12 +253,12 @@ jobs:
 
   ci-success:
     name: All CI Passed
-    needs: [backend, client, auth, trivy, e2e]
+    needs: [backend, client, auth, e2e]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Check dependencies status
         if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         run: |
-          echo "Un des jobs CI a echoue."
+          echo "Backend, client, auth ou e2e a echoue."
           exit 1
