@@ -19,7 +19,7 @@ function TodoPage() {
     return (
         <>
             <header
-                className="d-flex justify-content-end align-items-center mt-3"
+                className="d-flex justify-content-end align-items-center my-3"
                 role="banner"
             >
                 <span className="text-muted me-3">{user?.email}</span>
