@@ -20,7 +20,9 @@ function getKnexConfig(sqliteLocation?: string): Knex.Config {
             client: 'mysql2',
             connection: {
                 host: readSecret('MYSQL_HOST', 'MYSQL_HOST_FILE'),
-                port: process.env.MYSQL_PORT ? parseInt(process.env.MYSQL_PORT, 10) : 3306,
+                port: process.env.MYSQL_PORT
+                    ? parseInt(process.env.MYSQL_PORT, 10)
+                    : 3306,
                 user: readSecret('MYSQL_USER', 'MYSQL_USER_FILE'),
                 password: readSecret('MYSQL_PASSWORD', 'MYSQL_PASSWORD_FILE'),
                 database: readSecret('MYSQL_DB', 'MYSQL_DB_FILE'),
@@ -33,7 +35,10 @@ function getKnexConfig(sqliteLocation?: string): Knex.Config {
             pool: { min: 0, max: 5 },
             migrations: migrationConfig,
         };
-        console.log('Using MySQL:', (config.connection as { host?: string }).host);
+        console.log(
+            'Using MySQL:',
+            (config.connection as { host?: string }).host,
+        );
         return config;
     }
 

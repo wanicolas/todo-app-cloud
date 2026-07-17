@@ -30,10 +30,17 @@ export default function createApp(service: TodoService) {
 
     // Global error handler
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    app.use((err: unknown, req: express.Request, res: express.Response, _next: express.NextFunction) => {
-        console.error('Unhandled error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    });
+    app.use(
+        (
+            err: unknown,
+            req: express.Request,
+            res: express.Response,
+            _next: express.NextFunction,
+        ) => {
+            console.error('Unhandled error:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        },
+    );
 
     return app;
 }

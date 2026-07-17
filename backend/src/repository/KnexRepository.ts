@@ -4,7 +4,12 @@ import { logger } from '../utils/logger';
 
 function mapRow(row: unknown): TodoItem | null {
     if (!row || typeof row !== 'object') return null;
-    const r = row as { id: string; name: string; completed: number | boolean; user_id: string };
+    const r = row as {
+        id: string;
+        name: string;
+        completed: number | boolean;
+        user_id: string;
+    };
     return {
         id: r.id,
         name: r.name,
@@ -28,7 +33,11 @@ class KnexRepository implements TodoRepository {
             try {
                 await this.db.migrate.latest();
                 if (process.env.NODE_ENV !== 'test') {
-                    const client = (this.db.client as unknown as { config: { client: string } }).config.client;
+                    const client = (
+                        this.db.client as unknown as {
+                            config: { client: string };
+                        }
+                    ).config.client;
                     logger.info(`Connected to ${client} database via Knex`);
                 }
                 return;
