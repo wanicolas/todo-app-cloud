@@ -1,8 +1,6 @@
 # Accessibilité Numérique (A11y) - Référentiels et Actions
 
-Ce document présente les choix méthodologiques et techniques mis en œuvre pour assurer l'accessibilité du projet **Todo App Cloud** conformément aux exigences de la compétence **C2.2.3** du RNCP.
-
----
+Ce document présente les choix méthodologiques et techniques mis en œuvre pour assurer l'accessibilité du projet.
 
 ## 1. Choix et Justification des Référentiels
 
@@ -17,8 +15,6 @@ Pour ce projet, deux référentiels de qualité et d'accessibilité web ont ét�
 
 - **Justification** : OPQUAST est le standard de référence en France pour la qualité globale des sites internet (contenant de nombreuses règles dédiées à l'accessibilité, à l'éco-conception, au RGPD et à la sécurité).
 - **Application** : Alignement sur les fiches de bonnes pratiques pour les formulaires, la navigation et le respect de la vie privée des utilisateurs.
-
----
 
 ## 2. Actions Techniques Mises en Œuvre
 
