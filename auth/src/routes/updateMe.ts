@@ -1,15 +1,17 @@
 import { Request, Response } from 'express';
+import { AuthError, AuthService } from '../service/AuthService';
 
-const { AuthError } = require('../service/AuthService');
-
-function makeUpdateMe(service: any) {
+export default function makeUpdateMe(service: AuthService) {
     return async (req: Request, res: Response) => {
         try {
             const { email, password } = req.body;
-            const user = await service.updateProfile((req as any).userId, {
-                email,
-                password,
-            });
+            const user = await service.updateProfile(
+                (req as Request & { userId: string }).userId,
+                {
+                    email,
+                    password,
+                },
+            );
             res.send(user);
         } catch (err) {
             if (err instanceof AuthError) {
@@ -19,5 +21,3 @@ function makeUpdateMe(service: any) {
         }
     };
 }
-
-module.exports = makeUpdateMe;

@@ -1,0 +1,73 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-reverse-proxy-ingress
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: reverse-proxy
+  policyTypes:
+  - Ingress
+  ingress:
+  - {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-internal-from-proxy
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchExpressions:
+      - {key: app, operator: In, values: [backend, client, auth]}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: reverse-proxy
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - ports:
+    - protocol: UDP
+      port: 53
+  - to:
+    - ipBlock:
+        cidr: 10.0.2.0/24
+  - to:
+    - podSelector:
+        matchLabels:
+          app: backend
+  - to:
+    - podSelector:
+        matchLabels:
+          app: client
+  - to:
+    - podSelector:
+        matchLabels:
+          app: auth

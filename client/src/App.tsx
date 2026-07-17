@@ -10,24 +10,35 @@ import { ProtectedRoute } from './auth/ProtectedRoute';
 import { Account } from './pages/Account';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function TodoPage() {
     const { user, logout } = useAuth();
 
     return (
         <>
-            <div className="d-flex justify-content-end align-items-center mt-3">
+            <header
+                className="d-flex justify-content-end align-items-center my-3"
+                role="banner"
+            >
                 <span className="text-muted me-3">{user?.email}</span>
-                <Link
-                    to="/account"
-                    className="btn btn-outline-primary btn-sm me-2"
-                >
-                    My account
-                </Link>
-                <Button variant="outline-secondary" size="sm" onClick={logout}>
-                    Log out
-                </Button>
-            </div>
+                <nav aria-label="Account navigation">
+                    <Link
+                        to="/account"
+                        className="btn btn-outline-primary btn-sm me-2"
+                    >
+                        My account
+                    </Link>
+                    <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={logout}
+                    >
+                        Log out
+                    </Button>
+                </nav>
+            </header>
             <Greeting />
             <TodoListCard />
         </>
@@ -36,7 +47,8 @@ function TodoPage() {
 
 function App() {
     return (
-        <Container>
+        <Container as="main">
+            <ToastContainer position="top-right" autoClose={3000} />
             <Row>
                 <Col md={{ offset: 3, span: 6 }}>
                     <Routes>

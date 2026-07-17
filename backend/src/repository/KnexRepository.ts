@@ -2,12 +2,19 @@ import knex, { Knex } from 'knex';
 import { TodoItem, TodoRepository } from '../types';
 import { logger } from '../utils/logger';
 
-function mapRow(row: any): TodoItem {
+function mapRow(row: unknown): TodoItem | null {
+    if (!row || typeof row !== 'object') return null;
+    const r = row as {
+        id: string;
+        name: string;
+        completed: number | boolean;
+        user_id: string;
+    };
     return {
-        id: row.id,
-        name: row.name,
-        completed: Boolean(row.completed),
-        userId: row.user_id,
+        id: r.id,
+        name: r.name,
+        completed: Boolean(r.completed),
+        userId: r.user_id,
     };
 }
 
@@ -26,7 +33,11 @@ class KnexRepository implements TodoRepository {
             try {
                 await this.db.migrate.latest();
                 if (process.env.NODE_ENV !== 'test') {
-                    const client = (this.db.client as any).config.client;
+                    const client = (
+                        this.db.client as unknown as {
+                            config: { client: string };
+                        }
+                    ).config.client;
                     logger.info(`Connected to ${client} database via Knex`);
                 }
                 return;
@@ -49,10 +60,12 @@ class KnexRepository implements TodoRepository {
 
     async getItems(userId: string): Promise<TodoItem[]> {
         const rows = await this.db('todo_items').where({ user_id: userId });
-        return rows.map(mapRow);
+        return rows
+            .map(mapRow)
+            .filter((item): item is TodoItem => item !== null);
     }
 
-    async getItem(userId: string, id: string): Promise<TodoItem> {
+    async getItem(userId: string, id: string): Promise<TodoItem | null> {
         const row = await this.db('todo_items')
             .where({ id, user_id: userId })
             .first();
@@ -88,4 +101,4 @@ class KnexRepository implements TodoRepository {
     }
 }
 
-module.exports = { KnexRepository };
+export { KnexRepository };

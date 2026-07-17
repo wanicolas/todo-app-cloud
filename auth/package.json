@@ -8,13 +8,17 @@
     "lint": "eslint . --ext ts --max-warnings 0",
     "format": "prettier -l --write \"**/*.{js,ts}\"",
     "format-check": "prettier --check \"**/*.{js,ts}\"",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
+    "test": "jest --runInBand",
+    "test:coverage": "jest --coverage --runInBand",
     "dev": "nodemon --exec tsx src/index.ts"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.2",
+    "@types/bcrypt": "^6.0.0",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.2",
     "knex": "^3.2.9",
     "mysql2": "^3.14.1",
@@ -49,8 +53,8 @@
     ]
   },
   "devDependencies": {
-    "sqlite3": "^5.1.7",
     "@eslint/js": "^10.0.1",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.6.0",

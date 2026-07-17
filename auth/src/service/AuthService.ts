@@ -1,8 +1,9 @@
 import { PublicUser, User, UserRepository } from '../types';
 
-const { v4: uuid } = require('uuid');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import { randomUUID } from 'crypto';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import * as fs from 'fs';
 
 const BCRYPT_ROUNDS = 10;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -29,18 +30,27 @@ class AuthService {
     constructor(private repository: UserRepository) {}
 
     private get secret(): string {
-        let val = process.env.JWT_SECRET || 'dev-insecure-secret';
         if (process.env.JWT_SECRET_FILE) {
             try {
-                const fs = require('fs');
-                val = fs
+                return fs
                     .readFileSync(process.env.JWT_SECRET_FILE, 'utf8')
                     .trim();
-            } catch {
-                // Fallback to default
+            } catch (err) {
+                if (process.env.NODE_ENV === 'production') {
+                    throw new Error(
+                        'Critical: JWT secret file is unreadable in production.',
+                        { cause: err },
+                    );
+                }
             }
         }
-        return val;
+        if (process.env.JWT_SECRET) {
+            return process.env.JWT_SECRET;
+        }
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error('Critical: JWT secret is missing in production.');
+        }
+        return 'dev-insecure-secret';
     }
 
     private get expiresIn(): string {
@@ -69,7 +79,7 @@ class AuthService {
 
     private sign(user: User): string {
         return jwt.sign({ sub: user.id, email: user.email }, this.secret, {
-            expiresIn: this.expiresIn,
+            expiresIn: this.expiresIn as jwt.SignOptions['expiresIn'],
         });
     }
 
@@ -87,7 +97,7 @@ class AuthService {
 
         const now = new Date().toISOString();
         const user: User = {
-            id: uuid(),
+            id: randomUUID(),
             email: normalizedEmail,
             passwordHash: await bcrypt.hash(password, BCRYPT_ROUNDS),
             createdAt: now,
@@ -170,4 +180,4 @@ class AuthService {
     }
 }
 
-module.exports = { AuthService, AuthError };
+export { AuthService, AuthError };

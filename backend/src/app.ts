@@ -1,16 +1,21 @@
 import express from 'express';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
-const getGreeting = require('./routes/getGreeting');
-const makeGetItems = require('./routes/getItems');
-const makeAddItem = require('./routes/addItem');
-const makeUpdateItem = require('./routes/updateItem');
-const makeDeleteItem = require('./routes/deleteItem');
-const makeDeleteAllItems = require('./routes/deleteAllItems');
-const requireAuth = require('./middleware/requireAuth');
+import getGreeting from './routes/getGreeting';
+import makeGetItems from './routes/getItems';
+import makeAddItem from './routes/addItem';
+import makeUpdateItem from './routes/updateItem';
+import makeDeleteItem from './routes/deleteItem';
+import makeDeleteAllItems from './routes/deleteAllItems';
+import requireAuth from './middleware/requireAuth';
+import { TodoService } from './service/TodoService';
 
-function createApp(service: any) {
+export default function createApp(service: TodoService) {
     const app = express();
 
+    app.use(helmet());
+    app.use(cookieParser());
     app.use(express.json());
 
     // Public endpoint.
@@ -23,7 +28,18 @@ function createApp(service: any) {
     app.delete('/api/items', requireAuth, makeDeleteAllItems(service));
     app.delete('/api/items/:id', requireAuth, makeDeleteItem(service));
 
+    app.use(
+        (
+            err: unknown,
+            req: express.Request,
+            res: express.Response,
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            _next: express.NextFunction,
+        ) => {
+            console.error('Unhandled error:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        },
+    );
+
     return app;
 }
-
-module.exports = createApp;

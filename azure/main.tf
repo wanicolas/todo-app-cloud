@@ -19,7 +19,49 @@ resource "azurerm_container_registry" "acr" {
   name                = "${random_string.name.result}registry"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  sku                 = "Basic"
+  sku                 = "Standard"
+}
+
+# Virtual Network & Subnets
+resource "azurerm_virtual_network" "vnet" {
+  name                = "${var.resource_group_prefix}-vnet-${random_string.name.result}"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  address_space       = ["10.0.0.0/16"]
+}
+
+resource "azurerm_subnet" "aks_subnet" {
+  name                 = "aks-subnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
+}
+
+resource "azurerm_subnet" "mysql_subnet" {
+  name                 = "mysql-subnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.2.0/24"]
+
+  delegation {
+    name = "fs"
+    service_delegation {
+      name    = "Microsoft.DBforMySQL/flexibleServers"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+    }
+  }
+}
+
+resource "azurerm_private_dns_zone" "mysql_dns" {
+  name                = "${var.resource_group_prefix}-mysql-${random_string.name.result}.private.mysql.database.azure.com"
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "mysql_dns_link" {
+  name                  = "mysql-dns-link"
+  private_dns_zone_name = azurerm_private_dns_zone.mysql_dns.name
+  virtual_network_id    = azurerm_virtual_network.vnet.id
+  resource_group_name   = azurerm_resource_group.rg.name
 }
 
 # AKS Cluster
@@ -30,9 +72,15 @@ resource "azurerm_kubernetes_cluster" "aks" {
   dns_prefix          = "${var.resource_group_prefix}-aks-${random_string.name.result}"
 
   default_node_pool {
-    name       = "default"
-    node_count = 1
-    vm_size    = "Standard_B2ms"
+    name           = "default"
+    node_count     = 1
+    vm_size        = "Standard_B2ms"
+    vnet_subnet_id = azurerm_subnet.aks_subnet.id
+  }
+
+  network_profile {
+    network_plugin    = "kubenet"
+    load_balancer_sku = "standard"
   }
 
   identity {
@@ -91,30 +139,30 @@ resource "azurerm_key_vault" "kv" {
   enabled_for_disk_encryption = true
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   soft_delete_retention_days  = 7
-  purge_protection_enabled    = false
+  purge_protection_enabled    = true
+  enable_rbac_authorization   = true
 
   sku_name = "standard"
+}
 
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-
-    secret_permissions = [
-      "Get", "Backup", "Delete", "List", "Purge", "Recover", "Restore", "Set"
-    ]
-  }
+resource "azurerm_role_assignment" "kv_secrets_officer" {
+  scope                = azurerm_key_vault.kv.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = data.azurerm_client_config.current.object_id
 }
 
 resource "azurerm_key_vault_secret" "mysql_password" {
   name         = "mysql-admin-password"
   value        = random_password.mysql_admin_password.result
   key_vault_id = azurerm_key_vault.kv.id
+  depends_on   = [azurerm_role_assignment.kv_secrets_officer]
 }
 
 resource "azurerm_key_vault_secret" "jwt_secret" {
   name         = "jwt-secret"
   value        = random_password.jwt_secret.result
   key_vault_id = azurerm_key_vault.kv.id
+  depends_on   = [azurerm_role_assignment.kv_secrets_officer]
 }
 
 # Managed MySQL Flexible Server
@@ -127,6 +175,9 @@ resource "azurerm_mysql_flexible_server" "mysql" {
   backup_retention_days        = 7
   sku_name                     = "B_Standard_B1ms"
   version                      = "8.0.21"
+  delegated_subnet_id          = azurerm_subnet.mysql_subnet.id
+  private_dns_zone_id          = azurerm_private_dns_zone.mysql_dns.id
+  depends_on                   = [azurerm_private_dns_zone_virtual_network_link.mysql_dns_link]
 }
 
 # Create "todos" and "auth" databases
@@ -146,14 +197,7 @@ resource "azurerm_mysql_flexible_database" "auth" {
   collation           = "utf8mb4_unicode_ci"
 }
 
-# Allow other Azure services to connect to MySQL (e.g. AKS pods)
-resource "azurerm_mysql_flexible_server_firewall_rule" "allow_azure_services" {
-  name                = "allow-azure-internal"
-  server_name         = azurerm_mysql_flexible_server.mysql.name
-  resource_group_name = azurerm_resource_group.rg.name
-  start_ip_address    = "0.0.0.0"
-  end_ip_address      = "0.0.0.0"
-}
+# (Removed allow_azure_services firewall rule to isolate DB)
 
 # Enable secure transport enforcement to protect data in transit
 resource "azurerm_mysql_flexible_server_configuration" "disable_ssl" {
@@ -163,14 +207,10 @@ resource "azurerm_mysql_flexible_server_configuration" "disable_ssl" {
   value               = "ON"
 }
 
-# Grant secret access to the AKS Secrets Store CSI driver identity
-resource "azurerm_key_vault_access_policy" "aks_csi" {
-  key_vault_id = azurerm_key_vault.kv.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_kubernetes_cluster.aks.key_vault_secrets_provider[0].secret_identity[0].object_id
-
-  secret_permissions = [
-    "Get", "List"
-  ]
+# Grant secret access to the AKS Secrets Store CSI driver identity via RBAC
+resource "azurerm_role_assignment" "aks_kv_secrets_user" {
+  scope                = azurerm_key_vault.kv.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_kubernetes_cluster.aks.key_vault_secrets_provider[0].secret_identity[0].object_id
 }
 

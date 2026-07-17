@@ -1,0 +1,264 @@
+name: CI Monorepo
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      client: ${{ steps.filter.outputs.client }}
+      auth: ${{ steps.filter.outputs.auth }}
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            client:
+              - 'client/**'
+            auth:
+              - 'auth/**'
+
+  backend:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' || github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0.21
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: todos
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: ./.github/actions/node-ci
+        with:
+          working-directory: backend
+
+  client:
+    needs: changes
+    if: ${{ needs.changes.outputs.client == 'true' || github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: ./.github/actions/node-ci
+        with:
+          working-directory: client
+
+  auth:
+    needs: changes
+    if: ${{ needs.changes.outputs.auth == 'true' || github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0.21
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: auth
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: auth
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: ./.github/actions/node-ci
+        with:
+          working-directory: auth
+
+  trivy:
+    needs: [backend, client, auth]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [backend, client, auth]
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.2.0
+
+      - name: Build ${{ matrix.service }} image
+        uses: docker/build-push-action@v7.3.0
+        with:
+          context: ./${{ matrix.service }}
+          load: true
+          tags: todo-${{ matrix.service }}:scan
+          cache-from: type=gha,scope=${{ matrix.service }}
+
+      - name: Scan ${{ matrix.service }} image
+        uses: ./.github/actions/trivy-scan
+        with:
+          image-ref: todo-${{ matrix.service }}:scan
+
+  e2e:
+    needs: [backend, client, auth]
+    runs-on: ubuntu-latest
+    env:
+      COMPOSE_PROJECT_NAME: todo
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.2.0
+
+      - name: Build Backend (Cached)
+        uses: docker/build-push-action@v7.3.0
+        with:
+          context: ./backend
+          target: dev
+          load: true
+          tags: todo-backend:latest
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Build Client (Cached)
+        uses: docker/build-push-action@v7.3.0
+        with:
+          context: ./client
+          target: dev
+          load: true
+          tags: todo-client:latest
+          cache-from: type=gha,scope=client
+          cache-to: type=gha,mode=max,scope=client
+
+      - name: Build Auth (Cached)
+        uses: docker/build-push-action@v7.3.0
+        with:
+          context: ./auth
+          target: dev
+          load: true
+          tags: todo-auth:latest
+          cache-from: type=gha,scope=auth
+          cache-to: type=gha,mode=max,scope=auth
+
+      - name: Build and start services
+        run: docker compose up -d
+
+      - name: Wait for app to be ready
+        run: |
+          echo "Waiting for backend API..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3080/api/greeting > /dev/null 2>&1; then
+              echo "Backend API is ready!"
+              break
+            fi
+            echo "Waiting for backend... ($i/60)"
+            sleep 5
+          done
+
+          echo "Waiting for auth service..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3080/api/auth/health > /dev/null 2>&1; then
+              echo "Auth service is ready!"
+              break
+            fi
+            echo "Waiting for auth... ($i/30)"
+            sleep 5
+          done
+
+          echo "Waiting for client..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3080 2>&1 | grep -q 'root'; then
+              echo "Client is ready!"
+              exit 0
+            fi
+            echo "Waiting for client... ($i/30)"
+            sleep 5
+          done
+
+          echo "App failed to start. Docker logs:"
+          docker compose logs
+          exit 1
+
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Debug - check services
+        run: |
+          echo "=== Docker containers ==="
+          docker compose ps
+          echo ""
+          echo "=== Client page content ==="
+          curl -s http://localhost:3080 | head -30
+          echo ""
+          echo "=== API greeting ==="
+          curl -s http://localhost:3080/api/greeting
+          echo ""
+          echo "=== Client logs ==="
+          docker compose logs client 2>&1 | tail -30
+          echo ""
+          echo "=== Backend logs ==="
+          docker compose logs backend 2>&1 | tail -15
+
+      - run: npm ci
+
+      - name: Cache Playwright browsers
+        id: cache-playwright
+        uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: npx playwright install chromium
+
+      - name: Run E2E tests
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+
+      - name: Stop services
+        if: always()
+        run: docker compose down
+
+  ci-success:
+    name: All CI Passed
+    needs: [backend, client, auth, e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check dependencies status
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "Backend, client, auth ou e2e a echoue."
+          exit 1

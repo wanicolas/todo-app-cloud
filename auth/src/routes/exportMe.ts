@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
+import { AuthError, AuthService } from '../service/AuthService';
 
-const { AuthError } = require('../service/AuthService');
-
-function makeExportMe(service: any) {
+export default function makeExportMe(service: AuthService) {
     return async (req: Request, res: Response) => {
         try {
-            const data = await service.exportData((req as any).userId);
+            const data = await service.exportData(
+                (req as Request & { userId: string }).userId,
+            );
             res.setHeader(
                 'Content-Disposition',
                 'attachment; filename="my-data.json"',
@@ -19,5 +20,3 @@ function makeExportMe(service: any) {
         }
     };
 }
-
-module.exports = makeExportMe;

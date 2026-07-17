@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '../api/client';
 import { AddItemForm } from './AddNewItemForm';
 import { ItemDisplay } from './ItemDisplay';
+import ListGroup from 'react-bootstrap/ListGroup';
+import { toast } from 'react-toastify';
 
 interface TodoItem {
     id: string;
@@ -15,7 +17,12 @@ export function TodoListCard() {
     useEffect(() => {
         apiFetch('/api/items')
             .then((r) => r.json())
-            .then(setItems);
+            .then(setItems)
+            .catch((err) => {
+                console.error(err);
+                toast.error('Impossible de charger les tâches');
+                setItems([]);
+            });
     }, []);
 
     const onNewItem = useCallback(
@@ -53,14 +60,18 @@ export function TodoListCard() {
             {items.length === 0 && (
                 <p className="text-center">No items yet! Add one above!</p>
             )}
-            {items.map((item) => (
-                <ItemDisplay
-                    key={item.id}
-                    item={item}
-                    onItemUpdate={onItemUpdate}
-                    onItemRemoval={onItemRemoval}
-                />
-            ))}
+            {items.length > 0 && (
+                <ListGroup>
+                    {items.map((item) => (
+                        <ItemDisplay
+                            key={item.id}
+                            item={item}
+                            onItemUpdate={onItemUpdate}
+                            onItemRemoval={onItemRemoval}
+                        />
+                    ))}
+                </ListGroup>
+            )}
         </>
     );
 }

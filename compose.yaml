@@ -179,6 +179,8 @@ services:
   ###################################################
   mysql:
     image: mysql:8.0.21
+    ports:
+      - "3306:3306"
     volumes:
       - todo-mysql-data:/var/lib/mysql
     environment: 
@@ -198,6 +200,8 @@ services:
   ###################################################
   mysql-auth:
     image: mysql:8.0.21
+    ports:
+      - "3307:3306"
     volumes:
       - auth-mysql-data:/var/lib/mysql
     environment:

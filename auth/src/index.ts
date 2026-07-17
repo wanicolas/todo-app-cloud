@@ -1,12 +1,13 @@
-const { createRepository } = require('./repository');
-const { AuthService } = require('./service/AuthService');
-const createApp = require('./app');
-const { logger } = require('./utils/logger');
+import { createRepository } from './repository';
+import { AuthService } from './service/AuthService';
+import createApp from './app';
+import { Server } from 'http';
+import { logger } from './utils/logger';
 
 const repository = createRepository();
 const service = new AuthService(repository);
 
-let server: any;
+let server: Server;
 const port = process.env.PORT || 3001;
 
 service

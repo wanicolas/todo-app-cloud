@@ -1,12 +1,13 @@
-const { createRepository } = require('./repository');
-const { TodoService } = require('./service/TodoService');
-const createApp = require('./app');
-const { logger } = require('./utils/logger');
+import { createRepository } from './repository';
+import { TodoService } from './service/TodoService';
+import createApp from './app';
+import { logger } from './utils/logger';
+import * as http from 'http';
 
 const repository = createRepository();
 const service = new TodoService(repository);
 
-let server: any;
+let server: http.Server;
 const port = process.env.PORT || 3000;
 
 service

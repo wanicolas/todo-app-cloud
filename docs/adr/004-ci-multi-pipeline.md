@@ -1,7 +1,7 @@
 # ADR-004 : CI multi-pipeline
 
-**Date** : avril 2026
-**Statut** : Accepté
+**Date** : avril 2026  
+**Statut** : Dépassé (Superseded) par [ADR-014](014-ci-monorepo-merge-gate.md)
 
 ## Contexte
 

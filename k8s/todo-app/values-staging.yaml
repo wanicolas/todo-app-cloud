@@ -1,0 +1,26 @@
+# Values for Azure AKS staging (preproduction) environment
+global:
+  environment: staging
+
+# In staging, we use a local in-cluster MySQL to save cloud database cost.
+mysql:
+  local:
+    enabled: true
+  host: "mysql-local"
+  authHost: "mysql-auth-local"
+  user: "root"
+  db: "todos"
+  authDb: "auth"
+  ssl: false
+
+# Key Vault is disabled in staging (we fallback to Kubernetes Secrets for credentials)
+keyvault:
+  enabled: false
+  secrets:
+    mysqlPassword: "staging-db-password"
+    jwtSecret: "staging-jwt-secret-value-123!"
+
+# HTTP simple port 80 on reverse proxy for staging
+reverseProxy:
+  tls:
+    enabled: false

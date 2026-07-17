@@ -1,0 +1,153 @@
+name: CD Deploy to AKS
+
+on:
+  push:
+    branches: [develop] # Déploiement automatique sur Staging lors de push sur develop
+    tags: ["v*"] # Déploiement automatique sur Production lors d'un tag de version v* (ex: v1.0.0)
+  workflow_dispatch: # Déclenchement manuel
+    inputs:
+      environment:
+        description: "Target Environment"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - staging
+          - production
+
+# Requis pour l'authentification OIDC (fédération d'identité sans mot de passe)
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-scan:
+    name: Build and Scan Images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [backend, client, auth]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7.0.0
+
+      - name: Set Environment Variables
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="manual-${{ github.sha }}"
+            CACHE_SCOPE="manual"
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            TAG="${{ github.ref_name }}"
+            CACHE_SCOPE="prod"
+          else
+            TAG="develop-${{ github.sha }}"
+            CACHE_SCOPE="staging"
+          fi
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          echo "CACHE_SCOPE=$CACHE_SCOPE" >> $GITHUB_ENV
+
+      - name: Azure Login
+        uses: azure/login@v3.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to ACR
+        run: |
+          az acr login --name ${{ secrets.ACR_NAME }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.2.0
+
+      - name: Build and Push ${{ matrix.service }}
+        uses: docker/build-push-action@v7.3.0
+        with:
+          context: ./${{ matrix.service }}
+          push: true
+          tags: |
+            ${{ secrets.ACR_NAME }}.azurecr.io/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+            ${{ secrets.ACR_NAME }}.azurecr.io/${{ matrix.service }}:latest
+          cache-from: type=gha,scope=${{ matrix.service }}-${{ env.CACHE_SCOPE }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}-${{ env.CACHE_SCOPE }}
+
+      - name: Scan ${{ matrix.service }} Image
+        uses: ./.github/actions/trivy-scan
+        with:
+          image-ref: ${{ secrets.ACR_NAME }}.azurecr.io/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+
+  deploy:
+    name: Deploy to AKS
+    needs: build-and-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7.0.0
+
+      - name: Set Environment Variables
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ENV="${{ github.event.inputs.environment }}"
+            TAG="manual-${{ github.sha }}"
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            ENV="production"
+            TAG="${{ github.ref_name }}"
+          else
+            ENV="staging"
+            TAG="develop-${{ github.sha }}"
+          fi
+
+          echo "DEPLOY_ENV=$ENV" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+
+          if [ "$ENV" = "production" ]; then
+            echo "VALUES_FILE=values-prod.yaml" >> $GITHUB_ENV
+            echo "NAMESPACE=production" >> $GITHUB_ENV
+          else
+            echo "VALUES_FILE=values-staging.yaml" >> $GITHUB_ENV
+            echo "NAMESPACE=staging" >> $GITHUB_ENV
+          fi
+
+      - name: Azure Login
+        uses: azure/login@v3.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get AKS Credentials
+        run: |
+          az aks get-credentials --resource-group ${{ secrets.RESOURCE_GROUP }} --name ${{ secrets.CLUSTER_NAME }}
+
+      - name: Deploy with Helm
+        run: |
+          if [ "${{ env.DEPLOY_ENV }}" = "production" ]; then
+            helm upgrade --install todo-app ./k8s/todo-app --atomic \
+              --namespace ${{ env.NAMESPACE }} \
+              --create-namespace \
+              -f ./k8s/todo-app/${{ env.VALUES_FILE }} \
+              --set client.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/client" \
+              --set client.image.tag="${{ env.IMAGE_TAG }}" \
+              --set backend.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/backend" \
+              --set backend.image.tag="${{ env.IMAGE_TAG }}" \
+              --set auth.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/auth" \
+              --set auth.image.tag="${{ env.IMAGE_TAG }}" \
+              --set mysql.host="${{ secrets.MYSQL_HOST }}" \
+              --set mysql.authHost="${{ secrets.MYSQL_HOST }}" \
+              --set keyvault.name="${{ secrets.KEYVAULT_NAME }}" \
+              --set keyvault.tenantId="${{ secrets.KEYVAULT_TENANT_ID }}" \
+              --set keyvault.clientId="${{ secrets.KEYVAULT_CLIENT_ID }}"
+          else
+            helm upgrade --install todo-app ./k8s/todo-app --atomic \
+              --namespace ${{ env.NAMESPACE }} \
+              --create-namespace \
+              -f ./k8s/todo-app/${{ env.VALUES_FILE }} \
+              --set client.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/client" \
+              --set client.image.tag="${{ env.IMAGE_TAG }}" \
+              --set backend.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/backend" \
+              --set backend.image.tag="${{ env.IMAGE_TAG }}" \
+              --set auth.image.repository="${{ secrets.ACR_NAME }}.azurecr.io/auth" \
+              --set auth.image.tag="${{ env.IMAGE_TAG }}"
+          fi
+
+

@@ -1,3 +1,3 @@
-const { getKnexConfig } = require('./src/repository/knexConfig');
+import { getKnexConfig } from './src/repository/knexConfig';
 
-module.exports = getKnexConfig();
+export default getKnexConfig();

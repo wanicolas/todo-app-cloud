@@ -1,21 +1,36 @@
 const { TodoService } = require('../../src/service/TodoService');
-const {
-    InMemoryRepository,
-} = require('../../src/repository/InMemoryRepository');
+const { KnexRepository } = require('../../src/repository/KnexRepository');
+const { getKnexConfig } = require('../../src/repository/knexConfig');
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
+
+process.env.MYSQL_HOST = '127.0.0.1';
+process.env.MYSQL_PORT = '3306';
+process.env.MYSQL_USER = 'root';
+process.env.MYSQL_PASSWORD = 'secret';
+process.env.MYSQL_DB = 'todos';
 
 const USER = 'user-1';
 const OTHER_USER = 'user-2';
 
 let service;
+const knex = require('knex');
+const testDb = knex(getKnexConfig());
 
 beforeEach(async () => {
-    const repository = new InMemoryRepository();
+    const repository = new KnexRepository(getKnexConfig());
     service = new TodoService(repository);
     await service.init();
+    await testDb('todo_items').del();
 });
 
 afterEach(async () => {
     await service.teardown();
+});
+
+afterAll(async () => {
+    await testDb.destroy();
 });
 
 test('addItem creates an item with id, name and userId', async () => {
