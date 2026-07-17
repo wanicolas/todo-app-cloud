@@ -28,13 +28,12 @@ export default function createApp(service: TodoService) {
     app.delete('/api/items', requireAuth, makeDeleteAllItems(service));
     app.delete('/api/items/:id', requireAuth, makeDeleteItem(service));
 
-    // Global error handler
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     app.use(
         (
             err: unknown,
             req: express.Request,
             res: express.Response,
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             _next: express.NextFunction,
         ) => {
             console.error('Unhandled error:', err);
