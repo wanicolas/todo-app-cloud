@@ -1,5 +1,13 @@
 #import "@preview/cmarker:0.1.10": render
-#import "@preview/mmdr:0.2.2": mermaid
+#import "@preview/merman:0.1.0": mermaid
+
+// Fonction pour nettoyer le Markdown avant le rendu (supprime H1 et lignes horizontales)
+#let render-clean-md(path) = {
+  let content = read(path)
+  content = content.replace(regex("(?m)^# [^\n]*\n+"), "")
+  content = content.replace(regex("(?m)^---\n+"), "")
+  render(content)
+}
 
 // Paramètres généraux du document
 #set document(title: "CONCEVOIR ET DEVELOPPER DES APPLICATIONS LOGICIELLES - Todo App Cloud", author: "Nicolas Walter")
@@ -8,15 +16,14 @@
 
 // Style des titres
 #show heading: set text(fill: rgb("#000000"), font: "Hanken Grotesk")
-#show heading.where(level: 1): it => block(width: 100%, below: 1.5em, above: 2em)[
-  #text(size: 20pt, weight: "bold")[#it.body]
-]
-#show heading.where(level: 2): it => block(width: 100%, below: 1em, above: 1.5em)[
-  #text(size: 14pt, weight: "bold")[#it.body]
-]
-#show heading.where(level: 3): it => block(width: 100%, below: 0.8em, above: 1.2em)[
-  #text(size: 12pt, weight: "bold")[#it.body]
-]
+#show heading.where(level: 1): set text(size: 20pt, weight: "bold")
+#show heading.where(level: 1): set block(width: 100%, below: 1.5em, above: 2em)
+
+#show heading.where(level: 2): set text(size: 14pt, weight: "bold")
+#show heading.where(level: 2): set block(width: 100%, below: 1em, above: 1.5em)
+
+#show heading.where(level: 3): set text(size: 12pt, weight: "bold")
+#show heading.where(level: 3): set block(width: 100%, below: 0.8em, above: 1.2em)
 
 // Style des liens
 #show link: set text(fill: rgb("#0055cc"))
@@ -34,7 +41,9 @@
 
 // Intercept and Render Mermaid diagrams
 #show raw.where(lang: "mermaid"): it => {
-  mermaid(it.text)
+  align(center)[
+    #mermaid(it.text)
+  ]
 }
 
 // -------------------------------------------------------------
@@ -42,9 +51,12 @@
 // -------------------------------------------------------------
 #page(header: none, footer: none)[
   #align(center + horizon)[
-    #text(size: 14pt, weight: "light")[Nicolas Walter]
-    #v(2pt)
-    #text(size: 26pt, weight: "bold")[Concevoir et développer des applications logicielles]
+    #set par(justify: false)
+    #text(
+      size: 26pt,
+      weight: "bold",
+      hyphenate: false,
+    )[Concevoir et développer des applications logicielles]
     #v(1em)
     #text(size: 14pt, style: "italic")[Projet : Todo App Cloud]
     #v(2em)
@@ -138,7 +150,7 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
 Dans cette section, nous présentons la structure globale du monorepo, l'organisation en microservices, les technologies utilisées et le détail de notre cartographie applicative.
 
-#render(read("../context_map.md"))
+#render-clean-md("../context_map.md")
 
 #pagebreak()
 
@@ -149,7 +161,7 @@ Nous décrivons ici la gestion des environnements locaux et cloud, ainsi que la 
 == Déploiement multi-environnement
 Nous avons configuré des profils distincts pour isoler le Staging (préproduction économique) et la Production (hautement disponible et sécurisée). Les détails des configurations Helm de ces environnements sont décrits ci-dessous.
 
-#render(read("../performance_criteria.md"))
+#render-clean-md("../performance_criteria.md")
 
 #pagebreak()
 
@@ -157,7 +169,7 @@ Nous avons configuré des profils distincts pour isoler le Staging (préproducti
 
 Conformément à la compétence *C2.2.3*, nous présentons ici les standards choisis (RGAA/OPQUAST) et les mesures prises pour rendre l'application accessible aux personnes en situation de handicap.
 
-#render(read("../accessibility.md"))
+#render-clean-md("../accessibility.md")
 
 #pagebreak()
 
@@ -165,7 +177,7 @@ Conformément à la compétence *C2.2.3*, nous présentons ici les standards cho
 
 Nous détaillons ci-dessous le protocole complet de déploiement continu automatisé sur Azure AKS, sécurisé par authentification OIDC.
 
-#render(read("../deployment_procedure.md"))
+#render-clean-md("../deployment_procedure.md")
 
 #pagebreak()
 
@@ -173,7 +185,7 @@ Nous détaillons ci-dessous le protocole complet de déploiement continu automat
 
 Cette section présente le cahier de recettes validant les fonctionnalités, la sécurité applicative (OWASP) et les performances du logiciel.
 
-#render(read("../cahier_recettes.md"))
+#render-clean-md("../cahier_recettes.md")
 
 #pagebreak()
 
@@ -181,7 +193,7 @@ Cette section présente le cahier de recettes validant les fonctionnalités, la 
 
 Nous décrivons le registre des bogues identifiés lors de la recette applicative et les mesures de correction appliquées.
 
-#render(read("../plan_correction_bogues.md"))
+#render-clean-md("../plan_correction_bogues.md")
 
 #pagebreak()
 
@@ -190,22 +202,22 @@ Nous décrivons le registre des bogues identifiés lors de la recette applicativ
 Pour assurer la traçabilité et le suivi par les équipes opérationnelles, nous fournissons ici le manuel d'utilisation (incluant les aspects RGPD/droit à l'oubli) et le manuel de mise à jour/rollback de l'application.
 
 == Manuel d'Utilisation
-#render(read("../user_manual.md"))
+#render-clean-md("../user_manual.md")
 
 #v(2em)
 
 == Manuel de Mise à Jour et Exploitation
-#render(read("../upgrade_manual.md"))
+#render-clean-md("../upgrade_manual.md")
 
 #v(2em)
 
 == Runbooks d'Exploitation
-#render(read("../runbooks.md"))
+#render-clean-md("../runbooks.md")
 
 #v(2em)
 
 == Glossaire Technique
-#render(read("../glossaire.md"))
+#render-clean-md("../glossaire.md")
 
 // -------------------------------------------------------------
 // PAGE DE FIN (4ème de couverture)
