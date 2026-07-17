@@ -44,7 +44,7 @@ export default function requireAuth(
         if (typeof sub !== 'string' || sub.length === 0) {
             return res.status(401).send({ error: 'Invalid or expired token' });
         }
-        (req as any).userId = sub;
+        (req as unknown as { userId: string }).userId = sub;
         next();
     } catch {
         return res.status(401).send({ error: 'Invalid or expired token' });

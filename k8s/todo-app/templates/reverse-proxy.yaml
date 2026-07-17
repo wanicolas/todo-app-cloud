@@ -120,6 +120,10 @@ spec:
         - name: reverse-proxy
           image: "{{ .Values.reverseProxy.image.repository }}:{{ .Values.reverseProxy.image.tag }}"
           imagePullPolicy: {{ .Values.reverseProxy.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
           ports:
             - containerPort: 80
               name: http
@@ -127,6 +131,8 @@ spec:
             - containerPort: 443
               name: https
             {{- end }}
+          resources:
+            {{- toYaml .Values.reverseProxy.resources | nindent 12 }}
           volumeMounts:
             - name: config-volume
               mountPath: /etc/nginx/nginx.conf

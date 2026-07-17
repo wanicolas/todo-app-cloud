@@ -79,7 +79,7 @@ class AuthService {
 
     private sign(user: User): string {
         return jwt.sign({ sub: user.id, email: user.email }, this.secret, {
-            expiresIn: this.expiresIn as any,
+            expiresIn: this.expiresIn as jwt.SignOptions['expiresIn'],
         });
     }
 

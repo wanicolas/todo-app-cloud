@@ -28,5 +28,18 @@ export default function createApp(service: TodoService) {
     app.delete('/api/items', requireAuth, makeDeleteAllItems(service));
     app.delete('/api/items/:id', requireAuth, makeDeleteItem(service));
 
+    app.use(
+        (
+            err: unknown,
+            req: express.Request,
+            res: express.Response,
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            _next: express.NextFunction,
+        ) => {
+            console.error('Unhandled error:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        },
+    );
+
     return app;
 }

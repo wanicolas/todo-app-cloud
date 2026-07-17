@@ -9,11 +9,11 @@ Projet réalisé dans le cadre du module "Développer pour le cloud" — M2 Dev 
 - **Frontend** : React 19, TypeScript, Vite, React Bootstrap, React Router
 - **Backend** : Node.js 22, Express 5, TypeScript
 - **Auth** : microservice dédié (Express 5, TypeScript, JWT HS256, bcrypt) avec sa propre base
-- **Base de données** : MySQL 8.0.21 (SQLite en fallback local) — une instance par service de données
+- **Base de données** : MySQL 8.0.21 — une instance par service de données
 - **Query builder** : Knex.js (migrations versionnées, support multi-dialect)
 - **Proxy** : Traefik v3.6
 - **Tests** : Jest (backend + auth), Vitest (client), Playwright (E2E)
-- **CI** : GitHub Actions (5 pipelines : backend, client, auth, E2E, Trivy)
+- **CI** : GitHub Actions (2 pipelines centralisés : ci.yml et cd.yml)
 
 ## Prérequis
 
@@ -40,13 +40,13 @@ docker compose up --watch
 docker compose down
 ```
 
-### Sans Docker (dev local, SQLite)
+### Sans Docker (dev local)
 
 ```bash
 # Terminal 1 — Backend
 cd backend
 npm install
-npm run dev                    # API sur http://localhost:3000 (SQLite auto)
+npm run dev                    # API sur http://localhost:3000
 
 # Terminal 2 — Client
 cd client
@@ -61,7 +61,7 @@ npm run dev                    # React sur http://localhost:5173
 Le flag `--build` force la reconstruction de l'image (utile si le code a changé) et `--rm` supprime le conteneur après exécution.
 
 ```bash
-# Backend — 29 tests (SQLite automatique)
+# Backend — 29 tests
 docker compose run --build --rm -e MYSQL_HOST= backend npm test
 
 # Client — 23 tests
@@ -73,7 +73,7 @@ docker compose run --build --rm client npm test
 ```bash
 # Backend (Jest) — 29 tests
 cd backend
-npm install --ignore-scripts   # pour éviter la compilation native sqlite3 si make est manquant
+npm install
 npm test
 npm run test:coverage          # avec rapport de couverture
 
@@ -119,17 +119,24 @@ npm run typecheck              # tsc --noEmit
 npm run format-check           # Prettier
 ```
 
-## CI/CD
+## CI/CD & DevSecOps
 
-5 pipelines GitHub Actions dans `.github/workflows/` :
+L'architecture s'appuie sur 2 pipelines unifiés dans `.github/workflows/` :
 
-| Pipeline       | Déclencheur            | Contenu                                               |
-| -------------- | ---------------------- | ----------------------------------------------------- |
-| **ci-backend** | push/PR sur `backend/` | lint, typecheck, format, build, tests avec couverture |
-| **ci-client**  | push/PR sur `client/`  | lint, typecheck, format, build, tests avec couverture |
-| **ci-auth**    | push/PR sur `auth/`    | lint, typecheck, format, build, tests avec couverture |
-| **ci-e2e**     | PR vers main/develop   | Docker Compose + Playwright                           |
-| **ci-trivy**   | push main/develop      | Scan de vulnérabilités Trivy sur les images Docker    |
+| Pipeline   | Déclencheur                          | Contenu                                                                                                            |
+| ---------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| **ci.yml** | push/PR sur n'importe quelle branche | Orchestration intelligente (Lint/Typecheck → Build Docker avec cache Buildx → Scans Trivy → Tests E2E Playwright). |
+| **cd.yml** | push sur `develop` ou tag `v*`       | Build/Scan matriciel (parallèle) des images → Push ACR → Déploiement Helm sur AKS (OIDC sans mot de passe).        |
+
+### Cloud & Kubernetes Hardening (Azure / AKS)
+
+L'infrastructure a été durcie pour respecter les standards **Zero Trust** et **DevSecOps** :
+
+- **Isolation Réseau** : La base de données MySQL est isolée dans un réseau privé (Azure VNet + Private DNS Zone) et n'est plus accessible depuis Internet.
+- **Gestion des Secrets** : Azure Key Vault utilise désormais **Azure RBAC** avec l'identité CSI du cluster, et la protection anti-suppression (purge protection) est activée.
+- **Sécurité des Pods** : Les conteneurs tournent en mode **Non-Root** (`runAsNonRoot: true`) et sans escalade de privilèges.
+- **Pare-feu Kubernetes** : Des **NetworkPolicies** stricts sont appliqués. Seul le reverse-proxy (Nginx) peut recevoir du trafic public et router vers les microservices.
+- **Haute Disponibilité** : Tous les services sont configurés avec **HPA** (autoscaling dynamique) et **PDB** (Pod Disruption Budgets) pour garantir le Zéro-Downtime lors des maintenances Azure.
 
 ## Variables d'environnement
 
@@ -137,11 +144,11 @@ Voir `.env.example` pour la liste complète.
 
 | Variable             | Description                                        | Défaut                 |
 | -------------------- | -------------------------------------------------- | ---------------------- |
-| `MYSQL_HOST`         | Hôte MySQL                                         | — (si absent → SQLite) |
+| `MYSQL_HOST`         | Hôte MySQL                                         | `127.0.0.1`            |
 | `MYSQL_USER`         | Utilisateur MySQL                                  | —                      |
 | `MYSQL_PASSWORD`     | Mot de passe MySQL                                 | —                      |
 | `MYSQL_DB`           | Nom de la base                                     | —                      |
-| `SQLITE_DB_LOCATION` | Chemin du fichier SQLite                           | `/etc/todos/todo.db`   |
+
 | `JWT_SECRET`         | Secret partagé HS256 (auth signe, backend vérifie) | `dev-insecure-secret`  |
 | `JWT_EXPIRES_IN`     | Durée de validité des tokens                       | `1h`                   |
 | `NODE_ENV`           | Environnement Node                                 | `development`          |
@@ -180,7 +187,7 @@ laisser aucune donnée orpheline.
 │   ├── src/
 │   │   ├── routes/           # Controllers (factories avec injection du service)
 │   │   ├── service/          # TodoService (logique métier)
-│   │   ├── repository/       # KnexRepository, InMemoryRepository + factory
+│   │   ├── repository/       # KnexRepository + factory (MySQL)
 │   │   ├── migrations/       # Migrations Knex (schéma BDD)
 │   │   └── types.ts          # Interfaces TodoItem, TodoRepository
 │   ├── spec/                 # Tests Jest (unitaires + intégration + service)
@@ -204,9 +211,9 @@ laisser aucune donnée orpheline.
 │   └── Dockerfile            # Multi-stage (dev, build, production non-root)
 ├── e2e/                      # Tests Playwright (E2E)
 ├── k8s/todo-app/             # Chart Helm unifié (client, backend, auth, proxy, mysql-local, secrets CSI)
-├── .github/workflows/        # CI GitHub Actions (5 pipelines, scan Trivy adapté)
+├── .github/workflows/        # CI/CD GitHub Actions unifiée (pipelines ci.yml et cd.yml)
 ├── docs/
-│   ├── adr/                  # 11 ADR (décisions techniques)
+│   ├── adr/                  # ADR (décisions techniques)
 │   ├── context_map.md        # Cartographie des contextes métier
 │   ├── glossaire.md          # Glossaire technique des termes
 │   ├── deployment_procedure.md # Guide de déploiement pas-à-pas (Local & Azure AKS)
@@ -219,8 +226,7 @@ laisser aucune donnée orpheline.
 
 ```
 Routes (controllers)  →  TodoService  →  TodoRepository (interface)
-                                              ├── KnexRepository (SQLite / MySQL via Knex.js)
-                                              └── InMemoryRepository (tests)
+                                              └── KnexRepository (MySQL via Knex.js)
 ```
 
 L'injection de dépendances se fait par constructeur, sans framework. Le câblage est dans `index.ts` :

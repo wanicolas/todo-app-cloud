@@ -2,9 +2,12 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-// Set up temp SQLite DB and a deterministic secret before any app code loads.
-const dbPath = path.join(os.tmpdir(), `auth-integration-${Date.now()}.db`);
-delete process.env.MYSQL_HOST;
+// Set up MySQL environment and a deterministic secret before any app code loads.
+process.env.MYSQL_HOST = '127.0.0.1';
+process.env.MYSQL_PORT = '3307';
+process.env.MYSQL_USER = 'root';
+process.env.MYSQL_PASSWORD = 'secret';
+process.env.MYSQL_DB = 'auth';
 process.env.JWT_SECRET = 'test-secret';
 
 const {
@@ -15,17 +18,21 @@ const { AuthService } = require('../../src/service/AuthService');
 const { default: createApp } = require('../../src/app');
 const request = require('supertest');
 
-const repository = new KnexUserRepository(getKnexConfig(dbPath));
+const knex = require('knex');
+const testDb = knex(getKnexConfig());
+
+const repository = new KnexUserRepository(getKnexConfig());
 const service = new AuthService(repository);
 const app = createApp(service);
 
 beforeAll(async () => {
     await service.init();
+    await testDb('users').del();
 });
 
 afterAll(async () => {
+    await testDb.destroy();
     await service.teardown();
-    if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
 });
 
 describe('auth lifecycle', () => {

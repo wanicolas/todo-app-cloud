@@ -1,5 +1,7 @@
 # ADR-015 : Sécurisation Session (Cookies HttpOnly), ESModules et Mises à niveau Applicatives
 
+> **Note** : L'utilisation de bases de données locales SQLite mentionnée dans cet ADR a été abandonnée. Nous utilisons désormais des instances MySQL dédiées pour les tests (voir [ADR 016](./016-migration-full-mysql.md)).
+
 **Date** : juillet 2026  
 **Statut** : Accepté (Superpose et remplace [ADR-009](009-authentification-microservice-jwt.md))
 

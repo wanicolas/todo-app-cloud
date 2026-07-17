@@ -15,14 +15,34 @@ export default function requireAuth(
     }
 
     try {
-        let secret = process.env.JWT_SECRET || 'dev-insecure-secret';
+        let secret: string;
         if (process.env.JWT_SECRET_FILE) {
-            secret = fs
-                .readFileSync(process.env.JWT_SECRET_FILE, 'utf8')
-                .trim();
+            try {
+                secret = fs
+                    .readFileSync(process.env.JWT_SECRET_FILE, 'utf8')
+                    .trim();
+            } catch (err) {
+                if (process.env.NODE_ENV === 'production') {
+                    throw new Error(
+                        'Critical: JWT secret file is unreadable in production.',
+                        { cause: err },
+                    );
+                }
+                secret = 'dev-insecure-secret';
+            }
+        } else if (process.env.JWT_SECRET) {
+            secret = process.env.JWT_SECRET;
+        } else {
+            if (process.env.NODE_ENV === 'production') {
+                throw new Error(
+                    'Critical: JWT secret is missing in production.',
+                );
+            }
+            secret = 'dev-insecure-secret';
         }
+
         const payload = jwt.verify(token, secret) as jwt.JwtPayload;
-        (req as any).userId = payload.sub;
+        (req as Request & { userId: string }).userId = payload.sub as string;
         next();
     } catch {
         return res.status(401).send({ error: 'Invalid or expired token' });

@@ -13,7 +13,10 @@ export default function makeAddItem(service: TodoService) {
             return res.status(400).send({ error: 'Invalid name' });
         }
 
-        const item = await service.addItem((req as any).userId, name.trim());
+        const item = await service.addItem(
+            (req as unknown as { userId: string }).userId,
+            name.trim(),
+        );
         res.send(item);
     };
 }

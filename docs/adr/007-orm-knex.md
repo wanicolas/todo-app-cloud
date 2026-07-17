@@ -1,5 +1,7 @@
 # ADR-007 : Knex.js comme query builder
 
+> **Note** : Le support de SQLite mentionné dans cet ADR a été abandonné par la suite (voir [ADR 016](./016-migration-full-mysql.md)). L'application n'utilise plus que MySQL.
+
 **Date** : avril 2026
 **Statut** : Accepté
 
