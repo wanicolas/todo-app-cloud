@@ -1,6 +1,6 @@
 # Context Map
 
-Ce document décrit les limites des contextes métier (Bounded Contexts) et les relations entre les différents services de l'application.
+Ce chapitre présente la cartographie applicative de l'application : la structure globale du monorepo, l'organisation en microservices, les technologies utilisées et les limites des contextes métier (Bounded Contexts).
 
 ```mermaid
 graph TD

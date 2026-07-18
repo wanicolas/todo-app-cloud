@@ -1,6 +1,6 @@
 # Critères de Performance et de Qualité Logicielle
 
-Ce document définit les exigences et les critères mesurables en termes de performance et de qualité logicielle pour le projet **Todo App Cloud**, répondant aux modalités d'évaluation de la compétence **C2.1.1** du RNCP.
+Ce chapitre définit les exigences et critères mesurables en termes de performance et de qualité logicielle pour le projet **Todo App Cloud**. Il décrit également la gestion des environnements cloud distincts (Staging, Production) et la configuration Helm associée pour orchestrer les déploiements AKS de manière sécurisée et économique.
 
 ---
 

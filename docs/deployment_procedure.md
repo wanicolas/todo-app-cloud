@@ -1,6 +1,6 @@
 # Procédure de Déploiement
 
-Cette procédure explique pas à pas comment déployer l'infrastructure sur Azure, packager et pousser les images de conteneurs, et installer l'application sur le cluster AKS à l'aide de Helm.
+Ce chapitre détaille le protocole de déploiement continu automatisé sur Azure AKS, sécurisé par authentification OIDC. Il explique pas à pas comment déployer l'infrastructure Terraform, packager les images Docker, et installer l'application à l'aide de Helm.
 
 ---
 

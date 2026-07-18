@@ -148,18 +148,13 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
 = Architecture Logicielle & Choix Technologiques
 
-Dans cette section, nous présentons la structure globale du monorepo, l'organisation en microservices, les technologies utilisées et le détail de notre cartographie applicative.
-
 #render-clean-md("../context_map.md")
 
 #pagebreak()
 
 = Maintien des Environnements & Infrastructure (Helm)
 
-Nous décrivons ici la gestion des environnements locaux et cloud, ainsi que la configuration Helm pour orchestrer les déploiements AKS.
-
 == Déploiement multi-environnement
-Nous avons configuré des profils distincts pour isoler le Staging (préproduction économique) et la Production (hautement disponible et sécurisée). Les détails des configurations Helm de ces environnements sont décrits ci-dessous.
 
 #render-clean-md("../performance_criteria.md")
 
@@ -167,15 +162,11 @@ Nous avons configuré des profils distincts pour isoler le Staging (préproducti
 
 = Accessibilité Numérique (A11y)
 
-Conformément à la compétence *C2.2.3*, nous présentons ici les standards choisis (RGAA/OPQUAST) et les mesures prises pour rendre l'application accessible aux personnes en situation de handicap.
-
 #render-clean-md("../accessibility.md")
 
 #pagebreak()
 
 = Protocole de Déploiement Continu (CD)
-
-Nous détaillons ci-dessous le protocole complet de déploiement continu automatisé sur Azure AKS, sécurisé par authentification OIDC.
 
 #render-clean-md("../deployment_procedure.md")
 
@@ -183,15 +174,11 @@ Nous détaillons ci-dessous le protocole complet de déploiement continu automat
 
 = Recette Applicative & Cahier de Recettes
 
-Cette section présente le cahier de recettes validant les fonctionnalités, la sécurité applicative (OWASP) et les performances du logiciel.
-
 #render-clean-md("../cahier_recettes.md")
 
 #pagebreak()
 
 = Gestion des Anomalies & Plan de Correction
-
-Nous décrivons le registre des bogues identifiés lors de la recette applicative et les mesures de correction appliquées.
 
 #render-clean-md("../plan_correction_bogues.md")
 

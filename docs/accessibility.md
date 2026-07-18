@@ -1,6 +1,6 @@
 # Accessibilité Numérique (A11y) - Référentiels et Actions
 
-Ce document présente les choix méthodologiques et techniques mis en œuvre pour assurer l'accessibilité du projet.
+Ce chapitre présente les standards (RGAA/OPQUAST) et les mesures techniques mis en œuvre pour rendre l'application accessible aux personnes en situation de handicap.
 
 ## Choix et Justification des Référentiels
 

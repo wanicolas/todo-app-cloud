@@ -1,6 +1,6 @@
 # Cahier de Recettes
 
-Ce document recense l'ensemble des scénarios de test exécutés pour valider le bon fonctionnement technique, fonctionnel et de sécurité de l'application.
+Ce chapitre recense l'ensemble des scénarios de test (fonctionnels, sécurité OWASP, performance) exécutés pour valider la fiabilité globale de l'application.
 
 ## Stratégie de Test & Couverture
 

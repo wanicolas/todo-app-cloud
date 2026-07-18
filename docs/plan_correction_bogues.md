@@ -1,6 +1,6 @@
 # Plan de Correction des Bogues
 
-Ce document décrit les anomalies identifiées lors de la phase de recette technique et applicative du projet, ainsi que les correctifs appliqués.
+Ce chapitre décrit le registre des anomalies identifiées lors de la phase de recette technique et applicative du projet, ainsi que les mesures de correction appliquées de manière documentée.
 
 ## Suivi et Qualification des Anomalies
 
