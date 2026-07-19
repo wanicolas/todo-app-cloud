@@ -9,7 +9,7 @@ Ce chapitre réunit les exigences et mesures d'assurance qualité et de performa
 L'application déployée sur Kubernetes doit respecter les seuils de performance mesurables suivants :
 
 | Métrique (Metric)             | Seuil (SLA)  | Descriptif et Justification                                       |
-| :---------------------------- | :----------: | :---------------------------------------------------------------- |
+| :---------------------------- | :----------- | :---------------------------------------------------------------- |
 | **Temps de réponse p(95)**    | **< 300 ms** | 95% des appels HTTP de l'API doivent être traités sous les 300ms. |
 | **Taux d'échec des requêtes** |  **< 1 %**   | Moins de 1% des appels doivent renvoyer des erreurs HTTP 5xx.     |
 | **Démarrage des services**    |  **< 5 s**   | Temps requis pour démarrer un nouveau pod lors de l'autoscaling.  |

@@ -1,4 +1,6 @@
-# Protocole d'Intégration Continue (CI)
+# Protocole d'Intégration Continue (CI) et Environnement
+
+Le projet est conçu pour être totalement agnostique vis-à-vis de l'environnement de développement : le choix de l'éditeur de code (IDE) est libre, et toutes les commandes s'exécutent en ligne de commande (CLI). L'unique contrainte stricte est la présence de **Docker Engine** et **Docker Compose**. Cela permet d'isoler l'environnement local et d'exécuter les tests avec la même architecture logicielle (microservices et bases de données), sans avoir à reproduire localement la complexité opérationnelle de la production (qui s'appuie sur Kubernetes, Azure Key Vault et des bases managées).
 
 Le protocole d'intégration continue est au cœur de notre démarche d'assurance qualité et de prévention des régressions. Configuré via GitHub Actions dans [.github/workflows/ci.yml](file:///.github/workflows/ci.yml), il s'exécute automatiquement à chaque soumission de Pull Request ou push sur la branche principale `main`.
 

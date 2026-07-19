@@ -6,7 +6,7 @@ Pour garantir la maintenabilité, la robustesse et la testabilité, les microser
 
 ## Structure en Trois Couches (Three-Tier Architecture)
 
-Chaque service métier est séparé de manière hermétique en trois niveau de responsabilité :
+Chaque service métier est séparé de manière hermétique en trois niveaux de responsabilité :
 
 ```
 Requête HTTP  ──> [ Couche de Présentation (Routes/Controllers) ]
