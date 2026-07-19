@@ -35,10 +35,10 @@
 #show link: set text(fill: rgb("#0055cc"))
 
 // Style des blocs de code
-#show raw: set text(font: "JetBrains Mono", size: 9pt)
+#show raw: set text(font: "JetBrains Mono", size: 8.5pt)
 #show raw.where(block: true): it => block(
   fill: rgb("#f7f7f7"),
-  inset: 10pt,
+  inset: 6pt,
   radius: 3pt,
   width: 100%,
   stroke: 0.5pt + rgb("#e5e5e5"),
@@ -91,7 +91,7 @@
 // Style de la page pour le reste du document
 #set page(
   paper: "a4",
-  margin: (x: 2.5cm, top: 3cm, bottom: 3cm),
+  margin: (x: 2cm, top: 2cm, bottom: 2cm),
   header: [
     #grid(
       columns: (1fr, auto),
@@ -145,7 +145,7 @@
   #v(2em)
   #text(size: 18pt, weight: "bold")[Table des Matières]
   #v(1.5em)
-  #outline(title: none, indent: 1.5em)
+  #outline(title: none, indent: 1.5em, depth: 2)
 ]
 
 #set heading(numbering: "1.1.")
@@ -258,8 +258,7 @@ Pour assurer la traçabilité et le suivi par les équipes opérationnelles, nou
 
 #v(2em)
 
-== Glossaire Technique
-#render-clean-md("../glossaire.md")
+
 
 
 // -------------------------------------------------------------

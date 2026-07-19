@@ -46,7 +46,7 @@ graph TD
 
 Le prototype réalisé est une **Single Page Application (SPA)** développée avec **React 19** et **TypeScript**. Il cible des environnements multi-équipements (Web de bureau, tablettes et terminaux mobiles) grâce à une structure d'interface entièrement responsive utilisant le système de grille fluide de **React-Bootstrap** et du CSS personnalisé.
 
-### 1. Interface d'Authentification (Mire de Connexion et Inscription)
+### Interface d'Authentification (Mire de Connexion et Inscription)
 
 L'accès à l'application est protégé. L'interface propose deux parcours simples, sémantiques et conformes aux bonnes pratiques d'accessibilité (champs de saisie liés à leurs libellés HTML).
 
@@ -67,7 +67,7 @@ L'accès à l'application est protégé. L'interface propose deux parcours simpl
 
 ---
 
-### 2. Tableau de Bord (Gestion de la Liste de Tâches)
+### Tableau de Bord (Gestion de la Liste de Tâches)
 
 Une fois connecté, l'utilisateur est redirigé vers son tableau de bord personnel. La navigation est conçue pour limiter la charge cognitive et permettre une interaction rapide, au clavier comme à la souris.
 
@@ -81,7 +81,7 @@ Une fois connecté, l'utilisateur est redirigé vers son tableau de bord personn
 
 ---
 
-### 3. Espace de Gestion de Compte (Conformité RGPD & Sécurité)
+### Espace de Gestion de Compte (Conformité RGPD & Sécurité)
 
 Une page dédiée « Mon Compte » permet à l'utilisateur de gérer ses informations et d'exercer ses droits réglementaires :
 

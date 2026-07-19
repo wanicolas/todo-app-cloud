@@ -4,7 +4,7 @@ Pour garantir la maintenabilité, la robustesse et la testabilité (C2.2.1 et C2
 
 ---
 
-## 1. Structure en Trois Couches (Three-Tier Architecture)
+## Structure en Trois Couches (Three-Tier Architecture)
 
 Chaque service métier est séparé de manière hermétique en trois niveau de responsabilité :
 
@@ -19,28 +19,33 @@ Requête HTTP  ──> [ Couche de Présentation (Routes/Controllers) ]
 ```
 
 ### A. La Couche Présentation (Routes & Controllers)
+
 - **Rôle** : Réceptionner les flux HTTP, valider les paramètres entrants (body, query, headers), déléguer l'exécution à la couche domaine, et formater la réponse (JSON, codes de statut HTTP : 200, 201, 400, 401, 403, 404, 500).
 - **Structure** : Dans les fichiers sous `src/routes/`, les routeurs Express sont modélisés comme des factories (fonctions prenant le service en argument et retournant le routeur Express). Cela permet d'isoler Express des autres couches.
 
 ### C. La Couche Domaine (Service)
+
 - **Rôle** : Contenir la logique métier centrale de l'application (validation de règles d'affaires, calculs, génération d'identifiants uniques UUID, orchestration des flux métier).
 - **Indépendance** : La couche domaine n'a aucune connaissance d'Express (elle ne manipule ni objets `req` ou `res`, ni codes HTTP) et aucune connaissance directe de la base de données physique (elle manipule une interface abstraite de persistance).
 
 ### D. La Couche de Persistance (Repository)
+
 - **Rôle** : Interagir avec les bases de données SQL via le query-builder **Knex.js** (écriture des requêtes SELECT, INSERT, UPDATE, DELETE).
 - **Abstraction par Interface** : La persistance implémente une interface TypeScript stricte (par exemple, `TodoRepository` dans `backend/src/types.ts`). Le service ne dépend que de cette interface.
 
 ---
 
-## 2. Injection de Dépendances Manuelle (DI)
+## Injection de Dépendances Manuelle (DI)
 
-L'injection de dépendances consiste à passer à un objet ses collaborateurs (dépendances) lors de sa construction plutôt qu'il ne les instancie lui-même. 
+L'injection de dépendances consiste à passer à un objet ses collaborateurs (dépendances) lors de sa construction plutôt qu'il ne les instancie lui-même.
 
 ### Justification technique
+
 - **Testabilité** : Permet de tester la logique métier du service en lui passant un dépôt factice en mémoire (`InMemoryRepository`) sans dépendre d'une base de données active (évite les mocks globaux de modules Jest qui rendent le code fragile).
 - **Évolutivité** : Permet de changer d'implémentation de stockage (ex: passer d'un fichier plat à MySQL) sans modifier une seule ligne de code de la logique métier.
 
 ### Câblage au démarrage (Bootstrapping)
+
 Le point d'entrée de l'application (`index.ts`) orchestre la création des instances dans l'ordre de leurs dépendances. Voici comment s'effectue le câblage dans `backend/src/index.ts` :
 
 ```typescript
@@ -61,7 +66,7 @@ app.listen(port, () => { ... });
 
 ---
 
-## 3. Versioning et Migrations SQL de la Base de Données
+## Versioning et Migrations SQL de la Base de Données
 
 Pour répondre aux exigences de maintenabilité et de reproductibilité des environnements, la structure de la base de données est versionnée à l'aide des **migrations Knex.js** sous `src/migrations/`.
 

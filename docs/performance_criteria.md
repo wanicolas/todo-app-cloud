@@ -110,54 +110,54 @@ La qualité du code et du produit est assurée par un ensemble d'outils automati
 
 ## Conception du Harnais de Tests Unitaires & d'Intégration (C2.2.2)
 
-Le harnais de test automatisé a été conçu pour s'assurer du bon fonctionnement fonctionnel des microservices tout en prévenant les risques de régression lors des livraisons de code (C2.2.2). 
+Le harnais de test automatisé a été conçu pour s'assurer du bon fonctionnement fonctionnel des microservices tout en prévenant les risques de régression lors des livraisons de code (C2.2.2).
 
-### 1. Stratégie d'Isolation et Environnement Éphémère
+### Stratégie d'Isolation et Environnement Éphémère
 
 Afin de garantir que chaque cas de test s'exécute dans un état propre, sans dépendance réseau ou pollution de données (effets de bord entre tests exécutés en parallèle) :
+
 - **Base de données en mémoire** : Pour les tests de logique métier (`TodoService`, `AuthService`), la connexion s'appuie sur le moteur **SQLite3 en mémoire (`:memory:`)**.
-- **Cycle de vie des données (Hooks)** : 
+- **Cycle de vie des données (Hooks)** :
   - Le crochet `beforeEach` réinitialise la structure de la table par migration et vide le contenu.
   - Le crochet `afterEach` effectue la fermeture des ressources (Graceful Teardown).
   - Le crochet `afterAll` détruit l'instance éphémère de connexion SQL.
 
 ---
 
-### 2. Illustration d'un Cas de Test Unitaire (Jest)
+### Illustration d'un Cas de Test Unitaire (Jest)
 
 Plutôt que d'exposer la totalité du harnais, nous présentons ici l'un des scénarios les plus critiques de notre suite de tests : la vérification de l'isolation logique des données entre utilisateurs. Ce test garantit qu'un utilisateur A ne peut en aucun cas lire ou interagir avec les données appartenant à un utilisateur B.
 
 Le test utilise la structure standardisée **AAA (Arrange, Act, Assert)** :
 
 ```javascript
-const { TodoService } = require('../../src/service/TodoService');
-const { KnexRepository } = require('../../src/repository/KnexRepository');
-const { getKnexConfig } = require('../../src/repository/knexConfig');
+const { TodoService } = require("../../src/service/TodoService");
+const { KnexRepository } = require("../../src/repository/KnexRepository");
+const { getKnexConfig } = require("../../src/repository/knexConfig");
 
-const USER = 'user-1';
-const OTHER_USER = 'user-2';
+const USER = "user-1";
+const OTHER_USER = "user-2";
 let service;
 
 beforeEach(async () => {
-    // Initialisation éphémère pour chaque test
-    const repository = new KnexRepository(getKnexConfig());
-    service = new TodoService(repository);
-    await service.init();
+  // Initialisation éphémère pour chaque test
+  const repository = new KnexRepository(getKnexConfig());
+  service = new TodoService(repository);
+  await service.init();
 });
 
-test('a user cannot see another user items', async () => {
-    // 1. ARRANGE (Préparation) : L'utilisateur B crée une tâche privée
-    await service.addItem(OTHER_USER, 'Tâche Secrète');
+test("a user cannot see another user items", async () => {
+  // 1. ARRANGE (Préparation) : L'utilisateur B crée une tâche privée
+  await service.addItem(OTHER_USER, "Tâche Secrète");
 
-    // 2. ACT (Action) : L'utilisateur A tente de lister ses tâches
-    const items = await service.getAllItems(USER);
+  // 2. ACT (Action) : L'utilisateur A tente de lister ses tâches
+  const items = await service.getAllItems(USER);
 
-    // 3. ASSERT (Assertion) : On valide que la liste pour A est strictement vide
-    expect(items).toEqual([]);
+  // 3. ASSERT (Assertion) : On valide que la liste pour A est strictement vide
+  expect(items).toEqual([]);
 });
 ```
 
-### 3. Couverture de Code (Code Coverage)
+### Couverture de Code (Code Coverage)
 
 Grâce à cette suite de tests, nous mesurons la couverture du code via l'outil de rapport intégré à Jest (`c8` / `istanbul`). Elle atteint **plus de 90 %** sur les fichiers de services et repositories, garantissant ainsi qu'aucun chemin critique (gestion d'erreurs, injections) n'est laissé sans validation automatisée.
-
