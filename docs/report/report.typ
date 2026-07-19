@@ -50,7 +50,13 @@
 // PAGE DE GARDE
 // -------------------------------------------------------------
 #page(header: none, footer: none)[
-  #align(center + horizon)[
+  #align(center)[
+    #text(size: 14pt)[#upper("Nicolas Walter")]
+  ]
+
+  #v(1fr)
+
+  #align(center)[
     #set par(justify: false)
     #text(
       size: 26pt,
@@ -63,12 +69,16 @@
     #rect(width: 40%, height: 0.5pt, fill: rgb("#888888"))
     #v(2em)
     #text(size: 12pt)[
-      *Candidat :* Nicolas Walter \
+      *École :* Ynov Campus Strasbourg \
       *Formation :* Mastère 2 Expert en Développement Full Stack \
-      *École :* Ynov Informatique \
-      *Date :* 20 Juillet 2026 \
       *Réf. Évaluation :* Bloc 2 (Certification RNCP39583)
     ]
+  ]
+
+  #v(1fr)
+
+  #align(center)[
+    #text(size: 12pt)[20 Juillet 2026]
   ]
 ]
 
