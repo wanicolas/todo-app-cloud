@@ -8,15 +8,22 @@
   content = content.replace(regex("(?m)^---\n+"), "")
   render(content, scope: (
     image: (img-path, alt: none) => {
-      // Extrait le nom du fichier image et force la résolution relative à report.typ (dossier ../images)
+      // Résolution relative à report.typ : taille normale (100% du conteneur) pour les grilles et taille restreinte centrée pour la gestion de compte.
       let filename = img-path.split("/").last()
-      image("../images/" + filename, alt: alt)
+      if filename == "account.png" {
+        align(center)[#image("../images/" + filename, alt: alt, width: 55%)]
+      } else {
+        image("../images/" + filename, alt: alt)
+      }
     },
   ))
 }
 
 // Paramètres généraux du document
-#set document(title: "Concevoir et développer des applications logicielles - Todo App Cloud", author: "Nicolas Walter")
+#set document(
+  title: "Concevoir et développer des applications logicielles - Todo App Cloud",
+  author: "Nicolas Walter",
+)
 #set text(font: "Hanken Grotesk", size: 10.5pt, fill: rgb("#1a1a1a"))
 #set par(justify: true, leading: 0.65em)
 
@@ -35,6 +42,23 @@
 
 // Style des liens
 #show link: set text(fill: rgb("#0055cc"))
+
+// Style global pour tous les tableaux : alignement à gauche par défaut, en-tête gris et bordures fines
+#show table: set table(
+  fill: (x, y) => if y == 0 { rgb("#eaeaea") } else { none },
+  stroke: 0.5pt + rgb("#d0d0d0"),
+  align: left,
+)
+
+// En-têtes en gras automatique
+#show table.cell.where(y: 0): strong
+
+// Centrage des tableaux sur la page et désactivation de la justification et de la césure (hyphenate) dans les cellules
+#show table: it => {
+  set par(justify: false)
+  set text(hyphenate: false)
+  align(center, it)
+}
 
 // Style des blocs de code
 #show raw: set text(font: "JetBrains Mono", size: 8.5pt)
@@ -163,48 +187,43 @@ Ce dossier technique présente le travail de conception, de développement, de s
 Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des applications logicielles)* pour la certification professionnelle. Afin de faciliter la lecture de ce document et d'attester de la conformité des livrables techniques, la matrice de correspondance ci-dessous identifie les chapitres répondant précisément aux exigences de l'évaluation :
 
 #v(1em)
-#align(center)[
-  #table(
-    columns: (1.5fr, 0.8fr, 2.2fr),
-    fill: (x, y) => if y == 0 { rgb("#eaeaea") } else { none },
-    stroke: 0.5pt + rgb("#d0d0d0"),
-    [*Livrable requis pour l'évaluation*], [*Compétences RNCP*], [*Localisation dans ce dossier technique*],
-    [Le protocole de déploiement continu],
-    [C2.1.1 & C2.2.4],
-    [Chapitre 5 (Protocole de déploiement continu & Infrastructure)],
+#table(
+  columns: (1.5fr, 0.8fr, 2.2fr),
+  [Livrable requis pour l'évaluation], [Compétences RNCP], [Localisation dans ce dossier technique],
+  [Le protocole de déploiement continu],
+  [C2.1.1 & C2.2.4],
+  [Chapitre 5 (Protocole de déploiement continu & Infrastructure)],
 
-    [Les critères de qualité et de performance],
-    [C2.1.1],
-    [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
+  [Les critères de qualité et de performance],
+  [C2.1.1],
+  [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
 
-    [Le protocole d'intégration continue], [C2.1.2], [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
-    [Une architecture logicielle structurée],
-    [C2.2.1],
-    [Chapitre 1 (Architecture Logicielle, Modèle Métier & Prototype)],
+  [Le protocole d'intégration continue], [C2.1.2], [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
+  [Une architecture logicielle structurée], [C2.2.1], [Chapitre 1 (Architecture Logicielle, Modèle Métier & Prototype)],
 
-    [Une présentation d'un des prototypes réalisés],
-    [C2.2.1],
-    [Chapitre 1 (Architecture Logicielle, Modèle Métier & Prototype)],
+  [Une présentation d'un des prototypes réalisés],
+  [C2.2.1],
+  [Chapitre 1 (Architecture Logicielle, Modèle Métier & Prototype)],
 
-    [L'utilisation de Framework et paradigmes],
-    [C2.2.1],
-    [Chapitre 1 (Architecture Logicielle, Modèle Métier & Prototype)],
+  [L'utilisation de Framework et paradigmes],
+  [C2.2.1],
+  [Chapitre 1 (Architecture Logicielle, Modèle Métier & Prototype)],
 
-    [Un jeu de tests unitaires (Harnais de test)],
-    [C2.2.2],
-    [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
+  [Un jeu de tests unitaires (Harnais de test)],
+  [C2.2.2],
+  [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
 
-    [Une présentation des mesures de sécurité], [C2.2.3], [Chapitre 3 (Sécurité Applicative & Cloud)],
-    [Présentation de l'accès aux personnes handicapées], [C2.2.3], [Chapitre 4 (Accessibilité Numérique)],
-    [L'historique des différentes versions (Changelog)], [C2.2.4], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
-    [La dernière version fonctionnelle et fiable], [C2.2.4], [Code source fourni (Dépôt Git & images de production)],
-    [Le cahier de recettes], [C2.3.1], [Chapitre 6 (Recette Applicative & Cahier de Recettes)],
-    [Le plan de correction des bogues], [C2.3.2], [Chapitre 7 (Gestion des Anomalies & Plan de Correction)],
-    [Le manuel de déploiement], [C2.4.1], [Chapitre 5 (Protocole de déploiement continu & Infrastructure)],
-    [Le manuel d'utilisation], [C2.4.1], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
-    [Le manuel de mise à jour], [C2.4.1], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
-  )
-]
+  [Une présentation des mesures de sécurité], [C2.2.3], [Chapitre 3 (Sécurité Applicative & Cloud)],
+  [Présentation de l'accès aux personnes handicapées], [C2.2.3], [Chapitre 4 (Accessibilité Numérique)],
+  [L'historique des différentes versions (Changelog)], [C2.2.4], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
+  [La dernière version fonctionnelle et fiable], [C2.2.4], [Code source fourni (Dépôt Git & images de production)],
+  [Le cahier de recettes], [C2.3.1], [Chapitre 6 (Recette Applicative & Cahier de Recettes)],
+  [Le plan de correction des bogues], [C2.3.2], [Chapitre 7 (Gestion des Anomalies & Plan de Correction)],
+  [Le manuel de déploiement], [C2.4.1], [Chapitre 5 (Protocole de déploiement continu & Infrastructure)],
+  [Le manuel d'utilisation], [C2.4.1], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
+  [Le manuel de mise à jour], [C2.4.1], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
+)
+
 
 #pagebreak()
 
