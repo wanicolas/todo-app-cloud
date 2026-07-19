@@ -1,6 +1,6 @@
-# Protocole d'Intégration Continue (CI) (C2.1.2)
+# Protocole d'Intégration Continue (CI)
 
-Le protocole d'intégration continue est au cœur de notre démarche d'assurance qualité et de prévention des régressions (C2.1.2). Configuré via GitHub Actions dans [.github/workflows/ci.yml](file:///.github/workflows/ci.yml), il s'exécute automatiquement à chaque soumission de Pull Request ou push sur la branche principale `main`.
+Le protocole d'intégration continue est au cœur de notre démarche d'assurance qualité et de prévention des régressions. Configuré via GitHub Actions dans [.github/workflows/ci.yml](file:///.github/workflows/ci.yml), il s'exécute automatiquement à chaque soumission de Pull Request ou push sur la branche principale `main`.
 
 ---
 
@@ -19,28 +19,24 @@ Pour garantir la stabilité du tronc commun, aucun développeur ne peut fusionne
 Le workflow CI orchestre les validations de manière parallèle et progressive afin d'accélérer les retours (Fast Feedback) :
 
 ```
-             ┌────────────── Push / Pull Request ──────────────┐
-             │                                                 │
-             ▼                                                 ▼
-     [ Job: Backend ]                                  [ Job: Auth ]
- - Lint (ESLint)                                   - Lint (ESLint)
- - Typecheck (tsc)                                 - Typecheck (tsc)
- - Tests Jest (BDD MySQL éphémère)                 - Tests Jest (BDD MySQL éphémère)
-             │                                                 │
-             └───────────────────────┬─────────────────────────┘
-                                     │ (Si succès)
-                                     ▼
-                           [ Job: Client (Front) ]
-                        - Lint, Typecheck, Tests Vitest
-                                     │
-                                     ▼
-                        ┌────────────┴────────────┐
-                        │                         │
-                        ▼                         ▼
-               [ Job: Trivy Scan ]          [ Job: E2E Playwright ]
-             - Build images Docker        - Build local compose dev
-             - Scan CVE des conteneurs    - Démarrage stack Traefik
-                                          - Exécution tests Playwright
+             ┌───────────────────────── Push / Pull Request ─────────────────────────┐
+             │                                         │                             │
+             ▼                                         ▼                             ▼
+     [ Job: Backend ]                            [ Job: Auth ]             [ Job: Client (Front) ]
+ - Lint (ESLint)                             - Lint (ESLint)            - Lint (ESLint)
+ - Typecheck (tsc)                           - Typecheck (tsc)          - Typecheck (tsc)
+ - Tests Jest (BDD MySQL)                    - Tests Jest (BDD MySQL)   - Tests Vitest
+             │                                         │                             │
+             └─────────────────────────────────────────┼─────────────────────────────┘
+                                                       │ (Si succès des 3)
+                                                       ▼
+                                          ┌────────────┴────────────┐
+                                          │                         │
+                                          ▼                         ▼
+                                 [ Job: Trivy Scan ]          [ Job: E2E Playwright ]
+                               - Build images Docker        - Build dev stack Compose
+                               - Scan CVE des conteneurs    - Démarrage services & reverse proxy
+                                                            - Exécution tests Playwright
 ```
 
 ### Étape 1 : Validation Statique (Linting et Typechecking)

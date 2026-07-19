@@ -1,6 +1,6 @@
-# Architecture Logicielle Interne des Microservices (C2.2.1)
+# Architecture Logicielle Interne des Microservices
 
-Pour garantir la maintenabilité, la robustesse et la testabilité (C2.2.1 et C2.2.3), les microservices backend (`backend` et `auth`) ont été architecturés selon le modèle en **trois couches** couplé à un principe d'**injection de dépendances manuelle** (sans framework lourd).
+Pour garantir la maintenabilité, la robustesse et la testabilité, les microservices backend (`backend` et `auth`) ont été architecturés selon le modèle en **trois couches** couplé à un principe d'**injection de dépendances manuelle** (sans framework lourd).
 
 ---
 
@@ -18,7 +18,7 @@ Requête HTTP  ──> [ Couche de Présentation (Routes/Controllers) ]
                   [ Couche de Persistance (Repository) ]  ──> Base de données MySQL
 ```
 
-### A. La Couche Présentation (Routes & Controllers)
+### La Couche Présentation (Routes & Controllers)
 
 - **Rôle** : Réceptionner les flux HTTP, valider les paramètres entrants (body, query, headers), déléguer l'exécution à la couche domaine, et formater la réponse (JSON, codes de statut HTTP : 200, 201, 400, 401, 403, 404, 500).
 - **Structure** : Dans les fichiers sous `src/routes/`, les routeurs Express sont modélisés comme des factories (fonctions prenant le service en argument et retournant le routeur Express). Cela permet d'isoler Express des autres couches.

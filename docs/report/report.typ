@@ -23,13 +23,13 @@
 // Style des titres
 #show heading: set text(fill: rgb("#000000"), font: "Hanken Grotesk")
 #show heading.where(level: 1): set text(size: 20pt, weight: "bold")
-#show heading.where(level: 1): set block(width: 100%, below: 1.5em, above: 2em)
+#show heading.where(level: 1): set block(width: 100%, below: 1.5em, above: 2em, sticky: true)
 
 #show heading.where(level: 2): set text(size: 14pt, weight: "bold")
-#show heading.where(level: 2): set block(width: 100%, below: 1em, above: 1.5em)
+#show heading.where(level: 2): set block(width: 100%, below: 1em, above: 1.5em, sticky: true)
 
 #show heading.where(level: 3): set text(size: 12pt, weight: "bold")
-#show heading.where(level: 3): set block(width: 100%, below: 0.8em, above: 1.2em)
+#show heading.where(level: 3): set block(width: 100%, below: 0.8em, above: 1.2em, sticky: true)
 
 // Style des liens
 #show link: set text(fill: rgb("#0055cc"))
@@ -91,7 +91,7 @@
 // Style de la page pour le reste du document
 #set page(
   paper: "a4",
-  margin: (x: 2cm, top: 2cm, bottom: 2cm),
+  margin: (x: 2cm, top: 1.8cm, bottom: 1.8cm),
   header: [
     #grid(
       columns: (1fr, auto),
@@ -158,31 +158,61 @@
 
 Ce dossier technique présente le travail de conception, de développement, de sécurisation et de déploiement réalisé sur l'application *Todo App Cloud*. L'objectif de ce projet est de transformer une application de démonstration locale en une architecture microservices prête pour le Cloud (Cloud-Ready), robuste, hautement disponible, sécurisée selon les principes DevSecOps, accessible, et instrumentée pour le suivi de performance.
 
-Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des applications logicielles)* pour la certification professionnelle. Afin de guider le jury d'évaluation, le tableau ci-dessous établit la correspondance directe entre les compétences du référentiel et les chapitres de ce dossier :
+Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des applications logicielles)* pour la certification professionnelle. Afin de faciliter la lecture de ce document et d'attester de la conformité des livrables techniques, la matrice de correspondance ci-dessous identifie les chapitres répondant précisément aux exigences de l'évaluation :
 
 #v(1em)
 #align(center)[
   #table(
-    columns: (auto, 1fr),
+    columns: (1.5fr, 0.8fr, 2.2fr),
     fill: (x, y) => if y == 0 { rgb("#eaeaea") } else { none },
     stroke: 0.5pt + rgb("#d0d0d0"),
-    [*Compétence RNCP évaluée*], [*Chapitres du rapport associés*],
-    [C2.1.1 (Déploiement, performance et qualité)], [Chapitre 2 (Qualité/SLA) & Chapitre 5 (Déploiement Helm)],
-    [C2.1.2 (Intégration continue)], [Chapitre 2 (Protocole d'intégration continue CI)],
-    [C2.2.1 (Prototype, architecture et paradigmes)], [Chapitre 1 (Bounded Contexts, Prototype & Architecture interne)],
-    [C2.2.2 (Harnais de test unitaire)], [Chapitre 2 (Conception du harnais de test unitaire Jest)],
-    [C2.2.3 (Sécurité et accessibilité)], [Chapitre 3 (Sécurité OWASP/Cloud) & Chapitre 4 (Accessibilité A11y)],
-    [C2.2.4 (Gestion de versions et CD)], [Chapitre 5 (Déploiement continu CD) & Chapitre 8 (Historique des versions)],
-    [C2.3.1 (Cahier de recettes)], [Chapitre 6 (Cahier de recettes)],
-    [C2.3.2 (Plan de correction des bogues)], [Chapitre 7 (Plan de correction des bogues)],
-    [C2.4.1 (Documentation et manuels techniques)],
-    [Chapitre 8 (Manuels d'utilisation, de mise à jour, d'exploitation)],
+    [*Livrable requis pour l'évaluation*], [*Compétences RNCP*], [*Localisation dans ce dossier technique*],
+    [Le protocole de déploiement continu],
+    [C2.1.1 & C2.2.4],
+    [Chapitre 5 (Protocole de déploiement continu & Infrastructure)],
+
+    [Les critères de qualité et de performance],
+    [C2.1.1],
+    [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
+
+    [Le protocole d'intégration continue], [C2.1.2], [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
+    [Une architecture logicielle structurée],
+    [C2.2.1],
+    [Chapitre 1 (Architecture Logicielle, Modèle Métier & Prototype)],
+
+    [Une présentation d'un des prototypes réalisés],
+    [C2.2.1],
+    [Chapitre 1 (Architecture Logicielle, Modèle Métier & Prototype)],
+
+    [L'utilisation de Framework et paradigmes],
+    [C2.2.1],
+    [Chapitre 1 (Architecture Logicielle, Modèle Métier & Prototype)],
+
+    [Un jeu de tests unitaires (Harnais de test)],
+    [C2.2.2],
+    [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
+
+    [Une présentation des mesures de sécurité], [C2.2.3], [Chapitre 3 (Sécurité Applicative & Cloud)],
+    [Présentation de l'accès aux personnes handicapées], [C2.2.3], [Chapitre 4 (Accessibilité Numérique)],
+    [L'historique des différentes versions (Changelog)], [C2.2.4], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
+    [La dernière version fonctionnelle et fiable], [C2.2.4], [Code source fourni (Dépôt Git & images de production)],
+    [Le cahier de recettes], [C2.3.1], [Chapitre 6 (Recette Applicative & Cahier de Recettes)],
+    [Le plan de correction des bogues], [C2.3.2], [Chapitre 7 (Gestion des Anomalies & Plan de Correction)],
+    [Le manuel de déploiement], [C2.4.1], [Chapitre 5 (Protocole de déploiement continu & Infrastructure)],
+    [Le manuel d'utilisation], [C2.4.1], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
+    [Le manuel de mise à jour], [C2.4.1], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
   )
 ]
 
 #pagebreak()
 
 = Architecture Logicielle, Modèle Métier & Prototype
+
+#text(style: "italic", fill: rgb("#555555"))[
+  Ce chapitre documente la structure globale du projet (Bounded Contexts, couches logicielles, injection de dépendances manuelle) et présente l'ergonomie générale du prototype réalisé, répondant aux exigences de conception et de maintenabilité de la compétence *C2.2.1*.
+]
+
+#v(1em)
 
 == Cartographie des Contextes Métier (Bounded Contexts)
 #render-clean-md("../context_map.md")
@@ -195,6 +225,12 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
 = Intégration Continue, Tests & Critères de Qualité
 
+#text(style: "italic", fill: rgb("#555555"))[
+  Ce chapitre détaille le pipeline d'intégration continue unifié, les seuils de performance SLA (validés par k6) ainsi que la conception du harnais de test unitaire (Jest/Vitest), répondant aux exigences des compétences *C2.1.2* et *C2.2.2*.
+]
+
+#v(1em)
+
 == Protocole d'Intégration Continue (CI)
 #render-clean-md("../ci_procedure.md")
 
@@ -206,11 +242,23 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
 = Sécurité Applicative & Cloud (DevSecOps)
 
+#text(style: "italic", fill: rgb("#555555"))[
+  Ce chapitre présente l'évaluation et les contre-mesures appliquées face à l'OWASP Top 10 ainsi que le durcissement DevSecOps de l'infrastructure cloud AKS/MySQL (Zero Trust), répondant aux exigences de sécurisation de la compétence *C2.2.3*.
+]
+
+#v(1em)
+
 #render-clean-md("../security.md")
 
 #pagebreak()
 
 = Accessibilité Numérique (A11y)
+
+#text(style: "italic", fill: rgb("#555555"))[
+  Ce chapitre documente les actions techniques d'accessibilité (RGAA v4.1.2 et bonnes pratiques OPQUAST) pour l'inclusion des utilisateurs en situation de handicap, répondant aux exigences d'accessibilité de la compétence *C2.2.3*.
+]
+
+#v(1em)
 
 #render-clean-md("../accessibility.md")
 
@@ -218,11 +266,23 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
 = Protocole de Déploiement Continu (CD) & Infrastructure
 
+#text(style: "italic", fill: rgb("#555555"))[
+  Ce chapitre détaille les procédures de déploiement multi-environnement (IaC Terraform, conteneurs, Helm) et le protocole de CD automatisé par fédération OIDC, répondant aux exigences des compétences *C2.1.1* et *C2.2.4*.
+]
+
+#v(1em)
+
 #render-clean-md("../deployment_procedure.md")
 
 #pagebreak()
 
 = Recette Applicative & Cahier de Recettes
+
+#text(style: "italic", fill: rgb("#555555"))[
+  Ce chapitre regroupe la matrice des scénarios de test fonctionnels, de sécurité et de performance exécutés pour valider la livraison du logiciel, répondant aux exigences de recette de la compétence *C2.3.1*.
+]
+
+#v(1em)
 
 #render-clean-md("../cahier_recettes.md")
 
@@ -230,11 +290,23 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
 = Gestion des Anomalies & Plan de Correction
 
+#text(style: "italic", fill: rgb("#555555"))[
+  Ce chapitre trace le registre des anomalies qualifiées durant la recette technique ainsi que le plan de correction appliqué, répondant aux exigences de suivi de la compétence *C2.3.2*.
+]
+
+#v(1em)
+
 #render-clean-md("../plan_correction_bogues.md")
 
 #pagebreak()
 
 = Manuels d'Exploitation & Maintenance
+
+#text(style: "italic", fill: rgb("#555555"))[
+  Ce chapitre réunit les manuels d'utilisation, de mise à jour et d'exploitation requis pour le suivi des équipes et l'historique des versions, répondant aux exigences de documentation de la compétence *C2.4.1*.
+]
+
+#v(1em)
 
 Pour assurer la traçabilité et le suivi par les équipes opérationnelles, nous fournissons ici le manuel d'utilisation (incluant les aspects RGPD/droit à l'oubli), le manuel de mise à jour/rollback de l'application, et les fiches reflexes d'exploitation.
 

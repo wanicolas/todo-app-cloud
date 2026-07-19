@@ -42,7 +42,7 @@ graph TD
 
 ---
 
-## Présentation du Prototype & Spécificités Ergonomiques (C2.2.1)
+## Présentation du Prototype & Spécificités Ergonomiques
 
 Le prototype réalisé est une **Single Page Application (SPA)** développée avec **React 19** et **TypeScript**. Il cible des environnements multi-équipements (Web de bureau, tablettes et terminaux mobiles) grâce à une structure d'interface entièrement responsive utilisant le système de grille fluide de **React-Bootstrap** et du CSS personnalisé.
 

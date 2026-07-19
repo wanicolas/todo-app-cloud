@@ -1,6 +1,6 @@
-# Historique des Versions (C2.2.4)
+# Historique des Versions
 
-Le suivi du cycle de vie du projet s'appuie sur une gestion sémantique des versions (Git Tagging). Le tableau ci-dessous retrace l'historique des versions majeures et mineures, montrant l'évolution continue du logiciel depuis un prototype simple local jusqu'à une architecture Cloud durcie et sécurisée (C2.2.4).
+Le suivi du cycle de vie du projet s'appuie sur une gestion sémantique des versions (Git Tagging). Le tableau ci-dessous retrace l'historique des versions majeures et mineures, montrant l'évolution continue du logiciel depuis un prototype simple local jusqu'à une architecture Cloud durcie et sécurisée.
 
 | Version | Date | Type de modification | Description des évolutions majeures |
 | :--- | :--- | :--- | :--- |
