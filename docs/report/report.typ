@@ -6,11 +6,17 @@
   let content = read(path)
   content = content.replace(regex("(?m)^# [^\n]*\n+"), "")
   content = content.replace(regex("(?m)^---\n+"), "")
-  render(content)
+  render(content, scope: (
+    image: (img-path, alt: none) => {
+      // Extrait le nom du fichier image et force la résolution relative à report.typ (dossier ../images)
+      let filename = img-path.split("/").last()
+      image("../images/" + filename, alt: alt)
+    },
+  ))
 }
 
 // Paramètres généraux du document
-#set document(title: "CONCEVOIR ET DEVELOPPER DES APPLICATIONS LOGICIELLES - Todo App Cloud", author: "Nicolas Walter")
+#set document(title: "Concevoir et développer des applications logicielles - Todo App Cloud", author: "Nicolas Walter")
 #set text(font: "Hanken Grotesk", size: 10.5pt, fill: rgb("#1a1a1a"))
 #set par(justify: true, leading: 0.65em)
 
@@ -150,23 +156,57 @@
 
 = Introduction
 
-Ce dossier technique présente le travail de conception, de développement et de sécurisation réalisé sur l'application *Todo App*. L'objectif de ce projet était de transformer une application de démonstration locale en une architecture microservices prête pour le Cloud (Cloud-Ready), robuste, sécurisée selon les principes DevSecOps, accessible, et instrumentée pour le suivi de performance.
+Ce dossier technique présente le travail de conception, de développement, de sécurisation et de déploiement réalisé sur l'application *Todo App Cloud*. L'objectif de ce projet est de transformer une application de démonstration locale en une architecture microservices prête pour le Cloud (Cloud-Ready), robuste, hautement disponible, sécurisée selon les principes DevSecOps, accessible, et instrumentée pour le suivi de performance.
 
-Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des applications logicielles)* pour la certification professionnelle.
+Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des applications logicielles)* pour la certification professionnelle. Afin de guider le jury d'évaluation, le tableau ci-dessous établit la correspondance directe entre les compétences du référentiel et les chapitres de ce dossier :
+
+#v(1em)
+#align(center)[
+  #table(
+    columns: (auto, 1fr),
+    fill: (x, y) => if y == 0 { rgb("#eaeaea") } else { none },
+    stroke: 0.5pt + rgb("#d0d0d0"),
+    [*Compétence RNCP évaluée*], [*Chapitres du rapport associés*],
+    [C2.1.1 (Déploiement, performance et qualité)], [Chapitre 2 (Qualité/SLA) & Chapitre 5 (Déploiement Helm)],
+    [C2.1.2 (Intégration continue)], [Chapitre 2 (Protocole d'intégration continue CI)],
+    [C2.2.1 (Prototype, architecture et paradigmes)], [Chapitre 1 (Bounded Contexts, Prototype & Architecture interne)],
+    [C2.2.2 (Harnais de test unitaire)], [Chapitre 2 (Conception du harnais de test unitaire Jest)],
+    [C2.2.3 (Sécurité et accessibilité)], [Chapitre 3 (Sécurité OWASP/Cloud) & Chapitre 4 (Accessibilité A11y)],
+    [C2.2.4 (Gestion de versions et CD)], [Chapitre 5 (Déploiement continu CD) & Chapitre 8 (Historique des versions)],
+    [C2.3.1 (Cahier de recettes)], [Chapitre 6 (Cahier de recettes)],
+    [C2.3.2 (Plan de correction des bogues)], [Chapitre 7 (Plan de correction des bogues)],
+    [C2.4.1 (Documentation et manuels techniques)],
+    [Chapitre 8 (Manuels d'utilisation, de mise à jour, d'exploitation)],
+  )
+]
 
 #pagebreak()
 
-= Architecture Logicielle & Choix Technologiques
+= Architecture Logicielle, Modèle Métier & Prototype
 
+== Cartographie des Contextes Métier (Bounded Contexts)
 #render-clean-md("../context_map.md")
 
+#v(1em)
+== Structure Interne des Services (Architecture en couches & DI)
+#render-clean-md("../software_architecture.md")
+
 #pagebreak()
 
-= Maintien des Environnements & Infrastructure (Helm)
+= Intégration Continue, Tests & Critères de Qualité
 
-== Déploiement multi-environnement
+== Protocole d'Intégration Continue (CI)
+#render-clean-md("../ci_procedure.md")
 
+#v(1em)
+== Critères de Qualité, Performance & Harnais de Tests
 #render-clean-md("../performance_criteria.md")
+
+#pagebreak()
+
+= Sécurité Applicative & Cloud (DevSecOps)
+
+#render-clean-md("../security.md")
 
 #pagebreak()
 
@@ -176,7 +216,7 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
 #pagebreak()
 
-= Protocole de Déploiement Continu (CD)
+= Protocole de Déploiement Continu (CD) & Infrastructure
 
 #render-clean-md("../deployment_procedure.md")
 
@@ -196,7 +236,7 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
 = Manuels d'Exploitation & Maintenance
 
-Pour assurer la traçabilité et le suivi par les équipes opérationnelles, nous fournissons ici le manuel d'utilisation (incluant les aspects RGPD/droit à l'oubli) et le manuel de mise à jour/rollback de l'application.
+Pour assurer la traçabilité et le suivi par les équipes opérationnelles, nous fournissons ici le manuel d'utilisation (incluant les aspects RGPD/droit à l'oubli), le manuel de mise à jour/rollback de l'application, et les fiches reflexes d'exploitation.
 
 == Manuel d'Utilisation
 #render-clean-md("../user_manual.md")
@@ -208,13 +248,19 @@ Pour assurer la traçabilité et le suivi par les équipes opérationnelles, nou
 
 #v(2em)
 
-== Runbooks d'Exploitation
+== Runbooks d'Exploitation (Fiches Réflexes)
 #render-clean-md("../runbooks.md")
+
+#v(2em)
+
+== Historique des Versions (Changelog)
+#render-clean-md("../version_history.md")
 
 #v(2em)
 
 == Glossaire Technique
 #render-clean-md("../glossaire.md")
+
 
 // -------------------------------------------------------------
 // PAGE DE FIN (4ème de couverture)
