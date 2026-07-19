@@ -22,14 +22,16 @@
 
 // Style des titres
 #show heading: set text(fill: rgb("#000000"), font: "Hanken Grotesk")
+#show heading: set block(sticky: true)
+
 #show heading.where(level: 1): set text(size: 20pt, weight: "bold")
-#show heading.where(level: 1): set block(width: 100%, below: 1.5em, above: 2em, sticky: true)
+#show heading.where(level: 1): set block(width: 100%, below: 1.5em, above: 2em)
 
 #show heading.where(level: 2): set text(size: 14pt, weight: "bold")
-#show heading.where(level: 2): set block(width: 100%, below: 1em, above: 1.5em, sticky: true)
+#show heading.where(level: 2): set block(width: 100%, below: 1em, above: 1.5em)
 
 #show heading.where(level: 3): set text(size: 12pt, weight: "bold")
-#show heading.where(level: 3): set block(width: 100%, below: 0.8em, above: 1.2em, sticky: true)
+#show heading.where(level: 3): set block(width: 100%, below: 0.8em, above: 1.2em)
 
 // Style des liens
 #show link: set text(fill: rgb("#0055cc"))
