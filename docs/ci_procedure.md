@@ -4,8 +4,6 @@ Le projet est conçu pour être totalement agnostique vis-à-vis de l'environnem
 
 Le protocole d'intégration continue est au cœur de notre démarche d'assurance qualité et de prévention des régressions. Configuré via GitHub Actions dans [.github/workflows/ci.yml](file:///.github/workflows/ci.yml), il s'exécute automatiquement à chaque soumission de Pull Request ou push sur la branche principale `main`.
 
----
-
 ## Cycle de validation et "Merge Gates"
 
 Pour garantir la stabilité du tronc commun, aucun développeur ne peut fusionner directement du code non validé. Le dépôt applique une politique stricte de **Merge Gates** (barrières de fusion) exigeant :
@@ -13,8 +11,6 @@ Pour garantir la stabilité du tronc commun, aucun développeur ne peut fusionne
 1. Que la pipeline d'intégration continue s'exécute avec succès (statut vert).
 2. Que la couverture de test ne régresse pas.
 3. Qu'aucune vulnérabilité critique de dépendance ou d'image conteneur ne soit introduite.
-
----
 
 ## Séquence détaillée d'intégration
 

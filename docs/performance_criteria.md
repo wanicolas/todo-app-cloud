@@ -2,8 +2,6 @@
 
 Ce chapitre réunit les exigences et mesures d'assurance qualité et de performance du projet.
 
----
-
 ## Seuils de Performance & SLA (Service Level Agreements)
 
 L'application déployée sur Kubernetes doit respecter les seuils de performance mesurables suivants :
@@ -13,8 +11,6 @@ L'application déployée sur Kubernetes doit respecter les seuils de performance
 | **Temps de réponse p(95)**    | **< 300 ms** | 95% des appels HTTP de l'API doivent être traités sous les 300ms. |
 | **Taux d'échec des requêtes** | **< 1 %**    | Moins de 1% des appels doivent renvoyer des erreurs HTTP 5xx.     |
 | **Démarrage des services**    | **< 5 s**    | Temps requis pour démarrer un nouveau pod lors de l'autoscaling.  |
-
----
 
 ## Protocole de Test de Charge (k6)
 
@@ -38,8 +34,6 @@ Un test de charge automatisé a été développé avec **k6** (voir [k6-load-tes
   # Exécution Docker (alternative)
   docker run --rm --network host -i grafana/k6 run - <performance/k6-load-test.js
   ```
-
----
 
 ## Harnais de Tests Unitaires & d'Intégration
 

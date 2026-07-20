@@ -1,11 +1,23 @@
 #import "@preview/cmarker:0.1.10": render
 #import "@preview/merman:0.1.0": mermaid
 
-// Fonction pour nettoyer le Markdown avant le rendu (supprime H1 et lignes horizontales)
-#let render-clean-md(path) = {
+// Fonction pour nettoyer le Markdown avant le rendu (supprime tout jusqu'au premier H2)
+#let render-clean-md(path, offset: 0) = {
   let content = read(path)
-  content = content.replace(regex("(?m)^# [^\n]*\n+"), "")
-  content = content.replace(regex("(?m)^---\n+"), "")
+  if content.contains(regex("(?m)^## ")) {
+    let parts = content.split(regex("(?m)^## "))
+    content = "## " + parts.slice(1).join("## ")
+  } else {
+    content = content.replace(regex("(?m)^# [^\n]*\n+"), "")
+  }
+
+  if offset == 1 {
+    content = content.replace(regex("(?m)^#"), "##")
+  } else if offset == 2 {
+    content = content.replace(regex("(?m)^#"), "###")
+  }
+
+  content = content.trim()
   render(content, scope: (
     image: (img-path, alt: none) => {
       // Résolution relative à report.typ : taille normale (100% du conteneur) pour les grilles et taille restreinte centrée pour la gestion de compte.
@@ -240,15 +252,12 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
 #v(1em)
 
-== Cartographie des Contextes Métier (Bounded Contexts)
 #render-clean-md("../context_map.md")
 
 #v(1em)
-== Structure Interne des Services (Architecture en couches & DI)
 #render-clean-md("../software_architecture.md")
 
 #v(1em)
-== Présentation du Prototype & Ergonomie
 #render-clean-md("../prototype_ergonomics.md")
 
 #pagebreak()
@@ -262,10 +271,14 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 #v(1em)
 
 == Protocole d'Intégration Continue (CI)
-#render-clean-md("../ci_procedure.md")
+
+Le projet est conçu pour être totalement agnostique vis-à-vis de l'environnement de développement : le choix de l'éditeur de code (IDE) est libre, et toutes les commandes s'exécutent en ligne de commande (CLI). L'unique contrainte stricte est la présence de *Docker Engine* et *Docker Compose*. Cela permet d'isoler l'environnement local et d'exécuter les tests avec la même architecture logicielle (microservices et bases de données), sans avoir à reproduire localement la complexité opérationnelle de la production (qui s'appuie sur Kubernetes, Azure Key Vault et des bases managées).
+
+Le protocole d'intégration continue est au cœur de notre démarche d'assurance qualité et de prévention des régressions. Configuré via GitHub Actions dans `.github/workflows/ci.yml`, il s'exécute automatiquement à chaque soumission de Pull Request ou push sur la branche principale `main`.
+
+#render-clean-md("../ci_procedure.md", offset: 1)
 
 #v(1em)
-== Critères de Qualité, Performance & Harnais de Tests
 #render-clean-md("../performance_criteria.md")
 
 #pagebreak()
@@ -341,17 +354,17 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 Pour assurer la traçabilité et le suivi par les équipes opérationnelles, nous fournissons ici le manuel d'utilisation (incluant les aspects RGPD/droit à l'oubli), le manuel de mise à jour/rollback de l'application, et les fiches reflexes d'exploitation.
 
 == Manuel d'Utilisation
-#render-clean-md("../user_manual.md")
+#render-clean-md("../user_manual.md", offset: 1)
 
 #v(2em)
 
 == Manuel de Mise à Jour et Exploitation
-#render-clean-md("../upgrade_manual.md")
+#render-clean-md("../upgrade_manual.md", offset: 1)
 
 #v(2em)
 
 == Runbooks d'Exploitation (Fiches Réflexes)
-#render-clean-md("../runbooks.md")
+#render-clean-md("../runbooks.md", offset: 1)
 
 #v(2em)
 

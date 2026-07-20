@@ -2,8 +2,6 @@
 
 La sécurité de la solution s'appuie sur le principe de la **défense en profondeur** et du **Zero Trust**, couvrant le code source applicatif (OWASP Top 10) et l'infrastructure Cloud (DevSecOps).
 
----
-
 ## Alignement sur les Menaces de l'OWASP Top 10
 
 L'architecture logicielle apporte des réponses techniques systématiques aux failles de sécurité majeures :
@@ -21,8 +19,6 @@ L'architecture logicielle apporte des réponses techniques systématiques aux fa
   - Le démarrage de l'authentification crash instantanément (`throw Error`) si la clé de signature du jeton est absente ou non sécurisée en production.
 - **Faiblesses d'identification et d'authentification (A07: Identification and Authentication Failures)** :
   - Le middleware `express-rate-limit` restreint les tentatives d'authentification brute-force à 5 essais par tranche de 15 minutes par adresse IP.
-
----
 
 ## Hardening DevSecOps et Sécurisation de l'Infrastructure
 

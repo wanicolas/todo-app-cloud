@@ -2,8 +2,6 @@
 
 Ce document rassemble les fiches de maintenance rapide pour diagnostiquer et rétablir le service.
 
----
-
 ## Fiche 1 : Service indisponible (Erreur 502/504 - Pod Crash)
 
 ### Diagnostic
@@ -27,8 +25,6 @@ kubectl rollout restart deployment/auth
 kubectl rollout status deployment/backend
 ```
 
----
-
 ## Fiche 2 : Restauration de la Base de Données (Azure MySQL PITR)
 
 La base de données Azure MySQL Flexible Server effectue des sauvegardes automatiques avec une rétention de 7 jours.
@@ -51,8 +47,6 @@ La base de données Azure MySQL Flexible Server effectue des sauvegardes automat
       --set mysql.host="<NOM_SERVEUR_RESTOURE>.mysql.database.azure.com" \
       --set mysql.authHost="<NOM_SERVEUR_RESTOURE>.mysql.database.azure.com"
     ```
-
----
 
 ## Fiche 3 : Montée en charge soudaine (Manual Scaling)
 

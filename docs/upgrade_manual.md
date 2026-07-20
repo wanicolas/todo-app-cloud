@@ -2,8 +2,6 @@
 
 Ce document décrit les procédures pour appliquer des mises à jour applicatives et d'infrastructure.
 
----
-
 ## Mise à jour du Code et des Dépendances (CI/CD)
 
 - **Mise à jour locale des dépendances** :
@@ -16,8 +14,6 @@ Ce document décrit les procédures pour appliquer des mises à jour applicative
   git tag v2.1.0
   git push origin v2.1.0
   ```
-
----
 
 ## Déploiement et Migration (Kubernetes/Helm)
 
@@ -33,8 +29,6 @@ Le déploiement continu applique la nouvelle version de manière progressive sur
     --set auth.image.tag="v2.1.0"
   ```
 - **Migrations SQL Automatiques** : Les microservices exécutent leurs migrations Knex au démarrage (`await db.migrate.latest()`). Les modifications structurelles de la base sont appliquées automatiquement sans script SQL manuel.
-
----
 
 ## Vérification & Procédure de Retour Arrière (Rollback)
 

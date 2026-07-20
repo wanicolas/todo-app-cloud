@@ -2,12 +2,14 @@
 
 Ce chapitre présente la cartographie applicative de l'application : la structure globale du monorepo, l'organisation en microservices, les technologies utilisées et les limites des contextes métier (Bounded Contexts).
 
+## Bounded Contexts (Contextes Métier)
+
 ```mermaid
 %%{init: {'theme': 'neutral'}}%%
 graph TD
-    Client[Client React SPA] -->|Port 8080| Proxy[Reverse Proxy Nginx]
-    Proxy -->|Route /api/auth/*| AuthContext[Auth Microservice Bounded Context]
-    Proxy -->|Route /api/*| TodoContext[Todo Microservice Bounded Context]
+    Client([Client React SPA]) -->|Port 8080| Proxy([Reverse Proxy Nginx])
+    Proxy -->|Route /api/auth/*| AuthContext([Auth Microservice Bounded Context])
+    Proxy -->|Route /api/*| TodoContext([Todo Microservice Bounded Context])
 
     AuthContext -->|Propriétaire| AuthDB[(Base de données User)]
     TodoContext -->|Propriétaire| TodoDB[(Base de données Task)]
@@ -15,8 +17,6 @@ graph TD
     AuthContext -.->|Émet JWT sub: user_id| Client
     Client -.->|Envoie JWT Bearer Token| TodoContext
 ```
-
-## Bounded Contexts (Contextes Métier)
 
 ### Contexte d'Authentification (Auth Service)
 
@@ -29,8 +29,6 @@ graph TD
 - **Responsabilité** : Gestion de la liste de tâches des utilisateurs (création, mise à jour de l'état complété, filtrage, suppression globale).
 - **Modèle de données** : Gère la table `todo_items` dans sa base de données dédiée (`todos`).
 - **Langage omniprésent** : _Todo Item, Task Name, Completed State, Owner (user_id)._
-
----
 
 ## Relations entre les Contextes (Upstream/Downstream)
 

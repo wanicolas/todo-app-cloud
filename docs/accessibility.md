@@ -2,14 +2,10 @@
 
 Ce chapitre présente les standards adoptés et les mesures techniques mis en œuvre pour rendre l'application accessible aux personnes en situation de handicap.
 
----
-
 ## Justification des Référentiels Adoptés
 
 - **RGAA v4.1.2 (Référentiel Général d'Amélioration de l'Accessibilité)** : Choisi comme référentiel principal. Il transpose les normes internationales **WCAG 2.1** au niveau de conformité réglementaire **AA** (double A) obligatoire en France.
 - **Référentiel OPQUAST (Bonnes Pratiques de Qualité Web)** : Mobilisé pour harmoniser la qualité globale (formulaires, navigation, gestion du consentement RGPD et prévention des erreurs d'utilisabilité).
-
----
 
 ## Actions Techniques Mises en Œuvre
 

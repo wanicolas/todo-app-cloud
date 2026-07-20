@@ -2,8 +2,6 @@
 
 Ce guide détaille le protocole de déploiement continu automatisé sur Azure AKS.
 
----
-
 ## Prérequis et Initialisation (IaC)
 
 - **Outils requis** : Azure CLI (`az` connecté via `az login`), Terraform, Helm (v3) et Docker.
@@ -14,8 +12,6 @@ Ce guide détaille le protocole de déploiement continu automatisé sur Azure AK
   terraform apply -auto-approve
   ```
   _Notez les valeurs de sorties (outputs) générées : `resource_group_name`, `kubernetes_cluster_name`, `container_registry_name`, `key_vault_name` et `mysql_server_name`._
-
----
 
 ## Construction et Publication des Conteneurs (ACR)
 
@@ -34,8 +30,6 @@ docker push <NOM_ACR>.azurecr.io/backend:latest
 docker push <NOM_ACR>.azurecr.io/auth:latest
 docker push <NOM_ACR>.azurecr.io/client:latest
 ```
-
----
 
 ## Déploiement applicatif (Helm)
 
@@ -72,8 +66,6 @@ helm upgrade --install todo-app ./k8s/todo-app \
 ```
 
 _Vérifiez le statut avec `kubectl get pods` et obtenez l'IP publique du proxy via `kubectl get svc reverse-proxy`._
-
----
 
 ## Déploiement Continu Automatisé (CD GitHub Actions)
 

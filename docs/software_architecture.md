@@ -2,8 +2,6 @@
 
 Pour garantir la maintenabilité, la robustesse et la testabilité, les microservices backend (`backend` et `auth`) ont été architecturés selon le modèle en **trois couches** couplé à un principe d'**injection de dépendances manuelle** (sans framework lourd).
 
----
-
 ## Structure en Trois Couches (Three-Tier Architecture)
 
 Chaque service métier est séparé de manière hermétique en trois niveaux de responsabilité :
@@ -33,8 +31,6 @@ Requête HTTP  ──> [ Couche de Présentation (Routes/Controllers) ]
 - **Rôle** : Interagir avec les bases de données SQL via le query-builder **Knex.js** (écriture des requêtes SELECT, INSERT, UPDATE, DELETE).
 - **Abstraction par Interface** : La persistance implémente une interface TypeScript stricte (par exemple, `TodoRepository` dans `backend/src/types.ts`). Le service ne dépend que de cette interface.
 
----
-
 ## Injection de Dépendances Manuelle (DI)
 
 L'injection de dépendances consiste à passer à un objet ses collaborateurs (dépendances) lors de sa construction plutôt qu'il ne les instancie lui-même.
@@ -63,8 +59,6 @@ const service = new TodoService(repository);
 const app = createApp(service);
 app.listen(port, () => { ... });
 ```
-
----
 
 ## Versioning et Migrations SQL de la Base de Données
 
