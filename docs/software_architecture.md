@@ -21,12 +21,12 @@ Requête HTTP  ──> [ Couche de Présentation (Routes/Controllers) ]
 - **Rôle** : Réceptionner les flux HTTP, valider les paramètres entrants (body, query, headers), déléguer l'exécution à la couche domaine, et formater la réponse (JSON, codes de statut HTTP : 200, 201, 400, 401, 403, 404, 500).
 - **Structure** : Dans les fichiers sous `src/routes/`, les routeurs Express sont modélisés comme des factories (fonctions prenant le service en argument et retournant le routeur Express). Cela permet d'isoler Express des autres couches.
 
-### C. La Couche Domaine (Service)
+### La Couche Domaine (Service)
 
 - **Rôle** : Contenir la logique métier centrale de l'application (validation de règles d'affaires, calculs, génération d'identifiants uniques UUID, orchestration des flux métier).
 - **Indépendance** : La couche domaine n'a aucune connaissance d'Express (elle ne manipule ni objets `req` ou `res`, ni codes HTTP) et aucune connaissance directe de la base de données physique (elle manipule une interface abstraite de persistance).
 
-### D. La Couche de Persistance (Repository)
+### La Couche de Persistance (Repository)
 
 - **Rôle** : Interagir avec les bases de données SQL via le query-builder **Knex.js** (écriture des requêtes SELECT, INSERT, UPDATE, DELETE).
 - **Abstraction par Interface** : La persistance implémente une interface TypeScript stricte (par exemple, `TodoRepository` dans `backend/src/types.ts`). Le service ne dépend que de cette interface.
