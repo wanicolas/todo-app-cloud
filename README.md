@@ -17,8 +17,8 @@ Projet réalisé dans le cadre du module "Développer pour le cloud" — M2 Dev 
 
 ## Prérequis
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- Node.js 22 (voir `.nvmrc`)
+- Docker Engine et Docker Compose
+- Node.js 22
 
 ## Lancement rapide
 
