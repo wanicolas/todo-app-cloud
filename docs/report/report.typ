@@ -28,7 +28,7 @@
 #set par(justify: true, leading: 0.65em)
 
 // Style des titres
-#show heading: set text(fill: rgb("#000000"), font: "Hanken Grotesk")
+#show heading: set text(fill: rgb("#000000"))
 #show heading: set block(sticky: true)
 
 #show heading.where(level: 1): set text(size: 20pt, weight: "bold")
@@ -37,7 +37,7 @@
 #show heading.where(level: 2): set text(size: 14pt, weight: "bold")
 #show heading.where(level: 2): set block(width: 100%, below: 1em, above: 1.5em)
 
-#show heading.where(level: 3): set text(size: 12pt, weight: "bold")
+#show heading.where(level: 3): set text(size: 12pt, weight: "light")
 #show heading.where(level: 3): set block(width: 100%, below: 0.8em, above: 1.2em)
 
 // Style des liens
@@ -63,7 +63,7 @@
 // Style des blocs de code
 #show raw: set text(font: "JetBrains Mono", size: 8.5pt)
 #show raw.where(block: true): it => block(
-  fill: rgb("#f7f7f7"),
+  fill: rgb("#fafafa"),
   inset: 6pt,
   radius: 3pt,
   width: 100%,
@@ -98,12 +98,13 @@
     #v(1em)
     #text(size: 14pt, style: "italic")[Projet : Todo App Cloud]
     #v(2em)
-    #rect(width: 40%, height: 0.5pt, fill: rgb("#888888"))
+    #line(length: 40%, stroke: 0.5pt + rgb("#888888"))
     #v(2em)
     #text(size: 12pt)[
       *École :* Ynov Campus Strasbourg \
       *Formation :* Mastère 2 Expert en Développement Full Stack \
       *Réf. Évaluation :* Bloc 2 (Certification RNCP39583)
+
     ]
   ]
 
@@ -121,8 +122,8 @@
   header: [
     #grid(
       columns: (1fr, auto),
-      text(size: 8.5pt, fill: rgb("#777777"), font: "Hanken Grotesk")[Dossier Technique (Bloc 2) — Todo App Cloud],
-      text(size: 8.5pt, fill: rgb("#777777"), font: "Hanken Grotesk")[Nicolas Walter],
+      text(size: 8.5pt, fill: rgb("#777777"))[Dossier Technique (Bloc 2) — Todo App Cloud],
+      text(size: 8.5pt, fill: rgb("#777777"))[Nicolas Walter],
     )
     #line(length: 100%, stroke: 0.5pt + rgb("#d0d0d0"))
   ],
@@ -130,17 +131,17 @@
     #line(length: 100%, stroke: 0.5pt + rgb("#d0d0d0"))
     #grid(
       columns: (1fr, 1fr, 1fr),
-      align(left)[#text(size: 8pt, fill: rgb("#999999"), font: "Hanken Grotesk")[Document d'évaluation]],
+      align(left)[#text(size: 8pt, fill: rgb("#999999"))[Document d'évaluation]],
       align(center)[
         #context {
           let page-num = counter(page).get().first()
           let total-pages = counter(page).final().first()
-          text(size: 9pt, fill: rgb("#777777"), font: "Hanken Grotesk")[
+          text(size: 9pt, fill: rgb("#777777"))[
             Page #page-num sur #total-pages
           ]
         }
       ],
-      align(right)[#text(size: 8pt, fill: rgb("#999999"), font: "Hanken Grotesk")[Année 2025-2026]],
+      align(right)[#text(size: 8pt, fill: rgb("#999999"))[Année 2025-2026]],
     )
   ],
 )
@@ -171,6 +172,10 @@
   #v(2em)
   #text(size: 18pt, weight: "bold")[Table des Matières]
   #v(1.5em)
+  #show outline.entry.where(level: 1): it => {
+    v(1.5em, weak: true)
+    it
+  }
   #outline(title: none, indent: 1.5em, depth: 2)
 ]
 
@@ -241,6 +246,10 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 #v(1em)
 == Structure Interne des Services (Architecture en couches & DI)
 #render-clean-md("../software_architecture.md")
+
+#v(1em)
+== Présentation du Prototype & Ergonomie
+#render-clean-md("../prototype_ergonomics.md")
 
 #pagebreak()
 
@@ -360,9 +369,9 @@ Pour assurer la traçabilité et le suivi par les équipes opérationnelles, nou
 #pagebreak()
 #page(header: none, footer: none)[
   #align(center + horizon)[
-    #text(size: 20pt, weight: "bold", fill: rgb("#1a1a1a"))[Merci de votre lecture.]
+    #text(size: 20pt, weight: "bold")[Merci de votre lecture.]
     #v(3em)
-    #rect(width: 30%, height: 0.5pt, fill: rgb("#888888"))
+    #line(length: 40%, stroke: 0.5pt + rgb("#888888"))
     #v(3em)
     #text(size: 12pt)[
       *Candidat :* Nicolas Walter \
