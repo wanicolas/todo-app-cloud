@@ -7,9 +7,9 @@ Ce chapitre présente la cartographie applicative de l'application : la structur
 ```mermaid
 %%{init: {'theme': 'neutral'}}%%
 graph TD
-    Client([Client React SPA]) -->|Port 8080| Proxy([Reverse Proxy Nginx])
-    Proxy -->|Route /api/auth/*| AuthContext([Auth Microservice Bounded Context])
-    Proxy -->|Route /api/*| TodoContext([Todo Microservice Bounded Context])
+    Client[Client React SPA] -->|Port 8080| Proxy[Reverse Proxy Nginx]
+    Proxy -->|Route /api/auth/*| AuthContext[Auth Microservice Bounded Context]
+    Proxy -->|Route /api/*| TodoContext[Todo Microservice Bounded Context]
 
     AuthContext -->|Propriétaire| AuthDB[(Base de données User)]
     TodoContext -->|Propriétaire| TodoDB[(Base de données Task)]
