@@ -17,8 +17,8 @@ Nous utilisons une classification par sévérité pour traiter les bogues :
 - **Symptôme** : Lors de l'exécution des tests du backend en conteneur, Jest échouait immédiatement avec l'erreur `/lib/x86_64-linux-gnu/libm.so.6: version 'GLIBC_2.38' not found`.
 - **Sévérité** : Bloquant.
 - **Analyse** : Le package `sqlite3` avait été mis à jour en version `6.0.1`. Les binaires pré-compilés de cette version exigent la version 2.38 de GLIBC. Or, l'image officielle de base `node:22` (Debian Bookworm) embarque GLIBC 2.36.
-- **Correction** : Downgrade du package `sqlite3` à la version stable **`5.1.7`** dans [package.json](file:///home/nicolaswalter/Ynov/Cloud/todo-app-cloud/backend/package.json).
-- **Résultat** : La compilation et le chargement du binaire SQLite3 s'effectuent sans aucune erreur. Les tests passent à 100%.
+- **Correction** : Migration complète vers MySQL pour les tests (iso-production) et suppression définitive du package `sqlite3` de l'application (cf. ADR 016).
+- **Résultat** : La dépendance problématique `sqlite3` est éliminée. Les tests s'exécutent avec succès contre la base MySQL éphémère.
 
 ### B-02 : Crash serveur (TypeError 500) sur mise à jour de tâche inexistante
 

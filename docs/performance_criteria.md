@@ -41,7 +41,7 @@ L'assurance qualité repose sur un harnais de tests unitaires et d'intégration 
 
 ### Isolation de l'environnement de test (Jest)
 
-- **Base en mémoire éphémère** : Pour les tests unitaires et d'intégration, nous utilisons le dialecte **SQLite3 en mémoire (`:memory:`)**.
+- **Base de données éphémère** : Pour les tests unitaires et d'intégration, nous utilisons des instances **MySQL éphémères (via Docker)**.
 - **Hooks de nettoyage** : Le hook `beforeEach` initialise le schéma SQL par migration à blanc. Le hook `afterEach` effectue la fermeture propre (teardown) pour éviter toute fuite de ressources.
 
 ### Illustration d'un scénario de test d'isolation (Jest)

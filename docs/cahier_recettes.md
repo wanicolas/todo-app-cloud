@@ -6,7 +6,7 @@ Ce chapitre recense l'ensemble des scénarios de test (fonctionnels, sécurité 
 
 L'application s'appuie sur une pyramide des tests automatisés et manuels :
 
-1. **Tests Unitaires & Intégration API (Backend/Auth)** : Écrit en Jest, s'exécutant sur une base SQLite éphémère. (29 tests pour le backend, 23 tests pour l'authentification).
+1. **Tests Unitaires & Intégration API (Backend/Auth)** : Écrit en Jest, s'exécutant sur une base MySQL éphémère Docker. (29 tests pour le backend, 23 tests pour l'authentification).
 2. **Tests Frontend (Client)** : Écrit en Vitest, simulant le rendu des composants React et le comportement de l'UI. (23 tests).
 3. **Tests de Charge & Performance** : Script k6 simulant des parcours utilisateurs sous charge réseau.
 4. **Tests de Sécurité** : Scans de vulnérabilités Trivy (images Docker) et Dependabot (code).
