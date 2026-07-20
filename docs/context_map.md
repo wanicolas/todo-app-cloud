@@ -3,6 +3,7 @@
 Ce chapitre présente la cartographie applicative de l'application : la structure globale du monorepo, l'organisation en microservices, les technologies utilisées et les limites des contextes métier (Bounded Contexts).
 
 ```mermaid
+%%{init: {'theme': 'neutral'}}%%
 graph TD
     Client[Client React SPA] -->|Port 8080| Proxy[Reverse Proxy Nginx]
     Proxy -->|Route /api/auth/*| AuthContext[Auth Microservice Bounded Context]
