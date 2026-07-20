@@ -191,7 +191,6 @@
   #outline(title: none, indent: 1.5em, depth: 2)
 ]
 
-#set heading(numbering: "1.1.")
 
 // -------------------------------------------------------------
 // SECTIONS INTERNES
@@ -207,17 +206,18 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 #table(
   columns: (1.5fr, 0.8fr, 2.2fr),
   [Livrable requis pour l'évaluation], [Compétences RNCP], [Localisation dans ce dossier technique],
+
   [Le protocole de déploiement continu],
   [C2.1.1 & C2.2.4],
-  [Chapitre 5 (Protocole de déploiement continu & Infrastructure)],
+  [Chapitre 5 (Protocole de Déploiement Continu & Infrastructure)],
 
   [Les critères de qualité et de performance],
   [C2.1.1],
-  [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
+  [Chapitre 2 (Intégration Continue, Tests & Critères de Qualité)],
 
-  [Le protocole d'intégration continue], [C2.1.2], [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
+  [Le protocole d'intégration continue], [C2.1.2], [Chapitre 2 (Intégration Continue, Tests & Critères de Qualité)],
+
   [Une architecture logicielle structurée], [C2.2.1], [Chapitre 1 (Architecture Logicielle, Modèle Métier & Prototype)],
-
   [Une présentation d'un des prototypes réalisés],
   [C2.2.1],
   [Chapitre 1 (Architecture Logicielle, Modèle Métier & Prototype)],
@@ -228,15 +228,18 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
   [Un jeu de tests unitaires (Harnais de test)],
   [C2.2.2],
-  [Chapitre 2 (Intégration continue, Tests & Critères de qualité)],
+  [Chapitre 2 (Intégration Continue, Tests & Critères de Qualité)],
 
   [Une présentation des mesures de sécurité], [C2.2.3], [Chapitre 3 (Sécurité Applicative & Cloud)],
   [Présentation de l'accès aux personnes handicapées], [C2.2.3], [Chapitre 4 (Accessibilité Numérique)],
+
   [L'historique des différentes versions (Changelog)], [C2.2.4], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
-  [La dernière version fonctionnelle et fiable], [C2.2.4], [Code source fourni (Dépôt Git & images de production)],
+  [La dernière version fonctionnelle et fiable], [C2.2.4], [Code source fourni (Dépôt Git & Release v2.1.0)],
+
   [Le cahier de recettes], [C2.3.1], [Chapitre 6 (Recette Applicative & Cahier de Recettes)],
   [Le plan de correction des bogues], [C2.3.2], [Chapitre 7 (Gestion des Anomalies & Plan de Correction)],
-  [Le manuel de déploiement], [C2.4.1], [Chapitre 5 (Protocole de déploiement continu & Infrastructure)],
+
+  [Le manuel de déploiement], [C2.4.1], [Chapitre 5 (Protocole de Déploiement Continu & Infrastructure)],
   [Le manuel d'utilisation], [C2.4.1], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
   [Le manuel de mise à jour], [C2.4.1], [Chapitre 8 (Manuels d'Exploitation & Maintenance)],
 )
@@ -244,6 +247,7 @@ Ce projet valide les compétences du *Bloc 2 (Concevoir et développer des appli
 
 #pagebreak()
 
+#set heading(numbering: "1.1.")
 = Architecture Logicielle, Modèle Métier & Prototype
 
 #text(style: "italic", fill: rgb("#555555"))[
