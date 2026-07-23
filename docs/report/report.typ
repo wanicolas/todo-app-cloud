@@ -131,7 +131,7 @@
   #v(1fr)
 
   #align(center)[
-    #text(size: 12pt)[#upper("20/07/2026")]
+    #text(size: 12pt)[#upper("23/07/2026")]
   ]
 ]
 
