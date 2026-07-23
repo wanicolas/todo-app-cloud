@@ -43,8 +43,14 @@
 #show heading: set text(fill: rgb("#000000"))
 #show heading: set block(sticky: true)
 
-#show heading.where(level: 1): set text(size: 20pt, weight: "bold")
-#show heading.where(level: 1): set block(width: 100%, below: 1.5em, above: 2em)
+#show heading.where(level: 1): set text(size: 20pt, weight: "bold", fill: rgb("fff"))
+#show heading.where(level: 1): set block(below: 1.5em)
+#show heading.where(level: 1): it => block(
+  width: 100%,
+  fill: rgb("#000000"),
+  inset: 0.4em,
+  it,
+)
 
 #show heading.where(level: 2): set text(size: 14pt, weight: "bold")
 #show heading.where(level: 2): set block(width: 100%, below: 1em, above: 1.5em)
@@ -106,41 +112,45 @@
       size: 26pt,
       weight: "bold",
       hyphenate: false,
-    )[Concevoir et développer des applications logicielles]
-    #v(1em)
-    #text(size: 14pt, style: "italic")[Projet : Todo App Cloud]
+    )[
+      #upper[#align(left)[Concevoir et développer]]
+      #v(-16pt)
+      #upper[#align(right)[des applications logicielles]]
+    ]
+    #text(size: 14pt)[Projet : Todo App Cloud]
     #v(2em)
     #line(length: 40%, stroke: 0.5pt + rgb("#888888"))
     #v(2em)
     #text(size: 12pt)[
-      *École :* Ynov Campus Strasbourg \
+      *Réf. Évaluation :* Bloc 2 (Certification RNCP39583) \
       *Formation :* Mastère 2 Expert en Développement Full Stack \
-      *Réf. Évaluation :* Bloc 2 (Certification RNCP39583)
-
+      *École :* Ynov Campus Strasbourg \
     ]
   ]
 
   #v(1fr)
 
   #align(center)[
-    #text(size: 12pt)[20 Juillet 2026]
+    #text(size: 12pt)[#upper("23/07/2026")]
   ]
 ]
 
 // Style de la page pour le reste du document
 #set page(
   paper: "a4",
-  margin: (x: 2cm, top: 1.8cm, bottom: 1.8cm),
-  header: [
+  margin: 2cm,
+  header: move(dy: -8pt)[
     #grid(
       columns: (1fr, auto),
       text(size: 8.5pt, fill: rgb("#777777"))[Dossier Technique (Bloc 2) — Todo App Cloud],
       text(size: 8.5pt, fill: rgb("#777777"))[Nicolas Walter],
     )
+    #v(-0.3em)
     #line(length: 100%, stroke: 0.5pt + rgb("#d0d0d0"))
   ],
-  footer: [
+  footer: move(dy: 8pt)[
     #line(length: 100%, stroke: 0.5pt + rgb("#d0d0d0"))
+    #v(-0.3em)
     #grid(
       columns: (1fr, 1fr, 1fr),
       align(left)[#text(size: 8pt, fill: rgb("#999999"))[Document d'évaluation]],
@@ -384,7 +394,25 @@ Pour assurer la traçabilité et le suivi par les équipes opérationnelles, nou
 // PAGE DE FIN (4ème de couverture)
 // -------------------------------------------------------------
 #pagebreak()
-#page(header: none, footer: none)[
+#page(
+  header: none,
+  footer: move(dy: 8pt)[
+    #line(length: 100%, stroke: 0.5pt + rgb("#d0d0d0"))
+    #v(-0.3em)
+    #grid(
+      columns: (1fr, 1fr, 1fr),
+      [],
+      align(center)[
+        #link("https://nicolaswalter.fr")[
+          #box(baseline: 20%)[#image("website_logo.svg", height: 0.8em)]
+          #h(0.3em)
+          #text(size: 9pt, fill: rgb("#777777"))[nicolaswalter.fr]
+        ]
+      ],
+      [],
+    )
+  ],
+)[
   #align(center + horizon)[
     #text(size: 20pt, weight: "bold")[Merci de votre lecture.]
     #v(3em)
