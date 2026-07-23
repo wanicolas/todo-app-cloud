@@ -112,24 +112,26 @@
       size: 26pt,
       weight: "bold",
       hyphenate: false,
-    )[Concevoir et développer des applications logicielles]
-    #v(1em)
+    )[
+      #upper[#align(left)[Concevoir et développer]]
+      #v(-16pt)
+      #upper[#align(right)[des applications logicielles]]
+    ]
     #text(size: 14pt)[Projet : Todo App Cloud]
     #v(2em)
     #line(length: 40%, stroke: 0.5pt + rgb("#888888"))
     #v(2em)
     #text(size: 12pt)[
-      *École :* Ynov Campus Strasbourg \
+      *Réf. Évaluation :* Bloc 2 (Certification RNCP39583) \
       *Formation :* Mastère 2 Expert en Développement Full Stack \
-      *Réf. Évaluation :* Bloc 2 (Certification RNCP39583)
-
+      *École :* Ynov Campus Strasbourg \
     ]
   ]
 
   #v(1fr)
 
   #align(center)[
-    #text(size: 12pt)[20 Juillet 2026]
+    #text(size: 12pt)[#upper("20/07/2026")]
   ]
 ]
 
