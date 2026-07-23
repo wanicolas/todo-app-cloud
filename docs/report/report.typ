@@ -114,7 +114,7 @@
       hyphenate: false,
     )[Concevoir et développer des applications logicielles]
     #v(1em)
-    #text(size: 14pt, style: "italic")[Projet : Todo App Cloud]
+    #text(size: 14pt)[Projet : Todo App Cloud]
     #v(2em)
     #line(length: 40%, stroke: 0.5pt + rgb("#888888"))
     #v(2em)
