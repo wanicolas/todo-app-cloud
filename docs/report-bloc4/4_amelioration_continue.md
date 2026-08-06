@@ -3,7 +3,7 @@
 Sur la base de l'analyse des métriques de production et des retours utilisateurs, deux axes majeurs de perfectionnement technique sont proposés pour garantir la scalabilité et renforcer l'attractivité du logiciel, tout en maîtrisant les coûts.
 
 ### Axe 1 : Mise en place d'un Cache Redis (Performance)
-- **Constat :** L'endpoint `GET /api/items` concentre 80% du trafic. Chaque requête interroge directement la base de données MySQL, ce qui augmente le temps de réponse (actuellement ~150ms) et sollicite inutilement la BDD pour des données peu volatiles.
+- **Constat :** Suite à plusieurs retours d'utilisateurs se plaignant de lenteurs d'affichage de la liste des tâches le matin (lors des pics de connexion), l'analyse des temps de réponse a mis en évidence que l'endpoint `GET /api/items` concentre 80% du trafic. Chaque requête interroge directement la base de données MySQL, ce qui augmente le temps de réponse (actuellement ~150ms) et sollicite inutilement la BDD pour des données peu volatiles.
 - **Solution proposée :** Intégrer un cluster Redis (Azure Cache for Redis) entre le backend Express et MySQL.
 - **Gains évalués :** 
   - Réduction du temps de réponse p95 en dessous de 50ms.
@@ -29,3 +29,5 @@ Le journal des versions (Changelog) assure la traçabilité des évolutions et c
 | **v2.1.0** | 20/07/2026 | Architecture | - Version initiale Cloud validée (Bloc 2).<br>- Provisionnement IaC Terraform et déploiement Kubernetes AKS. |
 | **v2.0.0** | 22/06/2026 | CI/CD | - Création du workflow automatisé GitHub Actions et packaging Helm. |
 | **v1.2.0** | 28/05/2026 | Fonctionnalité | - Implémentation de la conformité RGPD (portabilité et suppression). |
+
+*Note : Chaque version déployée est accompagnée d'une note de version (Release Note) sur le wiki de l'entreprise. De plus, chaque correctif inclut un fichier Markdown technique documentant l'origine de l'anomalie pour la base de connaissances interne de l'équipe.*

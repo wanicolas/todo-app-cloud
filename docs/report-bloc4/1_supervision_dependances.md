@@ -13,7 +13,7 @@ Le maintien à jour des composants logiciels est essentiel pour prévenir les fa
 
 ### 1.2.2. Fréquence et Automatisation (Dependabot)
 Une analyse automatisée est effectuée chaque semaine (le lundi à 08h00) via **GitHub Dependabot**. L'outil génère automatiquement des *Pull Requests (PR)* pour chaque dépendance périmée. 
-La CI exécute ensuite la suite de tests (unitaires et E2E). Si les tests sont au vert, la PR est fusionnée manuellement par l'équipe de développement.
+La CI exécute ensuite la suite de tests (unitaires et E2E). Les mises à jour correctives et mineures sont automatiquement fusionnées si la CI passe au vert. En revanche, les mises à jour majeures (qui peuvent introduire des *breaking changes*) nécessitent une validation et des tests manuels par l'équipe de développement.
 
 ### 1.2.3. Gestion des Failles Critiques (CVE)
 En cas de détection d'une vulnérabilité de sévérité *HIGH* ou *CRITICAL* (via Trivy lors du déploiement ou Dependabot), une alerte immédiate est envoyée. Un correctif manuel (Hotfix) est appliqué et déployé sous 24 heures sans attendre le cycle hebdomadaire.

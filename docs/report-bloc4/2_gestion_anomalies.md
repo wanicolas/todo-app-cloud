@@ -11,6 +11,8 @@ Afin de ne rater aucune erreur applicative, la collecte est divisée sur deux ni
 ### 2.1.2. Fiche de Consignation (Exemple de Bug)
 **ID du Ticket :** INC-1042  
 **Titre :** Déconnexion intempestive des utilisateurs après 1 heure.  
+**Environnement concerné :** Production (v2.1.0)  
+**Navigateur/Client :** Tous les navigateurs  
 **Sévérité :** Majeure (Impact direct sur l'expérience utilisateur).  
 **Description :** Les utilisateurs signalent qu'ils sont redirigés vers la page de connexion alors qu'ils sont en pleine saisie de tâches, exactement 60 minutes après leur connexion initiale.  
 **Étapes de reproduction :** 
