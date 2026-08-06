@@ -164,7 +164,7 @@
   #v(2em)
   #text(size: 18pt, weight: "bold")[Résumé Exécutif]
   #v(1.5em)
-  Ce dossier technique détaille la démarche de Maintien en Condition Opérationnelle (MCO) de l'application *Todo App Cloud*, refonte Cloud-Native et DevSecOps de l'application #link("https://github.com/docker/getting-started-todo-app")[Todo App] des tutoriels Docker. Réalisé dans le cadre scolaire durant les cours "Développer pour le cloud" et amélioré pour la certification RNCP (Bloc 2 et 4), ce projet démontre la capacité à monitorer, maintenir et améliorer une architecture microservices en production.
+  Ce dossier technique détaille la démarche de Maintien en Condition Opérationnelle (MCO) de l'application *Todo App Cloud*, refonte Cloud-Native et DevSecOps de l'application #link("https://github.com/docker/getting-started-todo-app")[Todo App] des tutoriels Docker. Réalisé dans le cadre scolaire durant les cours "Développer pour le cloud" et amélioré à part pour la certification RNCP Bloc 4, ce projet démontre la capacité à monitorer, maintenir et améliorer une architecture microservices en production.
 
   *Périmètre du MCO :*
   - *Supervision & Dépendances :* Stratégie de mise à jour des packages, sondes Kubernetes et supervision des performances et de la disponibilité.
