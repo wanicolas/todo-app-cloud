@@ -41,12 +41,11 @@
 #show heading: set block(sticky: true)
 
 #show heading.where(level: 1): set text(size: 20pt, weight: "bold", fill: rgb("fff"))
-#show heading.where(level: 1): set block(below: 1.5em, above: 2em)
+#show heading.where(level: 1): set block(below: 1.5em)
 #show heading.where(level: 1): it => block(
   width: 100%,
   fill: rgb("#000000"),
-  inset: (x: 0.6em, top: 0.4em, bottom: 0.7em),
-  radius: 3pt,
+  inset: 0.4em,
   it,
 )
 
@@ -165,7 +164,7 @@
   #v(2em)
   #text(size: 18pt, weight: "bold")[Résumé Exécutif]
   #v(1.5em)
-  Ce dossier technique détaille la démarche de Maintien en Condition Opérationnelle (MCO) de l'application #link("https://github.com/docker/getting-started-todo-app")[Todo App Cloud]. Réalisé dans le cadre scolaire et amélioré pour la certification RNCP (Bloc 4), ce projet démontre la capacité à monitorer, maintenir et améliorer une architecture microservices en production.
+  Ce dossier technique détaille la démarche de Maintien en Condition Opérationnelle (MCO) de l'application *Todo App Cloud*, refonte Cloud-Native et DevSecOps de l'application #link("https://github.com/docker/getting-started-todo-app")[Todo App] des tutoriels Docker. Réalisé dans le cadre scolaire durant les cours "Développer pour le cloud" et amélioré pour la certification RNCP (Bloc 2 et 4), ce projet démontre la capacité à monitorer, maintenir et améliorer une architecture microservices en production.
 
   *Périmètre du MCO :*
   - *Supervision & Dépendances :* Stratégie de mise à jour des packages, sondes Kubernetes et supervision des performances et de la disponibilité.
@@ -274,14 +273,10 @@
       *Projet :* Todo App Cloud \
       *Certification :* Bloc 4 - RNCP39583
     ]
-    #v(2em)
-    #link("https://github.com/wanicolas/todo-app-cloud")[#text(
-      size: 11pt,
-    )[Consulter le code source sur GitHub]]
 
     #v(6em)
     #text(size: 9pt, fill: rgb("#888888"))[
-      Ce document a été généré automatiquement à partir de la documentation interne en Markdown du projet \
+      Ce document a été généré à partir de la documentation interne en Markdown du projet \
       (Approche _Documentation as Code_) et compilé avec le moteur de composition #link("https://typst.app")[Typst].
     ]
   ]
