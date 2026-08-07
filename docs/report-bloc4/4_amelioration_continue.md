@@ -1,4 +1,4 @@
-## 4.1. Propositions d'Axes d'Amélioration (C4.3.1)
+## Propositions d'Axes d'Amélioration (C4.3.1)
 
 Sur la base de l'analyse conjointe des métriques de performance de production et de l'analyse des retours utilisateurs, trois axes majeurs de perfectionnement sont proposés pour maintenir la scalabilité, maîtriser les coûts et renforcer l'attractivité du logiciel.
 
@@ -27,27 +27,27 @@ Sur la base de l'analyse conjointe des métriques de performance de production e
 - **Gains évalués :** Renforcement direct de l'attractivité de l'application, amélioration de la rétention utilisateur (+20% d'engagement quotidien projeté) et alignement sur les standards modernes de design.
 - **Délai & Coût :** ~1 semaine de développement Frontend. Aucun coût d'infrastructure additionnel.
 
-### 4.1.4. Priorisation et Feuille de Route (Matrice Valeur / Effort)
+### Priorisation et Feuille de Route (Matrice Valeur / Effort)
 
 Afin d'ordonnancer efficacement ces chantiers dans le plan de charge de l'équipe, une évaluation selon la matrice Valeur / Effort / ROI a été réalisée :
 
-| Axe d'Amélioration | Valeur Métier / Technique | Effort (J/H) | Impact Financier | Priorité |
-| :--- | :--- | :---: | :---: | :---: |
-| **Axe 1 : Cache Redis** | High (Latence -66%, Stabilité) | Moyen (5j) | +30€/mois | **P1 (Immédiat)** |
-| **Axe 3 : UX & Dark Mode** | High (Rétention +20%, Attractivité) | Faible (4j) | 0€ | **P2 (Court terme)** |
-| **Axe 2 : Serverless Container Apps** | Medium (Optimisation Infra) | Élevé (10j) | -40% Facture Azure | **P3 (Moyen terme)** |
+| Axe d'Amélioration                    | Valeur Métier / Technique           | Effort (J/H) |  Impact Financier  |       Priorité       |
+| :------------------------------------ | :---------------------------------- | :----------: | :----------------: | :------------------: |
+| **Axe 1 : Cache Redis**               | High (Latence -66%, Stabilité)      |  Moyen (5j)  |     +30€/mois      |  **P1 (Immédiat)**   |
+| **Axe 3 : UX & Dark Mode**            | High (Rétention +20%, Attractivité) | Faible (4j)  |         0€         | **P2 (Court terme)** |
+| **Axe 2 : Serverless Container Apps** | Medium (Optimisation Infra)         | Élevé (10j)  | -40% Facture Azure | **P3 (Moyen terme)** |
 
-## 4.2. Historique des Versions et Correctifs (C4.3.2)
+## Historique des Versions et Correctifs (C4.3.2)
 
 Le journal des versions (Changelog) assure la traçabilité des évolutions et correctifs déployés en production. Il est directement couplé au système de gestion de versions Git et à la plateforme **GitHub Releases**.
 
-### 4.2.1. Stratégie de Versionnement et GitHub Releases
+### Stratégie de Versionnement et GitHub Releases
 
 Chaque livraison en production donne lieu à la création d'un **Tag Git annoté** (ex: `git tag -a v2.1.2 -m "Hotfix: Race condition checkbox"`) poussé sur le dépôt principal.
 
-Via l'intégration native de **GitHub Releases** et le suivi des conventions de commits (_Conventional Commits_), le Changelog ci-dessous est automatiquement publié sur la page *Releases* du dépôt GitHub à chaque tag déployé. De plus, un fichier `CHANGELOG.md` est maintenu à la racine du dépôt code source pour consultation directe par les développeurs.
+Via l'intégration native de **GitHub Releases** et le suivi des conventions de commits (_Conventional Commits_), le Changelog ci-dessous est automatiquement publié sur la page _Releases_ du dépôt GitHub à chaque tag déployé. De plus, un fichier `CHANGELOG.md` est maintenu à la racine du dépôt code source pour consultation directe par les développeurs.
 
-### 4.2.2. Journal de Versions Déployées
+### Journal de Versions Déployées
 
 | Version    | Date       | Type de modification | Description des évolutions et correctifs                                                                                                                                                                                           |
 | :--------- | :--------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
