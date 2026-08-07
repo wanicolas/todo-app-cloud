@@ -2,6 +2,10 @@
 
 Lorsqu'une anomalie survient en production, sa résolution rapide dépend de la qualité des informations collectées.
 
+### Outil de Suivi des Incidents : GitHub Issues
+
+Le projet s'appuie sur **GitHub Issues** comme outil centralisé de collecte et de consignation des anomalies. Chaque incident est créé sous forme d'_Issue_ labelisée (`bug`, `severity:major`, `area:backend`, etc.) directement dans le dépôt du projet, ce qui permet d'associer nativement les tickets aux commits, Pull Requests et releases correspondants.
+
 ### Outils de Collecte (Exceptions & Logs)
 
 Afin de ne rater aucune erreur applicative, la collecte est divisée sur deux niveaux :
@@ -11,8 +15,11 @@ Afin de ne rater aucune erreur applicative, la collecte est divisée sur deux ni
 
 ### Fiche de Consignation (Exemple de Bug)
 
-**ID du Ticket :** INC-1042  
+**ID du Ticket :** INC-1042 (GitHub Issue #47)  
 **Titre :** Déconnexion intempestive des utilisateurs après 1 heure.  
+**Date de détection :** 26/07/2026 à 09h14 (alerte Application Insights)  
+**Assigné à :** Nicolas Walter (Développeur Backend)  
+**Statut :** Résolu — Fermé le 28/07/2026 (correctif déployé en v2.1.1)  
 **Environnement concerné :** Production (v2.1.0)  
 **Navigateur/Client :** Tous les navigateurs  
 **Sévérité :** Majeure (Impact direct sur l'expérience utilisateur).  

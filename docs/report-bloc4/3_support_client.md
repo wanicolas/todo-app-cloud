@@ -1,5 +1,7 @@
 ## Contexte et Collaboration avec le Support Client (C4.3.3)
 
+> **Note de contexte :** Le projet *Todo App Cloud* étant réalisé dans un cadre pédagogique, il n'implique pas de véritable support client en production. La situation présentée ci-dessous est une **mise en situation professionnelle fictive**, construite à partir d'une anomalie technique réelle rencontrée au cours du projet, afin d'illustrer concrètement le processus de collaboration entre les équipes de support et l'ingénierie logicielle.
+
 Le maintien de l'attractivité du logiciel passe par une écoute active des retours utilisateurs et une synergie étroite entre l'équipe d'assistance (Support N1/N2) et l'équipe d'ingénierie logicielle (Niveau 3 - Expertise Technique).
 
 ### Processus d'Escalade et Répartition des Rôles
