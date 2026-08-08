@@ -1,6 +1,6 @@
 ## Contexte : Le "Sprint MCO" et l'Observabilité
 
-> **Note de contexte :** L'infrastructure Azure (AKS, Application Insights, Azure Monitor) de ce projet n'est pas maintenue en production permanente pour des raisons budgétaires liées à la facturation à l'usage d'Azure. L'ensemble des configurations de supervision décrites dans ce chapitre — sondes Kubernetes, règles d'alerte Azure Monitor, intégration Application Insights et Sentry — a été **conçu, implémenté et validé fonctionnellement** sur un environnement de staging dédié lors du "Sprint MCO". L'infrastructure a ensuite été déprovisionnée via `terraform destroy` pour maîtriser les coûts. Conformément aux modalités d'évaluation du Bloc 4 (*"mise en situation professionnelle réelle ou fictive"*), le présent dossier constitue une description technique complète du système de supervision conçu. Les configurations (YAML Kubernetes, fichiers Terraform, code d'intégration SDK) sont versionnées dans le dépôt Git du projet et peuvent être redéployées à tout moment.
+> **Note de contexte :** L'infrastructure Azure (AKS, Application Insights, Azure Monitor) de ce projet n'est pas maintenue en production permanente pour des raisons budgétaires liées à la facturation à l'usage d'Azure. L'ensemble des configurations de supervision décrites dans ce chapitre — sondes Kubernetes, règles d'alerte Azure Monitor, intégration Application Insights et Sentry — a été **conçu, implémenté et validé fonctionnellement** sur un environnement de staging dédié lors du "Sprint MCO". L'infrastructure a ensuite été déprovisionnée via `terraform destroy` pour maîtriser les coûts. Conformément aux modalités d'évaluation du Bloc 4 (_"mise en situation professionnelle réelle ou fictive"_), le présent dossier constitue une description technique complète du système de supervision conçu. Les configurations (YAML Kubernetes, fichiers Terraform, code d'intégration SDK) sont versionnées dans le dépôt Git du projet et peuvent être redéployées à tout moment.
 
 Lors de la validation initiale de l'architecture (Bloc 2), l'application disposait d'une base Cloud-Native solide mais dépourvue d'outils complets de Maintien en Condition Opérationnelle (MCO). Afin de garantir la disponibilité en production (Bloc 4), l'équipe a dédié un "Sprint MCO" entier pour implémenter une stack d'Observabilité à trois piliers (Front, Back, Infra).
 
@@ -16,7 +16,7 @@ Le maintien à jour des composants logiciels est essentiel pour prévenir les fa
 
 ### Fréquence et Automatisation (Dependabot)
 
-Une analyse automatisée est effectuée chaque semaine (le lundi à 08h00) via **GitHub Dependabot** défini par le fichier de configuration `.github/dependabot.yml` :
+Une analyse automatisée est effectuée chaque semaine (le lundi à 08h00) via **GitHub Dependabot** défini par le fichier de configuration `.github/dependabot.yml` dont voici un extrait :
 
 ```yaml
 version: 2
@@ -138,22 +138,22 @@ spec:
 
 Afin de structurer la surveillance, le périmètre de supervision a été formalisé dans la matrice suivante, couvrant l'ensemble des composants critiques de l'architecture :
 
-| Composant | Sonde / Métrique | Seuil d'Alerte | Action Déclenchée |
-| :--- | :--- | :--- | :--- |
-| **Backend API (Express)** | Liveness Probe (`/api/health/live`) | 3 échecs consécutifs (30s) | Redémarrage automatique du Pod |
-| | Readiness Probe (`/api/health/ready`) | 1 échec | Retrait du Pod du routage Ingress |
-| | Temps de réponse HTTP (p95) | > 300ms sur 5 min | Alerte Sev.2 + Investigation |
-| | Taux d'erreur HTTP 5xx | > 1% sur 5 min | Alerte Sev.1 + Astreinte |
-| **Frontend (React SPA)** | Erreurs JavaScript (Sentry) | > 5 erreurs/min | Alerte Sev.2 via Slack |
-| | Disponibilité (Health Check HTTP 200) | Échec pendant 2 min | Alerte Sev.1 + Astreinte |
-| **Base de données MySQL** | Connexions actives | > 80% de `max_connections` | Alerte Sev.2 + Scaling pool |
-| | Slow Queries (> 1s) | > 10 requêtes/min | Alerte Sev.3 + Revue requêtes |
-| | Espace de stockage utilisé | > 85% du volume | Alerte Sev.1 + Extension disque |
-| | Latence de réplication (si replica) | > 5s de retard | Alerte Sev.2 |
-| **Cluster AKS (Nœuds)** | Utilisation CPU par nœud | > 80% sur 5 min | Autoscaling HPA / Alerte Sev.2 |
-| | Utilisation RAM par nœud | > 85% sur 5 min | Alerte Sev.2 + Investigation OOM |
-| | État des Pods (CrashLoopBackOff) | Détection immédiate | Alerte Sev.1 + Astreinte |
-| **Certificats TLS** | Expiration du certificat Ingress | < 14 jours avant expiration | Alerte Sev.2 + Renouvellement |
+| Composant                 | Sonde / Métrique                      | Seuil d'Alerte              | Action Déclenchée                 |
+| :------------------------ | :------------------------------------ | :-------------------------- | :-------------------------------- |
+| **Backend API (Express)** | Liveness Probe (`/api/health/live`)   | 3 échecs consécutifs (30s)  | Redémarrage automatique du Pod    |
+|                           | Readiness Probe (`/api/health/ready`) | 1 échec                     | Retrait du Pod du routage Ingress |
+|                           | Temps de réponse HTTP (p95)           | > 300ms sur 5 min           | Alerte Sev.2 + Investigation      |
+|                           | Taux d'erreur HTTP 5xx                | > 1% sur 5 min              | Alerte Sev.1 + Astreinte          |
+| **Frontend (React SPA)**  | Erreurs JavaScript (Sentry)           | > 5 erreurs/min             | Alerte Sev.2 via Slack            |
+|                           | Disponibilité (Health Check HTTP 200) | Échec pendant 2 min         | Alerte Sev.1 + Astreinte          |
+| **Base de données MySQL** | Connexions actives                    | > 80% de `max_connections`  | Alerte Sev.2 + Scaling pool       |
+|                           | Slow Queries (> 1s)                   | > 10 requêtes/min           | Alerte Sev.3 + Revue requêtes     |
+|                           | Espace de stockage utilisé            | > 85% du volume             | Alerte Sev.1 + Extension disque   |
+|                           | Latence de réplication (si replica)   | > 5s de retard              | Alerte Sev.2                      |
+| **Cluster AKS (Nœuds)**   | Utilisation CPU par nœud              | > 80% sur 5 min             | Autoscaling HPA / Alerte Sev.2    |
+|                           | Utilisation RAM par nœud              | > 85% sur 5 min             | Alerte Sev.2 + Investigation OOM  |
+|                           | État des Pods (CrashLoopBackOff)      | Détection immédiate         | Alerte Sev.1 + Astreinte          |
+| **Certificats TLS**       | Expiration du certificat Ingress      | < 14 jours avant expiration | Alerte Sev.2 + Renouvellement     |
 
 ### Critères de Qualité et Indicateurs de Performance (KPIs)
 
@@ -170,10 +170,10 @@ Ces indicateurs sont collectés par **Azure Monitor** (métriques d'infrastructu
 
 Lorsqu'un seuil critique est franchi, une alerte est déclenchée et classifiée selon trois niveaux de sévérité :
 
-| Sévérité | Critère de déclenchement | Délai de réaction | Canal de notification |
-| :--- | :--- | :--- | :--- |
-| **Sev.1 (Critique)** | Indisponibilité totale, perte de données, CrashLoop | < 15 min | Webhook Teams/Slack + SMS astreinte |
-| **Sev.2 (Majeure)** | Dégradation de performance, saturation partielle | < 1h | Webhook Teams/Slack |
-| **Sev.3 (Mineure)** | Anomalie non bloquante, slow queries | Jour ouvré suivant | Notification e-mail |
+| Sévérité             | Critère de déclenchement                            | Délai de réaction  | Canal de notification               |
+| :------------------- | :-------------------------------------------------- | :----------------- | :---------------------------------- |
+| **Sev.1 (Critique)** | Indisponibilité totale, perte de données, CrashLoop | < 15 min           | Webhook Teams/Slack + SMS astreinte |
+| **Sev.2 (Majeure)**  | Dégradation de performance, saturation partielle    | < 1h               | Webhook Teams/Slack                 |
+| **Sev.3 (Mineure)**  | Anomalie non bloquante, slow queries                | Jour ouvré suivant | Notification e-mail                 |
 
 Chaque alerte est accompagnée des logs et traces pertinents (ID de corrélation, Stacktrace, métriques contextuelles) pour accélérer le diagnostic par l'équipe d'astreinte.
