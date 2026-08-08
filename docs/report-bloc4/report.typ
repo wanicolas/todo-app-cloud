@@ -34,6 +34,7 @@
   title: "Maintenir l'application logicielle en condition opérationnelle - Todo App Cloud",
   author: "Nicolas Walter",
 )
+#set text(lang: "fr")
 #set text(font: "Hanken Grotesk", size: 10.5pt, fill: rgb("#1a1a1a"))
 #set par(justify: true, leading: 0.65em)
 
@@ -120,7 +121,7 @@
   #v(1fr)
 
   #align(center)[
-    #text(size: 12pt)[#upper("03/08/2026")]
+    #text(size: 12pt)[#datetime.today().display("[day]/[month]/[year]")]
   ]
 ]
 
@@ -241,6 +242,24 @@
 
 #render-clean-md("4_amelioration_continue.md")
 
+// -------------------------------------------------------------
+// CONCLUSION
+// -------------------------------------------------------------
+#pagebreak()
+
+#heading(numbering: none)[Conclusion]
+
+#v(1em)
+
+Ce dossier a présenté la démarche complète de Maintien en Condition Opérationnelle de l'application *Todo App Cloud*, articulée autour de trois axes concrets :
+
+- *Supervision proactive :* mise à jour automatisée des dépendances (Dependabot, Trivy), sondes Kubernetes et alertes multi-niveaux (Sentry, Application Insights, Azure Monitor) pour garantir la disponibilité du service.
+
+- *Traitement structuré des anomalies :* processus de collecte et consignation via GitHub Issues, correctifs déployés en zero-downtime grâce au pipeline CI/CD, avec tests de non-régression systématiques.
+
+- *Amélioration continue :* propositions chiffrées d'évolution (cache Redis, migration Serverless, améliorations UX) fondées sur les métriques de production et les retours utilisateurs, accompagnées d'un journal de versions assurant la traçabilité de chaque livraison.
+
+L'ensemble de ces pratiques — observabilité, automatisation des déploiements, collaboration avec le support et pilotage par les données — constitue un socle opérationnel réaliste et reproductible pour maintenir une application Cloud-Native en production.
 
 // -------------------------------------------------------------
 // PAGE DE FIN (4ème de couverture)
