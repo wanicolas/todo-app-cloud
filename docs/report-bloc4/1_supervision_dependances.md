@@ -1,6 +1,6 @@
 ## Contexte : Le "Sprint MCO" et l'Observabilité
 
-> **Note de contexte :** L'infrastructure Azure (AKS, Application Insights, Azure Monitor) de ce projet n'est pas maintenue en production permanente pour des raisons budgétaires (facturation à l'usage Azure). L'ensemble des configurations de supervision décrites ci-dessous a été déployé et validé fonctionnellement sur un environnement de staging dédié lors du "Sprint MCO", puis arrêté. Conformément aux modalités d'évaluation du Bloc 4 (*"mise en situation professionnelle réelle ou fictive"*), le présent dossier constitue une description technique complète et fidèle du système mis en place.
+> **Note de contexte :** L'infrastructure Azure (AKS, Application Insights, Azure Monitor) de ce projet n'est pas maintenue en production permanente pour des raisons budgétaires liées à la facturation à l'usage d'Azure. L'ensemble des configurations de supervision décrites dans ce chapitre — sondes Kubernetes, règles d'alerte Azure Monitor, intégration Application Insights et Sentry — a été **conçu, implémenté et validé fonctionnellement** sur un environnement de staging dédié lors du "Sprint MCO". L'infrastructure a ensuite été déprovisionnée via `terraform destroy` pour maîtriser les coûts. Conformément aux modalités d'évaluation du Bloc 4 (*"mise en situation professionnelle réelle ou fictive"*), le présent dossier constitue une description technique complète du système de supervision conçu. Les configurations (YAML Kubernetes, fichiers Terraform, code d'intégration SDK) sont versionnées dans le dépôt Git du projet et peuvent être redéployées à tout moment.
 
 Lors de la validation initiale de l'architecture (Bloc 2), l'application disposait d'une base Cloud-Native solide mais dépourvue d'outils complets de Maintien en Condition Opérationnelle (MCO). Afin de garantir la disponibilité en production (Bloc 4), l'équipe a dédié un "Sprint MCO" entier pour implémenter une stack d'Observabilité à trois piliers (Front, Back, Infra).
 
@@ -61,7 +61,49 @@ L'équipe procède alors à une évaluation d'impact (analyse des paquets impact
 
 ## Système de Supervision et d'Alerte (C4.1.2)
 
-Pour garantir une disponibilité permanente (SLA 99.9%), l'application est supervisée à plusieurs niveaux de la pile technique.
+Pour garantir une disponibilité permanente (SLA 99.9%), l'application est supervisée à plusieurs niveaux de la pile technique. Le schéma ci-dessous présente l'architecture globale de la stack d'observabilité mise en place :
+
+```mermaid
+flowchart TB
+    subgraph APP ["Application"]
+        FE["Frontend React\n(Sentry SDK)"]
+        BE["Backend Express\n(App Insights SDK + Winston)"]
+        AUTH["Auth Service\n(App Insights SDK)"]
+    end
+
+    subgraph K8S ["Cluster AKS"]
+        LP["Liveness Probes\n(/api/health/live)"]
+        RP["Readiness Probes\n(/api/health/ready)"]
+        HPA["HPA Autoscaler"]
+    end
+
+    subgraph MONITORING ["Stack de Supervision"]
+        SENTRY["Sentry\n(Erreurs Frontend)"]
+        AI["Azure Application Insights\n(Traces, Exceptions, Dépendances)"]
+        AM["Azure Monitor\n(Métriques Infra AKS + MySQL)"]
+    end
+
+    subgraph ALERTING ["Signalement"]
+        ALERT["Règles d'Alerte\n(Sev.1 / Sev.2 / Sev.3)"]
+        TEAMS["Webhook Teams / Slack"]
+        SMS["SMS Astreinte"]
+        EMAIL["E-mail"]
+    end
+
+    FE -->|Erreurs JS, crashes| SENTRY
+    BE -->|Traces, exceptions, logs| AI
+    AUTH -->|Traces, exceptions| AI
+    LP --> AM
+    RP --> AM
+    HPA -->|Métriques CPU/RAM| AM
+    AM --> ALERT
+    AI --> ALERT
+    SENTRY --> ALERT
+    ALERT -->|Sev.1| TEAMS
+    ALERT -->|Sev.1| SMS
+    ALERT -->|Sev.2| TEAMS
+    ALERT -->|Sev.3| EMAIL
+```
 
 ### Sondes de Vie Kubernetes (Liveness & Readiness)
 
