@@ -6,6 +6,20 @@ Lorsqu'une anomalie survient en production, sa résolution rapide dépend de la 
 
 Le projet s'appuie sur **GitHub Issues** comme outil centralisé de collecte et de consignation des anomalies. Chaque incident est créé sous forme d'_Issue_ labelisée (`bug`, `severity:major`, `area:backend`, etc.) directement dans le dépôt du projet, ce qui permet d'associer nativement les tickets aux commits, Pull Requests et releases correspondants.
 
+### Processus de Collecte des Anomalies
+
+Le schéma ci-dessous synthétise le flux complet de traitement d'une anomalie, depuis sa détection automatique ou manuelle jusqu'à sa clôture :
+
+```mermaid
+flowchart LR
+    A["Détection\n(Sentry / App Insights / Utilisateur)"] --> B["Création Issue GitHub\n(Labelisation & Sévérité)"]
+    B --> C["Qualification\n(Reproduction & Analyse)"]
+    C --> D["Assignation\n(Développeur Responsable)"]
+    D --> E["Correctif\n(Branche Hotfix + Tests)"]
+    E --> F["Déploiement CI/CD\n(PR → Merge → Deploy)"]
+    F --> G["Vérification Prod\n& Clôture Issue"]
+```
+
 ### Outils de Collecte (Exceptions & Logs)
 
 Afin de ne rater aucune erreur applicative, la collecte est divisée sur deux niveaux :
@@ -14,6 +28,8 @@ Afin de ne rater aucune erreur applicative, la collecte est divisée sur deux ni
 - **Côté Backend (Express) :** Toutes les erreurs non gérées (Exceptions, rejets de promesses) sont capturées globalement par un middleware et transmises via Winston à **Azure Application Insights**. Les logs incluent l'horodatage, la Stacktrace et l'ID de corrélation (Trace ID).
 
 ### Fiche de Consignation (Exemple de Bug)
+
+![Issue GitHub #47 — Déconnexion intempestive des utilisateurs après 1 heure (Statut: Closed)](gh_issue.png)
 
 **ID du Ticket :** INC-1042 (GitHub Issue #47)  
 **Titre :** Déconnexion intempestive des utilisateurs après 1 heure.  
@@ -81,6 +97,9 @@ describe("AuthService - JWT Expiration Hotfix Test", () => {
 Le correctif a été développé sur la branche `hotfix/jwt-expiration`.
 
 1. **Intégration Continue (CI) :** Lors de la création de la Pull Request, le pipeline GitHub Actions a exécuté la totalité des tests (`npm test`, Lint, Types). Le test automatisé ci-dessus s'est exécuté avec succès.
+
+![Pull Request avec l'ensemble des checks CI au vert (6 jobs réussis)](gh_ci_passed.png)
+
 2. **Déploiement Continu (CD) :** Après revue de code, la PR a été fusionnée sur `main`. Le pipeline CD a compilé la version `v2.1.1` des images Docker, validé la sécurité avec Trivy, et mis à jour le cluster AKS via Helm.
 3. **Zéro Coupure :** Grâce au `Rolling Update` de Kubernetes, les nouveaux pods ont été déployés progressivement sans interruption de service.
 

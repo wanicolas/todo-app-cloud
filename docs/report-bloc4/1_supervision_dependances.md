@@ -92,14 +92,46 @@ spec:
 - **Liveness Probe (`/api/health/live`) :** Vérifie l'état du processus applicatif Node.js (check mémoire/event loop sans dépendance externe). En cas de blocage ou d'échec successif (3 tentatives), le Pod est redémarré par Kubernetes.
 - **Readiness Probe (`/api/health/ready`) :** Vérifie que le service est prêt à traiter du trafic en testant les connexions actives aux dépendances (Base de données MySQL, Cache). La séparation des deux sondes évite les pannes en cascade (_CrashLoopBackOff_) : si la BDD rencontre une micro-coupure, le Pod est simplement retiré des routes Ingress/Nginx le temps du rétablissement, sans subir de redémarrage destructeur.
 
-### Métriques et Suivi des Performances
+### Périmètre de Supervision et Cartographie des Sondes
 
-Nous utilisons **Azure Monitor** et **Application Insights** pour remonter les indicateurs clés :
+Afin de structurer la surveillance, le périmètre de supervision a été formalisé dans la matrice suivante, couvrant l'ensemble des composants critiques de l'architecture :
 
-- Taux d'utilisation CPU/RAM des Pods (pour déclencher l'autoscaling HPA).
-- Temps de réponse HTTP (surveillance du seuil p95 < 300ms).
-- Taux d'erreur HTTP 5xx.
+| Composant | Sonde / Métrique | Seuil d'Alerte | Action Déclenchée |
+| :--- | :--- | :--- | :--- |
+| **Backend API (Express)** | Liveness Probe (`/api/health/live`) | 3 échecs consécutifs (30s) | Redémarrage automatique du Pod |
+| | Readiness Probe (`/api/health/ready`) | 1 échec | Retrait du Pod du routage Ingress |
+| | Temps de réponse HTTP (p95) | > 300ms sur 5 min | Alerte Sev.2 + Investigation |
+| | Taux d'erreur HTTP 5xx | > 1% sur 5 min | Alerte Sev.1 + Astreinte |
+| **Frontend (React SPA)** | Erreurs JavaScript (Sentry) | > 5 erreurs/min | Alerte Sev.2 via Slack |
+| | Disponibilité (Health Check HTTP 200) | Échec pendant 2 min | Alerte Sev.1 + Astreinte |
+| **Base de données MySQL** | Connexions actives | > 80% de `max_connections` | Alerte Sev.2 + Scaling pool |
+| | Slow Queries (> 1s) | > 10 requêtes/min | Alerte Sev.3 + Revue requêtes |
+| | Espace de stockage utilisé | > 85% du volume | Alerte Sev.1 + Extension disque |
+| | Latence de réplication (si replica) | > 5s de retard | Alerte Sev.2 |
+| **Cluster AKS (Nœuds)** | Utilisation CPU par nœud | > 80% sur 5 min | Autoscaling HPA / Alerte Sev.2 |
+| | Utilisation RAM par nœud | > 85% sur 5 min | Alerte Sev.2 + Investigation OOM |
+| | État des Pods (CrashLoopBackOff) | Détection immédiate | Alerte Sev.1 + Astreinte |
+| **Certificats TLS** | Expiration du certificat Ingress | < 14 jours avant expiration | Alerte Sev.2 + Renouvellement |
+
+### Critères de Qualité et Indicateurs de Performance (KPIs)
+
+Les critères de qualité suivants ont été définis en adéquation avec la typologie de l'application (application web collaborative utilisée en journée, architecture microservices sur AKS) :
+
+- **Disponibilité cible (SLA) :** 99.9% sur une fenêtre glissante de 30 jours, soit un budget d'indisponibilité maximal de ~43 minutes/mois.
+- **Performance (Latence) :** Temps de réponse API p95 < 300ms et p99 < 500ms. Au-delà, dégradation perceptible de l'expérience utilisateur.
+- **Fiabilité (Taux d'erreur) :** Taux d'erreurs HTTP 5xx < 0.1% en régime nominal. Le seuil d'alerte est fixé à 1% pour laisser une marge avant impact utilisateur significatif.
+- **Saturation (Capacité) :** Utilisation CPU/RAM des nœuds maintenue sous 80% pour absorber les pics imprévus sans dégradation.
+
+Ces indicateurs sont collectés par **Azure Monitor** (métriques d'infrastructure AKS et MySQL) et **Application Insights** (métriques applicatives : traces de requêtes, dépendances, exceptions). Les données sont consolidées dans un tableau de bord unifié permettant une vue temps réel de la santé du système.
 
 ### Modalités de Signalement
 
-Lorsqu'un seuil critique est franchi (ex: Taux d'erreur > 1% sur 5 minutes), une alerte de sévérité 1 est déclenchée. Cette alerte est propagée via un Webhook vers le canal Microsoft Teams/Slack de l'équipe d'astreinte, accompagnée des logs pertinents pour accélérer le diagnostic.
+Lorsqu'un seuil critique est franchi, une alerte est déclenchée et classifiée selon trois niveaux de sévérité :
+
+| Sévérité | Critère de déclenchement | Délai de réaction | Canal de notification |
+| :--- | :--- | :--- | :--- |
+| **Sev.1 (Critique)** | Indisponibilité totale, perte de données, CrashLoop | < 15 min | Webhook Teams/Slack + SMS astreinte |
+| **Sev.2 (Majeure)** | Dégradation de performance, saturation partielle | < 1h | Webhook Teams/Slack |
+| **Sev.3 (Mineure)** | Anomalie non bloquante, slow queries | Jour ouvré suivant | Notification e-mail |
+
+Chaque alerte est accompagnée des logs et traces pertinents (ID de corrélation, Stacktrace, métriques contextuelles) pour accélérer le diagnostic par l'équipe d'astreinte.

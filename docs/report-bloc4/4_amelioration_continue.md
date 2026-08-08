@@ -47,13 +47,62 @@ Chaque livraison en production donne lieu à la création d'un **Tag Git annoté
 
 Via l'intégration native de **GitHub Releases** et le suivi des conventions de commits (_Conventional Commits_), le Changelog ci-dessous est automatiquement publié sur la page _Releases_ du dépôt GitHub à chaque tag déployé. De plus, un fichier `CHANGELOG.md` est maintenu à la racine du dépôt code source pour consultation directe par les développeurs.
 
+![Page GitHub Releases du projet — Release v2.1.0 Infrastructure & DevSecOps](gh_release.png)
+
+### Extrait du `CHANGELOG.md`
+
+```markdown
+# Changelog — Todo App Cloud
+
+## [v2.1.2] - 2026-08-03
+
+### Fixed
+
+- **Frontend:** Résolution d'une Race Condition provoquant le clignotement
+  des cases à cocher lors de clics rapides successifs (Ticket SUP-89).
+
+## [v2.1.1] - 2026-07-28
+
+### Fixed
+
+- **Auth:** Extension de la durée de vie du JWT (1h → 12h configurable via
+  `JWT_EXPIRES_IN`) pour corriger les déconnexions intempestives (Ticket INC-1042).
+
+### Security
+
+- **Dépendances:** Mise à jour mineure de `express` suite alerte Dependabot.
+
+## [v2.1.0] - 2026-07-20
+
+### Added
+
+- Provisionnement de l'infrastructure managée sur Azure (AKS, MySQL,
+  Key Vault) via Terraform.
+- Durcissement Zero Trust (VNet MySQL privé, NetworkPolicies Kubernetes,
+  Key Vault CSI Secrets Provider, conteneurs Non-Root).
+- Déploiement continu (CD) automatisé via OIDC.
+
+## [v2.0.0] - 2026-06-22
+
+### Added
+
+- Création du workflow automatisé GitHub Actions (CI multi-services).
+- Packaging Helm Chart pour déploiement Kubernetes.
+
+## [v1.2.0] - 2026-05-28
+
+### Added
+
+- Implémentation de la conformité RGPD (portabilité et suppression des données).
+```
+
 ### Journal de Versions Déployées
 
 | Version    | Date       | Type de modification | Description des évolutions et correctifs                                                                                                                                                                                           |
 | :--------- | :--------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **v2.1.2** | 03/08/2026 | Correctif (MCO)      | - **Fix (Frontend) :** Résolution d'une _Race Condition_ provoquant le clignotement des cases à cocher lors de clics rapides (Ticket SUP-89).                                                                                      |
 | **v2.1.1** | 28/07/2026 | Correctif (MCO)      | - **Fix (Auth) :** Extension de la durée de vie du JWT (de 1h à 12h) pour éviter les déconnexions intempestives (Ticket INC-1042). <br> - **Sec (Dépendances) :** Mise à jour mineure de la lib `express` suite alerte Dependabot. |
-| **v2.1.0** | 20/07/2026 | Architecture         | - Version initiale Cloud validée (Bloc 2).<br>- Provisionnement IaC Terraform et déploiement Kubernetes AKS.                                                                                                                       |
+| **v2.1.0** | 20/07/2026 | Architecture         | - Provisionnement IaC Terraform (AKS, MySQL, Key Vault).<br>- Durcissement Zero Trust (VNet privé, NetworkPolicies, CSI Secrets, Non-Root).<br>- Déploiement continu (CD) automatisé via OIDC.                                     |
 | **v2.0.0** | 22/06/2026 | CI/CD                | - Création du workflow automatisé GitHub Actions et packaging Helm.                                                                                                                                                                |
 | **v1.2.0** | 28/05/2026 | Fonctionnalité       | - Implémentation de la conformité RGPD (portabilité et suppression).                                                                                                                                                               |
 
