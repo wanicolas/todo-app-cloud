@@ -1,4 +1,4 @@
-FROM node:22.23.1 AS base
+FROM node:26.6.0 AS base
 WORKDIR /usr/local/app
 
 # Dev stage — Vite hot-reload
